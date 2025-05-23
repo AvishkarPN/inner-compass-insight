@@ -44,13 +44,13 @@ const MoodGarden = () => {
           return (
             <div
               key={entry.id}
-              className="absolute animate-float"
+              className="absolute transition-all duration-700 ease-in-out" // Smoother animation
               style={{
                 left: `${position}%`,
                 bottom: '8%',
                 transform: 'translateX(-50%)',
                 fontSize: `${plantInfo.size}px`,
-                transition: 'all 0.3s ease-in-out',
+                animation: `float-gentle 4s infinite ease-in-out ${index * 0.5}s`, // Staggered and gentler animation
               }}
               title={`${entry.mood} - ${new Date(entry.timestamp).toLocaleDateString()}`}
             >

@@ -102,6 +102,10 @@ export default {
 				'float': {
 					'0%, 100%': { transform: 'translateY(0)' },
 					'50%': { transform: 'translateY(-5px)' },
+				},
+				'float-gentle': {
+					'0%, 100%': { transform: 'translateY(0) translateX(-50%)' },
+					'50%': { transform: 'translateY(-3px) translateX(-50%)' },
 				}
 			},
 			animation: {
@@ -109,6 +113,7 @@ export default {
 				'accordion-up': 'accordion-up 0.2s ease-out',
 				'pulse-gentle': 'pulse-gentle 3s infinite ease-in-out',
 				'float': 'float 3s infinite ease-in-out',
+				'float-gentle': 'float-gentle 4s infinite ease-in-out',
 			}
 		}
 	},

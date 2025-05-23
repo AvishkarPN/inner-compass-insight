@@ -49,19 +49,14 @@ interface MoodSelectorProps {
 
 export default function MoodSelector({ onMoodSelect, selectedMood }: MoodSelectorProps) {
   const [hoverMood, setHoverMood] = useState<MoodOption | null>(null);
-  const [animating, setAnimating] = useState<MoodType | null>(null);
   
   const handleMoodClick = (mood: MoodType) => {
-    // Add haptic animation effect
+    // More subtle haptic feedback
     if ('vibrate' in navigator) {
-      navigator.vibrate(50); // Vibrate for 50ms for haptic feedback
+      navigator.vibrate(30); // Shorter vibration for subtler feedback
     }
     
-    setAnimating(mood);
-    setTimeout(() => {
-      setAnimating(null);
-      onMoodSelect(mood);
-    }, 300);
+    onMoodSelect(mood);
   };
   
   return (
@@ -73,17 +68,16 @@ export default function MoodSelector({ onMoodSelect, selectedMood }: MoodSelecto
           <button
             key={mood.value}
             className={cn(
-              "rounded-xl p-4 h-24 transition-all duration-300 flex flex-col items-center justify-center gap-2",
+              "rounded-xl p-4 h-24 flex flex-col items-center justify-center gap-2",
+              "transition-all duration-300 ease-in-out", // Smoother transition
               selectedMood === mood.value 
-                ? "ring-4 ring-offset-2 ring-offset-background scale-105 shadow-lg" 
-                : "hover:scale-105 shadow-md",
-              "focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-background",
-              animating === mood.value && "animate-ping"
+                ? "ring-2 ring-offset-1 ring-offset-background scale-[1.02] shadow-md" // More subtle selected state
+                : "hover:scale-[1.02] shadow hover:shadow-md", // More subtle hover effect
+              "focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-offset-background",
             )}
             style={{ 
               backgroundColor: mood.color,
-              boxShadow: selectedMood === mood.value ? `0 8px 24px rgba(0,0,0,0.15)` : undefined,
-              transform: selectedMood === mood.value ? 'scale(1.05)' : undefined
+              opacity: selectedMood && selectedMood !== mood.value ? 0.85 : 1, // Subtle dimming of unselected items
             }}
             onMouseEnter={() => setHoverMood(mood)}
             onMouseLeave={() => setHoverMood(null)}
@@ -95,7 +89,7 @@ export default function MoodSelector({ onMoodSelect, selectedMood }: MoodSelecto
       </div>
       
       {hoverMood && (
-        <div className="mt-2 text-sm text-muted-foreground animate-fade-in">
+        <div className="mt-2 text-sm text-muted-foreground transition-opacity duration-200">
           {hoverMood.description}
         </div>
       )}
