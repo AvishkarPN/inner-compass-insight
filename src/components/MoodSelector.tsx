@@ -49,6 +49,20 @@ interface MoodSelectorProps {
 
 export default function MoodSelector({ onMoodSelect, selectedMood }: MoodSelectorProps) {
   const [hoverMood, setHoverMood] = useState<MoodOption | null>(null);
+  const [animating, setAnimating] = useState<MoodType | null>(null);
+  
+  const handleMoodClick = (mood: MoodType) => {
+    // Add haptic animation effect
+    if ('vibrate' in navigator) {
+      navigator.vibrate(50); // Vibrate for 50ms for haptic feedback
+    }
+    
+    setAnimating(mood);
+    setTimeout(() => {
+      setAnimating(null);
+      onMoodSelect(mood);
+    }, 300);
+  };
   
   return (
     <div className="w-full">
@@ -63,7 +77,8 @@ export default function MoodSelector({ onMoodSelect, selectedMood }: MoodSelecto
               selectedMood === mood.value 
                 ? "ring-4 ring-offset-2 ring-offset-background scale-105 shadow-lg" 
                 : "hover:scale-105 shadow-md",
-              "focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-background"
+              "focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-background",
+              animating === mood.value && "animate-ping"
             )}
             style={{ 
               backgroundColor: mood.color,
@@ -72,7 +87,7 @@ export default function MoodSelector({ onMoodSelect, selectedMood }: MoodSelecto
             }}
             onMouseEnter={() => setHoverMood(mood)}
             onMouseLeave={() => setHoverMood(null)}
-            onClick={() => onMoodSelect(mood.value)}
+            onClick={() => handleMoodClick(mood.value)}
           >
             <span className="font-semibold text-white drop-shadow-sm">{mood.label}</span>
           </button>

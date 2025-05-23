@@ -3,17 +3,18 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import MoodSelector from '@/components/MoodSelector';
 import JournalEditor from '@/components/JournalEditor';
-import WeeklyMoodChart from '@/components/WeeklyMoodChart';
 import MoodEntryCard from '@/components/MoodEntryCard';
+import MoodGarden from '@/components/MoodGarden';
 import { MoodType } from '@/types/mood';
 import { useMood } from '@/contexts/MoodContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
+import { ChevronRight } from 'lucide-react';
 
 const Dashboard = () => {
   const [selectedMood, setSelectedMood] = useState<MoodType | undefined>();
-  const { addMoodEntry, getWeeklyMoodData, recentMoods } = useMood();
+  const { addMoodEntry, recentMoods } = useMood();
   const { toast } = useToast();
   
   const handleMoodSelect = (mood: MoodType) => {
@@ -40,19 +41,17 @@ const Dashboard = () => {
     setSelectedMood(undefined);
   };
   
-  const weeklyData = getWeeklyMoodData();
-  
   return (
     <div className="space-y-8">
       <div className="grid gap-6 lg:grid-cols-5">
         <div className="lg:col-span-3 space-y-6">
-          <Card className="border shadow-sm">
+          <Card className="border shadow-md overflow-hidden">
             <CardContent className="p-6">
               <MoodSelector onMoodSelect={handleMoodSelect} selectedMood={selectedMood} />
             </CardContent>
           </Card>
           
-          <Card className="border shadow-sm">
+          <Card className="border shadow-md">
             <CardContent className="p-6">
               <JournalEditor onSave={handleSaveJournal} />
             </CardContent>
@@ -60,9 +59,21 @@ const Dashboard = () => {
         </div>
         
         <div className="lg:col-span-2 space-y-6">
-          <WeeklyMoodChart data={weeklyData} />
+          <Card className="border shadow-md h-[300px]">
+            <CardHeader className="pb-2">
+              <CardTitle className="flex justify-between items-center">
+                <span>Mood Garden</span>
+                <Link to="/insights" className="text-sm text-primary flex items-center">
+                  View Insights <ChevronRight size={16} />
+                </Link>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <MoodGarden />
+            </CardContent>
+          </Card>
           
-          <Card>
+          <Card className="border shadow-md">
             <CardHeader className="pb-2">
               <CardTitle className="text-lg">Recent Entries</CardTitle>
             </CardHeader>

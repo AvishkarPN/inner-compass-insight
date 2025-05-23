@@ -8,6 +8,7 @@ import { MoodProvider } from "./contexts/MoodContext";
 import AppLayout from "./components/layout/AppLayout";
 import Dashboard from "./pages/Dashboard";
 import History from "./pages/History";
+import Insights from "./pages/Insights";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -23,6 +24,7 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Dashboard />} />
               <Route path="/history" element={<History />} />
+              <Route path="/insights" element={<Insights />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </AppLayout>
