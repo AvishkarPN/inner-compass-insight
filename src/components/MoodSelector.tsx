@@ -68,8 +68,7 @@ export default function MoodSelector({ onMoodSelect, selectedMood }: MoodSelecto
             style={{ 
               backgroundColor: mood.color,
               boxShadow: selectedMood === mood.value ? `0 8px 24px rgba(0,0,0,0.15)` : undefined,
-              transform: selectedMood === mood.value ? 'scale(1.05)' : undefined,
-              ringColor: mood.color
+              transform: selectedMood === mood.value ? 'scale(1.05)' : undefined
             }}
             onMouseEnter={() => setHoverMood(mood)}
             onMouseLeave={() => setHoverMood(null)}
