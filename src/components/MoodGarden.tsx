@@ -4,23 +4,23 @@ import { useMood } from '@/contexts/MoodContext';
 import { MoodType } from '@/types/mood';
 import { differenceInDays, isToday, parseISO } from 'date-fns';
 
-// Map of mood types to plant emojis
+// Map of mood types to plant emojis - improved with more detailed plant emojis
 const moodPlantMap: Record<MoodType, string> = {
-  angry: '🌵',
-  energetic: '🌻',
-  happy: '🌺',
-  peaceful: '🌿',
-  calm: '🍀',
-  anxious: '🌱',
+  angry: '🌵', // Cactus for angry
+  energetic: '🌻', // Sunflower for energetic
+  happy: '🌸', // Cherry blossom for happy
+  peaceful: '🪴', // Potted plant for peaceful
+  calm: '🍀', // Four leaf clover for calm
+  anxious: '🌱', // Seedling for anxious
 };
 
-// Plant growth stages
+// Plant growth stages with improved descriptions
 const plantStages = [
-  { stage: 0, size: 16, description: "Seedling" },
-  { stage: 1, size: 20, description: "Small Plant" },
-  { stage: 2, size: 24, description: "Medium Plant" },
-  { stage: 3, size: 32, description: "Large Plant" },
-  { stage: 4, size: 40, description: "Thriving Plant" },
+  { stage: 0, size: 16, description: "Just Planted" },
+  { stage: 1, size: 20, description: "Tiny Sprout" },
+  { stage: 2, size: 24, description: "Growing Seedling" },
+  { stage: 3, size: 32, description: "Healthy Plant" },
+  { stage: 4, size: 40, description: "Flourishing" },
 ];
 
 const MoodGarden = () => {
@@ -140,57 +140,81 @@ const MoodGarden = () => {
   // No entries
   if (moodEntries.length === 0) {
     return (
-      <div className="h-full flex flex-col items-center justify-center p-4">
+      <div className="h-full flex flex-col items-center justify-center p-4 bg-gradient-to-b from-amber-50/30 to-amber-100/30 dark:from-amber-950/30 dark:to-amber-900/30 rounded-lg">
         <p className="text-muted-foreground text-center mb-2">
-          Your garden is empty. Add mood entries to see your plant grow!
+          Meet your companion plant! Start journaling to help it grow.
         </p>
-        <div className="text-xl opacity-50">🌱</div>
+        <div className="text-xl opacity-50 animate-pulse">🪴</div>
       </div>
     );
   }
   
   return (
-    <div className="relative h-full flex flex-col">
+    <div className="relative h-full flex flex-col bg-gradient-to-b from-amber-50/30 to-amber-100/30 dark:from-amber-950/30 dark:to-amber-900/30 rounded-lg p-4">
       {/* Info panel */}
-      <div className="mb-2">
+      <div className="mb-4 bg-white/80 dark:bg-gray-800/80 p-3 rounded-lg shadow-sm backdrop-blur-sm">
         <div className="flex justify-between text-sm">
-          <span>Streak: <span className="font-medium">{streak} day{streak !== 1 ? 's' : ''}</span></span>
-          <span>Health: <span className="font-medium">{plantHealth}%</span></span>
+          <span className="font-medium flex items-center gap-1">
+            <span className="inline-block w-2 h-2 bg-green-500 rounded-full"></span> 
+            Streak: <span className="font-bold">{streak} day{streak !== 1 ? 's' : ''}</span>
+          </span>
+          <span className="font-medium">
+            Health: <span className="font-bold">{plantHealth}%</span>
+          </span>
         </div>
-        <div className="w-full bg-muted rounded-full h-1.5 mt-1 overflow-hidden">
+        <div className="w-full bg-muted rounded-full h-2 mt-2 overflow-hidden">
           <div 
-            className="bg-green-500 h-1.5 rounded-full transition-all duration-1000"
+            className="bg-gradient-to-r from-green-400 to-green-500 h-2 rounded-full transition-all duration-1000"
             style={{ width: `${plantHealth}%` }}
           />
         </div>
       </div>
       
       {/* Garden area */}
-      <div className="flex-1 relative">
+      <div className="flex-1 relative bg-white/40 dark:bg-gray-800/40 rounded-lg overflow-hidden shadow-inner">
         {/* Garden ground */}
-        <div className="absolute bottom-0 left-0 right-0 h-1/5 bg-gradient-to-t from-amber-100 to-transparent dark:from-amber-950 rounded-b-lg"></div>
+        <div className="absolute bottom-0 left-0 right-0 h-1/4 bg-gradient-to-t from-amber-200/70 to-transparent dark:from-amber-900/70 rounded-b-lg"></div>
         
         {/* Plant */}
-        <div className="absolute inset-x-0 bottom-0 flex justify-center items-end pb-6">
+        <div className="absolute inset-0 flex justify-center items-end">
           <div
-            className="transition-all duration-700 ease-in-out"
+            className="absolute bottom-6 left-1/2 transform -translate-x-1/2 transition-all duration-700 ease-in-out"
             style={{
               fontSize: `${size}px`,
               opacity: getOpacity(),
-              animation: "float-gentle 4s infinite ease-in-out",
-              filter: plantHealth < 50 ? 'grayscale(50%)' : 'none',
+              filter: `saturate(${plantHealth / 100 * 1.2})`,
+              textShadow: '0 2px 5px rgba(0,0,0,0.1)',
             }}
           >
-            {plantEmoji}
+            <div className="relative">
+              {/* Ambient particles for visual effect */}
+              {plantHealth > 70 && (
+                <>
+                  <span className="absolute -top-4 -left-3 opacity-30 animate-float-gentle text-xs">✨</span>
+                  <span className="absolute -top-2 right-1 opacity-30 animate-float text-xs">✨</span>
+                </>
+              )}
+              
+              {/* The plant */}
+              <span className="animate-float-gentle inline-block">{plantEmoji}</span>
+              
+              {/* Ground/pot element */}
+              <div className="absolute -bottom-3 left-1/2 transform -translate-x-1/2 text-center">
+                <span className="text-xs opacity-80">🪨</span>
+              </div>
+            </div>
           </div>
         </div>
         
         {/* Plant stage info */}
-        <div className="absolute bottom-2 inset-x-0 text-center text-xs text-muted-foreground">
-          {plantStages[plantStage].description}
+        <div className="absolute bottom-2 inset-x-0 text-center text-xs font-medium">
+          <div className="bg-white/70 dark:bg-gray-800/70 mx-auto max-w-fit px-3 py-1 rounded-full shadow-sm backdrop-blur-sm">
+            {plantStages[plantStage].description}
+          </div>
+          
           {lastEntryDate && !isToday(lastEntryDate) && (
-            <div className="text-amber-500 mt-0.5">
-              {plantHealth < 70 ? 'Your plant needs attention!' : 'Add an entry today to maintain your plant!'}
+            <div className="text-amber-600 dark:text-amber-400 mt-1 font-medium bg-white/70 dark:bg-gray-800/70 mx-auto max-w-fit px-2 py-0.5 rounded-full text-[10px] animate-pulse shadow-sm">
+              {plantHealth < 70 ? 'Your companion needs attention!' : 'Journal today to maintain your streak!'}
             </div>
           )}
         </div>

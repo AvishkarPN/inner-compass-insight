@@ -10,7 +10,7 @@ import { useMood } from '@/contexts/MoodContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, Sprout, History } from 'lucide-react';
 
 const Dashboard = () => {
   const [selectedMood, setSelectedMood] = useState<MoodType | undefined>();
@@ -45,13 +45,19 @@ const Dashboard = () => {
     <div className="space-y-8">
       <div className="grid gap-6 lg:grid-cols-5">
         <div className="lg:col-span-3 space-y-6">
-          <Card className="border shadow-md overflow-hidden">
+          <Card className="border shadow-md overflow-hidden bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm">
+            <CardHeader className="pb-2 border-b bg-muted/30">
+              <CardTitle className="text-lg font-medium">How are you feeling today?</CardTitle>
+            </CardHeader>
             <CardContent className="p-6">
               <MoodSelector onMoodSelect={handleMoodSelect} selectedMood={selectedMood} />
             </CardContent>
           </Card>
           
-          <Card className="border shadow-md">
+          <Card className="border shadow-md bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm">
+            <CardHeader className="pb-2 border-b bg-muted/30">
+              <CardTitle className="text-lg font-medium">Journal Entry</CardTitle>
+            </CardHeader>
             <CardContent className="p-6">
               <JournalEditor onSave={handleSaveJournal} />
             </CardContent>
@@ -59,25 +65,33 @@ const Dashboard = () => {
         </div>
         
         <div className="lg:col-span-2 space-y-6">
-          <Card className="border shadow-md h-[300px]">
-            <CardHeader className="pb-2">
+          <Card className="border shadow-md h-[300px] bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm">
+            <CardHeader className="pb-2 border-b bg-muted/30">
               <CardTitle className="flex justify-between items-center">
-                <span>Mood Garden</span>
-                <Link to="/insights" className="text-sm text-primary flex items-center">
+                <span className="flex items-center gap-1.5">
+                  <Sprout size={18} className="text-green-500" />
+                  Your Companion
+                </span>
+                <Link to="/insights" className="text-sm text-primary flex items-center hover:underline">
                   View Insights <ChevronRight size={16} />
                 </Link>
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-0 h-[calc(300px-56px)]"> {/* Adjusted for header height */}
               <MoodGarden />
             </CardContent>
           </Card>
           
-          <Card className="border shadow-md">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg">Recent Entries</CardTitle>
+          <Card className="border shadow-md bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm">
+            <CardHeader className="pb-2 border-b bg-muted/30">
+              <CardTitle className="flex justify-between items-center">
+                <span className="flex items-center gap-1.5">
+                  <History size={18} />
+                  Recent Entries
+                </span>
+              </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-4">
               <div className="space-y-4">
                 {recentMoods.length > 0 ? (
                   recentMoods.map(entry => (
@@ -92,7 +106,7 @@ const Dashboard = () => {
               </div>
               
               <div className="mt-4 text-center">
-                <Button variant="outline" asChild>
+                <Button variant="outline" asChild className="shadow-sm">
                   <Link to="/history">View All Entries</Link>
                 </Button>
               </div>

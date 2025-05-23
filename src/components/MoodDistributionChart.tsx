@@ -29,7 +29,7 @@ const MoodDistributionChart = () => {
   
   if (data.length === 0) {
     return (
-      <div className="flex items-center justify-center h-[300px]">
+      <div className="flex items-center justify-center h-[300px] bg-muted/20 rounded-lg">
         <p className="text-muted-foreground">No mood data available yet</p>
       </div>
     );
@@ -47,6 +47,8 @@ const MoodDistributionChart = () => {
           fill="#8884d8"
           dataKey="value"
           label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+          animationDuration={500}
+          animationBegin={0}
         >
           {data.map((entry, index) => (
             <Cell 

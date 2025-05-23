@@ -12,56 +12,52 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   const location = useLocation();
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-b from-slate-50 to-slate-100 dark:from-gray-900 dark:to-gray-950">
-      <header className="border-b bg-white dark:bg-gray-900 shadow-sm">
-        <div className="container flex h-16 items-center justify-between">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-50 to-blue-50 dark:from-gray-900 dark:to-slate-900">
+      <header className="border-b bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm shadow-sm sticky top-0 z-10">
+        <div className="container flex h-16 items-center justify-between px-4 md:px-6">
           <div className="flex items-center gap-2">
-            <Calendar className="h-6 w-6" />
-            <h1 className="text-xl font-semibold">Mood Tracker</h1>
+            <div className="bg-primary/10 p-2 rounded-full">
+              <Calendar className="h-5 w-5 text-primary" />
+            </div>
+            <h1 className="text-xl font-semibold">Mood Journal</h1>
           </div>
           
           <nav>
-            <ul className="flex gap-4">
+            <ul className="flex gap-2 md:gap-6">
               <li>
                 <Link 
                   to="/" 
                   className={cn(
-                    "text-sm font-medium transition-colors hover:text-primary",
-                    location.pathname === "/" && "text-primary"
+                    "flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-primary/10",
+                    location.pathname === "/" ? "bg-primary/10 text-primary" : "text-muted-foreground"
                   )}
                 >
-                  <div className="flex items-center gap-1">
-                    <Home size={16} />
-                    <span>Dashboard</span>
-                  </div>
+                  <Home size={16} />
+                  <span className="hidden md:inline">Dashboard</span>
                 </Link>
               </li>
               <li>
                 <Link 
                   to="/insights" 
                   className={cn(
-                    "text-sm font-medium transition-colors hover:text-primary",
-                    location.pathname === "/insights" && "text-primary"
+                    "flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-primary/10",
+                    location.pathname === "/insights" ? "bg-primary/10 text-primary" : "text-muted-foreground"
                   )}
                 >
-                  <div className="flex items-center gap-1">
-                    <LineChart size={16} />
-                    <span>Insights</span>
-                  </div>
+                  <LineChart size={16} />
+                  <span className="hidden md:inline">Insights</span>
                 </Link>
               </li>
               <li>
                 <Link 
                   to="/history" 
                   className={cn(
-                    "text-sm font-medium transition-colors hover:text-primary",
-                    location.pathname === "/history" && "text-primary"
+                    "flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-primary/10",
+                    location.pathname === "/history" ? "bg-primary/10 text-primary" : "text-muted-foreground"
                   )}
                 >
-                  <div className="flex items-center gap-1">
-                    <Clock size={16} />
-                    <span>History</span>
-                  </div>
+                  <Clock size={16} />
+                  <span className="hidden md:inline">History</span>
                 </Link>
               </li>
             </ul>
@@ -69,13 +65,13 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
         </div>
       </header>
       
-      <main className="flex-1 container py-6">
+      <main className="flex-1 container py-6 px-4 md:px-6">
         {children}
       </main>
       
-      <footer className="border-t bg-white dark:bg-gray-900 py-4">
+      <footer className="border-t bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm py-4">
         <div className="container text-center text-sm text-muted-foreground">
-          © {new Date().getFullYear()} Mood Tracker App
+          © {new Date().getFullYear()} Mood Journal - Track your emotional well-being
         </div>
       </footer>
     </div>
