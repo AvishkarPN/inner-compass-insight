@@ -1,6 +1,6 @@
 
 import React, { ReactNode } from 'react';
-import { Calendar, Home, LineChart, Clock } from 'lucide-react';
+import { Calendar, Home, LineChart, Clock, PaintBrush } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 
@@ -58,6 +58,18 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
                 >
                   <Clock size={16} />
                   <span className="hidden md:inline">History</span>
+                </Link>
+              </li>
+              <li>
+                <Link 
+                  to="/mood-art" 
+                  className={cn(
+                    "flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-primary/10",
+                    location.pathname === "/mood-art" ? "bg-primary/10 text-primary" : "text-muted-foreground"
+                  )}
+                >
+                  <PaintBrush size={16} />
+                  <span className="hidden md:inline">Mood Art</span>
                 </Link>
               </li>
             </ul>
