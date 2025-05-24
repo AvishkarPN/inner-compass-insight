@@ -23,10 +23,10 @@ const moodOptions: MoodOption[] = [
     description: 'Joyful and content'
   },
   {
-    label: 'Peaceful',
-    value: 'peaceful',
-    color: '#2ecc71',
-    description: 'Calm and satisfied'
+    label: 'Sad',
+    value: 'sad',
+    color: '#74b9ff',
+    description: 'Feeling down or melancholic'
   },
   {
     label: 'Calm',

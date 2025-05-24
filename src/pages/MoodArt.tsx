@@ -11,7 +11,7 @@ const moodColorMap: Record<MoodType, string> = {
   angry: '#ff6b6b',
   energetic: '#ffa502',
   happy: '#feca57',
-  peaceful: '#2ecc71',
+  sad: '#74b9ff',
   calm: '#3498db',
   anxious: '#9b59b6',
 };
@@ -95,7 +95,7 @@ const MoodArt = () => {
         case 'happy':
           drawCircle(ctx, x, y, size, color);
           break;
-        case 'peaceful':
+        case 'sad':
         case 'calm':
           drawFluidShape(ctx, x, y, size, color);
           break;
@@ -291,7 +291,7 @@ const MoodArt = () => {
           
           <ul className="space-y-2 list-disc pl-5">
             <li><span className="font-medium">Colors:</span> Derived directly from your mood selections</li>
-            <li><span className="font-medium">Shapes:</span> Fluid shapes represent calm/peaceful moods, while angular shapes represent energetic/angry moods</li>
+            <li><span className="font-medium">Shapes:</span> Fluid shapes represent calm/sad moods, while angular shapes represent energetic/angry moods</li>
             <li><span className="font-medium">Complexity:</span> Based on the diversity of your emotions</li>
             <li><span className="font-medium">Patterns:</span> Influenced by your creative and energetic moods</li>
           </ul>

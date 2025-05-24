@@ -6,7 +6,7 @@ export const moodPlantMap: Record<MoodType, string> = {
   angry: '🌵', // Cactus for angry
   energetic: '🌻', // Sunflower for energetic
   happy: '🌸', // Cherry blossom for happy
-  peaceful: '🪴', // Potted plant for peaceful
+  sad: '🌿', // Herb for sad
   calm: '🍀', // Four leaf clover for calm
   anxious: '🌱', // Seedling for anxious
 };

@@ -1,5 +1,5 @@
 
-export type MoodType = 'angry' | 'energetic' | 'happy' | 'peaceful' | 'calm' | 'anxious';
+export type MoodType = 'angry' | 'energetic' | 'happy' | 'sad' | 'calm' | 'anxious';
 
 export interface MoodOption {
   label: string;
