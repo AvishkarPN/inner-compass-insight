@@ -4,7 +4,6 @@ import MoodSelector from '@/components/MoodSelector';
 import JournalEditor from '@/components/JournalEditor';
 import MoodEntryCard from '@/components/MoodEntryCard';
 import MoodGarden from '@/components/MoodGarden';
-import MoodCanvas from '@/components/MoodCanvas';
 import { MoodType } from '@/types/mood';
 import { useMood } from '@/contexts/MoodContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
