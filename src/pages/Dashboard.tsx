@@ -10,8 +10,7 @@ import { useMood } from '@/contexts/MoodContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
-import { ChevronRight, Sprout, History } from 'lucide-react';
-import Paintbrush from 'lucide-react/icons/paintbrush';
+import { ChevronRight, Sprout, History, Paintbrush } from 'lucide-react';
 
 const Dashboard = () => {
   const [selectedMood, setSelectedMood] = useState<MoodType | undefined>();
