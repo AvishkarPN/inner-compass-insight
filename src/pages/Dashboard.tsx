@@ -5,6 +5,7 @@ import MoodSelector from '@/components/MoodSelector';
 import JournalEditor from '@/components/JournalEditor';
 import MoodEntryCard from '@/components/MoodEntryCard';
 import MoodGarden from '@/components/MoodGarden';
+import MoodCanvas from '@/components/MoodCanvas';
 import { MoodType } from '@/types/mood';
 import { useMood } from '@/contexts/MoodContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -110,6 +111,15 @@ const Dashboard = () => {
                   <Link to="/history">View All Entries</Link>
                 </Button>
               </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="border shadow-md bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm overflow-hidden">
+            <CardHeader className="pb-2 border-b bg-muted/30">
+              <CardTitle className="text-lg font-medium">Mood Canvas</CardTitle>
+            </CardHeader>
+            <CardContent className="p-0 h-[300px]">
+              <MoodCanvas />
             </CardContent>
           </Card>
         </div>

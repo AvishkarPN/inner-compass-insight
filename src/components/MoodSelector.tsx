@@ -61,8 +61,6 @@ export default function MoodSelector({ onMoodSelect, selectedMood }: MoodSelecto
   
   return (
     <div className="w-full">
-      <h3 className="text-lg font-medium mb-4">How are you feeling today?</h3>
-      
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
         {moodOptions.map((mood) => (
           <button
@@ -88,11 +86,18 @@ export default function MoodSelector({ onMoodSelect, selectedMood }: MoodSelecto
         ))}
       </div>
       
-      {hoverMood && (
-        <div className="mt-2 text-sm text-muted-foreground transition-opacity duration-200">
-          {hoverMood.description}
+      {/* Fixed height container for mood descriptions to prevent layout shift */}
+      <div className="h-8 mt-3">
+        <div 
+          className={cn(
+            "text-sm text-muted-foreground",
+            "transition-opacity duration-300",
+            hoverMood ? "opacity-100" : "opacity-0"
+          )}
+        >
+          {hoverMood?.description || ""}
         </div>
-      )}
+      </div>
     </div>
   );
 }
