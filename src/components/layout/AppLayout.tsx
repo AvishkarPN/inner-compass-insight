@@ -1,6 +1,5 @@
-
 import React, { ReactNode } from 'react';
-import { Calendar, Home, LineChart, Clock, PaintBrush } from 'lucide-react';
+import { Calendar, Home, LineChart, Clock, Paintbrush } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 
@@ -68,7 +67,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
                     location.pathname === "/mood-art" ? "bg-primary/10 text-primary" : "text-muted-foreground"
                   )}
                 >
-                  <PaintBrush size={16} />
+                  <Paintbrush size={16} />
                   <span className="hidden md:inline">Mood Art</span>
                 </Link>
               </li>

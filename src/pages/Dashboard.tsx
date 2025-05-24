@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import MoodSelector from '@/components/MoodSelector';
@@ -12,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
 import { ChevronRight, Sprout, History } from 'lucide-react';
+import Paintbrush from 'lucide-react/icons/paintbrush';
 
 const Dashboard = () => {
   const [selectedMood, setSelectedMood] = useState<MoodType | undefined>();
@@ -116,10 +116,23 @@ const Dashboard = () => {
           
           <Card className="border shadow-md bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm overflow-hidden">
             <CardHeader className="pb-2 border-b bg-muted/30">
-              <CardTitle className="text-lg font-medium">Mood Canvas</CardTitle>
+              <CardTitle className="flex justify-between items-center">
+                <span>Mood Canvas</span>
+                <Link to="/mood-art" className="text-sm text-primary flex items-center hover:underline">
+                  View Full Art <ChevronRight size={16} />
+                </Link>
+              </CardTitle>
             </CardHeader>
-            <CardContent className="p-0 h-[300px]">
-              <MoodCanvas />
+            <CardContent className="p-0 h-[300px] flex items-center justify-center">
+              <Link to="/mood-art" className="text-muted-foreground hover:text-primary transition-colors">
+                <div className="text-center p-6">
+                  <div className="mx-auto w-16 h-16 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 mb-4 flex items-center justify-center">
+                    <Paintbrush className="h-8 w-8 text-white" />
+                  </div>
+                  <p className="font-medium">View Your Mood Art</p>
+                  <p className="text-xs mt-1">See your emotions visualized as art</p>
+                </div>
+              </Link>
             </CardContent>
           </Card>
         </div>
