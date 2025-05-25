@@ -1,11 +1,13 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useMood } from '@/contexts/MoodContext';
 import { MoodEntry } from '@/types/mood';
+import MoodCanvas from '@/components/MoodCanvas';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
 import { Share2, Download, Calendar } from 'lucide-react';
+import { getTimePeriodDescription } from '@/utils/artUtils';
 
 const MoodArt = () => {
   const { moodEntries } = useMood();
@@ -36,20 +38,6 @@ const MoodArt = () => {
   };
   
   const filteredEntries = getFilteredEntries();
-  
-  const getTimePeriodDescription = (entries: MoodEntry[]) => {
-    if (entries.length === 0) return 'no data';
-    
-    const dates = entries.map(e => new Date(e.timestamp));
-    const earliest = new Date(Math.min(...dates.map(d => d.getTime())));
-    const latest = new Date(Math.max(...dates.map(d => d.getTime())));
-    
-    if (timeFrame === 'day') return 'today';
-    if (timeFrame === 'all') return 'all time';
-    
-    return `${earliest.toLocaleDateString()} - ${latest.toLocaleDateString()}`;
-  };
-  
   const timePeriod = getTimePeriodDescription(filteredEntries);
   
   // Handle download canvas as image
@@ -69,7 +57,6 @@ const MoodArt = () => {
       navigator.share({
         title: 'My Mood Art',
         text: `Check out my mood art for ${timePeriod}!`,
-        // In a real implementation, we'd generate a shareable URL
         url: window.location.href,
       }).catch(err => {
         console.log('Error sharing:', err);
@@ -145,210 +132,6 @@ const MoodArt = () => {
           </ul>
         </CardContent>
       </Card>
-    </div>
-  );
-};
-
-// MoodCanvas component
-const MoodCanvas: React.FC<{ entries: MoodEntry[], width: number, height: number }> = ({ entries, width, height }) => {
-  const canvasRef = React.useRef<HTMLCanvasElement>(null);
-  
-  React.useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    
-    // Set canvas size
-    canvas.width = width;
-    canvas.height = height;
-    
-    // Clear canvas with dark background
-    ctx.fillStyle = '#1a1a2e';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
-    // Mood color mapping
-    const moodColors: Record<string, string> = {
-      angry: '#ff6b6b',
-      energetic: '#ffa502',
-      happy: '#feca57',
-      sad: '#74b9ff',
-      calm: '#3498db',
-      anxious: '#9b59b6',
-    };
-    
-    if (entries.length === 0) return;
-    
-    // Create background gradient
-    const gradient = ctx.createRadialGradient(
-      canvas.width/2, canvas.height/2, 0,
-      canvas.width/2, canvas.height/2, Math.max(canvas.width, canvas.height)/2
-    );
-    
-    const uniqueColors = [...new Set(entries.map(e => moodColors[e.mood]))];
-    uniqueColors.forEach((color, index) => {
-      gradient.addColorStop(index / Math.max(uniqueColors.length - 1, 1), color + '20');
-    });
-    
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
-    // Generate art based on moods
-    entries.forEach((entry, index) => {
-      const color = moodColors[entry.mood];
-      const progress = index / Math.max(entries.length - 1, 1);
-      
-      // Position
-      const x = (progress * canvas.width * 0.8) + (canvas.width * 0.1);
-      const y = canvas.height / 2 + Math.sin(progress * Math.PI * 4) * 80;
-      const size = 30 + Math.random() * 40;
-      
-      // Draw mood-specific art
-      ctx.save();
-      ctx.globalAlpha = 0.7;
-      
-      switch (entry.mood) {
-        case 'angry':
-          // Sharp, jagged shapes
-          ctx.beginPath();
-          for (let i = 0; i < 8; i++) {
-            const angle = (i / 8) * Math.PI * 2;
-            const radius = size + Math.random() * size * 0.5;
-            const px = x + Math.cos(angle) * radius;
-            const py = y + Math.sin(angle) * radius;
-            if (i === 0) ctx.moveTo(px, py);
-            else ctx.lineTo(px, py);
-          }
-          ctx.closePath();
-          ctx.fillStyle = color;
-          ctx.fill();
-          break;
-          
-        case 'energetic':
-          // Radiating lines
-          for (let i = 0; i < 12; i++) {
-            const angle = (i / 12) * Math.PI * 2;
-            const length = size + Math.random() * size;
-            ctx.beginPath();
-            ctx.moveTo(x, y);
-            ctx.lineTo(x + Math.cos(angle) * length, y + Math.sin(angle) * length);
-            ctx.strokeStyle = color;
-            ctx.lineWidth = 3;
-            ctx.stroke();
-          }
-          break;
-          
-        case 'happy':
-          // Bright bubbles
-          for (let i = 0; i < 5; i++) {
-            const bx = x + (Math.random() - 0.5) * size;
-            const by = y + (Math.random() - 0.5) * size;
-            const radius = size * 0.3 + Math.random() * size * 0.4;
-            
-            const bubbleGradient = ctx.createRadialGradient(bx, by, 0, bx, by, radius);
-            bubbleGradient.addColorStop(0, color);
-            bubbleGradient.addColorStop(1, color + '00');
-            
-            ctx.beginPath();
-            ctx.arc(bx, by, radius, 0, Math.PI * 2);
-            ctx.fillStyle = bubbleGradient;
-            ctx.fill();
-          }
-          break;
-          
-        case 'sad':
-          // Teardrops
-          for (let i = 0; i < 3; i++) {
-            const tx = x + (Math.random() - 0.5) * size * 0.5;
-            const ty = y - size * 0.5;
-            const th = size + Math.random() * size * 0.5;
-            
-            ctx.beginPath();
-            ctx.ellipse(tx, ty + th * 0.7, size * 0.2, th * 0.3, 0, 0, Math.PI * 2);
-            
-            const tearGradient = ctx.createLinearGradient(tx, ty, tx, ty + th);
-            tearGradient.addColorStop(0, color);
-            tearGradient.addColorStop(1, color + '20');
-            
-            ctx.fillStyle = tearGradient;
-            ctx.fill();
-          }
-          break;
-          
-        case 'calm':
-          // Gentle waves
-          ctx.beginPath();
-          for (let angle = 0; angle < Math.PI * 2; angle += 0.1) {
-            const radius = size + Math.sin(angle * 6) * (size * 0.3);
-            const px = x + Math.cos(angle) * radius;
-            const py = y + Math.sin(angle) * radius;
-            if (angle === 0) ctx.moveTo(px, py);
-            else ctx.lineTo(px, py);
-          }
-          ctx.closePath();
-          
-          const waveGradient = ctx.createRadialGradient(x, y, 0, x, y, size);
-          waveGradient.addColorStop(0, color + '60');
-          waveGradient.addColorStop(1, color + '10');
-          
-          ctx.fillStyle = waveGradient;
-          ctx.fill();
-          break;
-          
-        case 'anxious':
-          // Chaotic curves
-          for (let i = 0; i < 8; i++) {
-            ctx.beginPath();
-            const sx = x + (Math.random() - 0.5) * size;
-            const sy = y + (Math.random() - 0.5) * size;
-            ctx.moveTo(sx, sy);
-            
-            for (let j = 0; j < 4; j++) {
-              const cx = sx + (Math.random() - 0.5) * size;
-              const cy = sy + (Math.random() - 0.5) * size;
-              const ex = x + (Math.random() - 0.5) * size;
-              const ey = y + (Math.random() - 0.5) * size;
-              ctx.quadraticCurveTo(cx, cy, ex, ey);
-            }
-            
-            ctx.strokeStyle = color;
-            ctx.lineWidth = 2;
-            ctx.stroke();
-          }
-          break;
-      }
-      
-      ctx.restore();
-    });
-    
-    // Add connecting flow lines
-    if (entries.length > 1) {
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      
-      entries.forEach((entry, index) => {
-        const progress = index / Math.max(entries.length - 1, 1);
-        const x = (progress * canvas.width * 0.8) + (canvas.width * 0.1);
-        const y = canvas.height / 2 + Math.sin(progress * Math.PI * 4) * 80;
-        
-        if (index === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
-      });
-      
-      ctx.stroke();
-    }
-    
-  }, [entries, width, height]);
-  
-  return (
-    <div className="rounded-md overflow-hidden border bg-black">
-      <canvas 
-        ref={canvasRef} 
-        className="w-full max-w-full"
-        style={{ aspectRatio: `${width}/${height}` }}
-      />
     </div>
   );
 };
