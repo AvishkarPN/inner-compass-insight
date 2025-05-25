@@ -9,7 +9,7 @@ import { Download, Share } from 'lucide-react';
 
 const moodColorMap: Record<MoodType, string> = {
   angry: '#ff6b6b',
-  energetic: '#ffa502',
+  energetic: '#ffa502', 
   happy: '#feca57',
   sad: '#74b9ff',
   calm: '#3498db',
@@ -21,7 +21,6 @@ const MoodArt = () => {
   const { moodEntries } = useMood();
   const [timeFrame, setTimeFrame] = useState<'today' | 'week' | 'month' | 'all'>('today');
   
-  // Generate and render mood art based on selected timeframe
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -29,10 +28,14 @@ const MoodArt = () => {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     
+    // Set canvas size
+    canvas.width = 800;
+    canvas.height = 500;
+    
     // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
-    // Get relevant mood entries based on timeframe
+    // Filter entries based on timeframe
     const now = new Date();
     const filteredEntries = moodEntries.filter(entry => {
       const entryDate = new Date(entry.timestamp);
@@ -54,154 +57,263 @@ const MoodArt = () => {
       }
     });
     
-    // Create gradient background based on mood colors
-    const createGradientBackground = () => {
-      // Default colors if no entries
-      let startColor = '#ff6b6b';  // angry
-      let endColor = '#3498db';    // calm
-      
-      if (filteredEntries.length > 0) {
-        // Use first and last mood for gradient
-        const firstMood = filteredEntries[0].mood;
-        const lastMood = filteredEntries[filteredEntries.length - 1].mood;
-        
-        startColor = moodColorMap[firstMood];
-        endColor = moodColorMap[lastMood];
+    // Create stunning background gradient
+    const createBackgroundGradient = () => {
+      if (filteredEntries.length === 0) {
+        const gradient = ctx.createRadialGradient(canvas.width/2, canvas.height/2, 0, canvas.width/2, canvas.height/2, canvas.width/2);
+        gradient.addColorStop(0, '#1a1a2e');
+        gradient.addColorStop(0.5, '#16213e');
+        gradient.addColorStop(1, '#0f3460');
+        return gradient;
       }
       
-      const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-      gradient.addColorStop(0, startColor);
-      gradient.addColorStop(1, endColor);
+      // Use mood colors for gradient
+      const moodColors = filteredEntries.map(entry => moodColorMap[entry.mood]);
+      const uniqueColors = [...new Set(moodColors)];
+      
+      const gradient = ctx.createRadialGradient(canvas.width/2, canvas.height/2, 0, canvas.width/2, canvas.height/2, canvas.width/2);
+      
+      uniqueColors.forEach((color, index) => {
+        gradient.addColorStop(index / (uniqueColors.length - 1), color + '20');
+      });
+      
       return gradient;
     };
     
     // Apply background
-    ctx.fillStyle = createGradientBackground();
+    ctx.fillStyle = createBackgroundGradient();
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     
-    // Draw mood shapes
+    // Add subtle texture overlay
+    for (let i = 0; i < 200; i++) {
+      ctx.fillStyle = `rgba(255, 255, 255, ${Math.random() * 0.02})`;
+      ctx.fillRect(Math.random() * canvas.width, Math.random() * canvas.height, 2, 2);
+    }
+    
+    // Generate art based on moods
     filteredEntries.forEach((entry, index) => {
       const color = moodColorMap[entry.mood];
-      const x = Math.random() * canvas.width;
-      const y = Math.random() * canvas.height;
-      const size = Math.random() * 40 + 10;
+      const progress = index / Math.max(filteredEntries.length - 1, 1);
       
-      // Draw different shapes based on mood
-      switch (entry.mood) {
-        case 'angry':
-          drawAngularShape(ctx, x, y, size, color);
-          break;
-        case 'energetic':
-        case 'happy':
-          drawCircle(ctx, x, y, size, color);
-          break;
-        case 'sad':
-        case 'calm':
-          drawFluidShape(ctx, x, y, size, color);
-          break;
-        case 'anxious':
-          drawComplexShape(ctx, x, y, size, color);
-          break;
+      // Position based on time and mood
+      const baseX = (progress * canvas.width * 0.8) + (canvas.width * 0.1);
+      const baseY = canvas.height / 2;
+      
+      // Create multiple layers for each mood
+      for (let layer = 0; layer < 3; layer++) {
+        const layerOffset = layer * 20;
+        const x = baseX + (Math.sin(progress * Math.PI * 4) * 80) + (Math.random() - 0.5) * 40;
+        const y = baseY + (Math.cos(progress * Math.PI * 3) * 60) + (Math.random() - 0.5) * 60 + layerOffset;
+        const size = 30 + (Math.random() * 40) - (layer * 8);
+        
+        switch (entry.mood) {
+          case 'angry':
+            drawAngryArt(ctx, x, y, size, color, layer);
+            break;
+          case 'energetic':
+            drawEnergeticArt(ctx, x, y, size, color, layer);
+            break;
+          case 'happy':
+            drawHappyArt(ctx, x, y, size, color, layer);
+            break;
+          case 'sad':
+            drawSadArt(ctx, x, y, size, color, layer);
+            break;
+          case 'calm':
+            drawCalmArt(ctx, x, y, size, color, layer);
+            break;
+          case 'anxious':
+            drawAnxiousArt(ctx, x, y, size, color, layer);
+            break;
+        }
       }
     });
     
+    // Add connecting lines between moods
+    if (filteredEntries.length > 1) {
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      
+      filteredEntries.forEach((entry, index) => {
+        const progress = index / Math.max(filteredEntries.length - 1, 1);
+        const x = (progress * canvas.width * 0.8) + (canvas.width * 0.1);
+        const y = canvas.height / 2 + (Math.sin(progress * Math.PI * 4) * 80);
+        
+        if (index === 0) {
+          ctx.moveTo(x, y);
+        } else {
+          ctx.lineTo(x, y);
+        }
+      });
+      
+      ctx.stroke();
+    }
+    
   }, [moodEntries, timeFrame]);
   
-  const drawCircle = (ctx: CanvasRenderingContext2D, x: number, y: number, size: number, color: string) => {
+  // Art generation functions for each mood
+  const drawAngryArt = (ctx: CanvasRenderingContext2D, x: number, y: number, size: number, color: string, layer: number) => {
+    ctx.save();
+    ctx.globalAlpha = 0.7 - (layer * 0.2);
+    
+    // Sharp, jagged shapes
     ctx.beginPath();
-    ctx.arc(x, y, size, 0, Math.PI * 2);
-    ctx.fillStyle = color;
-    ctx.globalAlpha = 0.7;
+    const spikes = 8;
+    for (let i = 0; i < spikes; i++) {
+      const angle = (i / spikes) * Math.PI * 2;
+      const spikeLength = size + (Math.random() * size * 0.5);
+      const pointX = x + Math.cos(angle) * spikeLength;
+      const pointY = y + Math.sin(angle) * spikeLength;
+      
+      if (i === 0) ctx.moveTo(pointX, pointY);
+      else ctx.lineTo(pointX, pointY);
+    }
+    ctx.closePath();
+    
+    const gradient = ctx.createRadialGradient(x, y, 0, x, y, size);
+    gradient.addColorStop(0, color);
+    gradient.addColorStop(1, color + '00');
+    
+    ctx.fillStyle = gradient;
     ctx.fill();
-    ctx.globalAlpha = 1;
+    ctx.restore();
   };
   
-  const drawAngularShape = (ctx: CanvasRenderingContext2D, x: number, y: number, size: number, color: string) => {
-    ctx.beginPath();
-    const sides = 4 + Math.floor(Math.random() * 3);
+  const drawEnergeticArt = (ctx: CanvasRenderingContext2D, x: number, y: number, size: number, color: string, layer: number) => {
+    ctx.save();
+    ctx.globalAlpha = 0.8 - (layer * 0.2);
     
-    for (let i = 0; i < sides; i++) {
-      const angle = (i / sides) * Math.PI * 2;
-      const distance = size + Math.random() * (size / 2);
+    // Radiating energy lines
+    for (let i = 0; i < 12; i++) {
+      const angle = (i / 12) * Math.PI * 2;
+      const length = size + (Math.random() * size);
       
-      const pointX = x + Math.cos(angle) * distance;
-      const pointY = y + Math.sin(angle) * distance;
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.lineTo(x + Math.cos(angle) * length, y + Math.sin(angle) * length);
       
-      if (i === 0) {
-        ctx.moveTo(pointX, pointY);
-      } else {
-        ctx.lineTo(pointX, pointY);
-      }
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 3 - layer;
+      ctx.stroke();
     }
     
-    ctx.closePath();
+    // Central burst
+    ctx.beginPath();
+    ctx.arc(x, y, size * 0.3, 0, Math.PI * 2);
     ctx.fillStyle = color;
-    ctx.globalAlpha = 0.7;
     ctx.fill();
-    ctx.globalAlpha = 1;
+    
+    ctx.restore();
   };
   
-  const drawFluidShape = (ctx: CanvasRenderingContext2D, x: number, y: number, size: number, color: string) => {
-    ctx.beginPath();
+  const drawHappyArt = (ctx: CanvasRenderingContext2D, x: number, y: number, size: number, color: string, layer: number) => {
+    ctx.save();
+    ctx.globalAlpha = 0.7 - (layer * 0.15);
     
+    // Bright, rounded bubbles
+    for (let i = 0; i < 5; i++) {
+      const bubbleX = x + (Math.random() - 0.5) * size;
+      const bubbleY = y + (Math.random() - 0.5) * size;
+      const bubbleSize = (size * 0.3) + (Math.random() * size * 0.4);
+      
+      const gradient = ctx.createRadialGradient(bubbleX, bubbleY, 0, bubbleX, bubbleY, bubbleSize);
+      gradient.addColorStop(0, color);
+      gradient.addColorStop(0.7, color + '80');
+      gradient.addColorStop(1, color + '00');
+      
+      ctx.beginPath();
+      ctx.arc(bubbleX, bubbleY, bubbleSize, 0, Math.PI * 2);
+      ctx.fillStyle = gradient;
+      ctx.fill();
+    }
+    
+    ctx.restore();
+  };
+  
+  const drawSadArt = (ctx: CanvasRenderingContext2D, x: number, y: number, size: number, color: string, layer: number) => {
+    ctx.save();
+    ctx.globalAlpha = 0.6 - (layer * 0.15);
+    
+    // Downward flowing teardrops
+    for (let i = 0; i < 3; i++) {
+      const tearX = x + (Math.random() - 0.5) * size * 0.5;
+      const tearY = y - size * 0.5;
+      const tearHeight = size + (Math.random() * size * 0.5);
+      
+      ctx.beginPath();
+      ctx.ellipse(tearX, tearY + tearHeight * 0.7, size * 0.2, tearHeight * 0.3, 0, 0, Math.PI * 2);
+      
+      const gradient = ctx.createLinearGradient(tearX, tearY, tearX, tearY + tearHeight);
+      gradient.addColorStop(0, color);
+      gradient.addColorStop(1, color + '20');
+      
+      ctx.fillStyle = gradient;
+      ctx.fill();
+    }
+    
+    ctx.restore();
+  };
+  
+  const drawCalmArt = (ctx: CanvasRenderingContext2D, x: number, y: number, size: number, color: string, layer: number) => {
+    ctx.save();
+    ctx.globalAlpha = 0.6 - (layer * 0.1);
+    
+    // Gentle, flowing waves
+    ctx.beginPath();
     for (let angle = 0; angle < Math.PI * 2; angle += 0.1) {
-      const variance = Math.random() * (size / 3);
-      const distance = size + variance;
+      const radius = size + Math.sin(angle * 6) * (size * 0.3);
+      const pointX = x + Math.cos(angle) * radius;
+      const pointY = y + Math.sin(angle) * radius;
       
-      const pointX = x + Math.cos(angle) * distance;
-      const pointY = y + Math.sin(angle) * distance;
-      
-      if (angle === 0) {
-        ctx.moveTo(pointX, pointY);
-      } else {
-        ctx.lineTo(pointX, pointY);
-      }
+      if (angle === 0) ctx.moveTo(pointX, pointY);
+      else ctx.lineTo(pointX, pointY);
     }
-    
     ctx.closePath();
-    ctx.fillStyle = color;
-    ctx.globalAlpha = 0.6;
+    
+    const gradient = ctx.createRadialGradient(x, y, 0, x, y, size);
+    gradient.addColorStop(0, color + '60');
+    gradient.addColorStop(1, color + '10');
+    
+    ctx.fillStyle = gradient;
     ctx.fill();
-    ctx.globalAlpha = 1;
+    
+    ctx.restore();
   };
   
-  const drawComplexShape = (ctx: CanvasRenderingContext2D, x: number, y: number, size: number, color: string) => {
-    ctx.beginPath();
+  const drawAnxiousArt = (ctx: CanvasRenderingContext2D, x: number, y: number, size: number, color: string, layer: number) => {
+    ctx.save();
+    ctx.globalAlpha = 0.7 - (layer * 0.2);
     
-    const points = 7 + Math.floor(Math.random() * 5);
-    
-    for (let i = 0; i < points; i++) {
-      const angle = (i / points) * Math.PI * 2;
-      const variance = Math.random() * size;
-      const distance = size / 2 + variance;
+    // Chaotic, overlapping patterns
+    for (let i = 0; i < 8; i++) {
+      ctx.beginPath();
+      const startX = x + (Math.random() - 0.5) * size;
+      const startY = y + (Math.random() - 0.5) * size;
       
-      const pointX = x + Math.cos(angle) * distance;
-      const pointY = y + Math.sin(angle) * distance;
+      ctx.moveTo(startX, startY);
       
-      if (i === 0) {
-        ctx.moveTo(pointX, pointY);
-      } else {
-        ctx.quadraticCurveTo(
-          x + Math.cos(angle - Math.PI / points) * distance * 1.5,
-          y + Math.sin(angle - Math.PI / points) * distance * 1.5,
-          pointX,
-          pointY
-        );
+      for (let j = 0; j < 4; j++) {
+        const controlX = startX + (Math.random() - 0.5) * size;
+        const controlY = startY + (Math.random() - 0.5) * size;
+        const endX = x + (Math.random() - 0.5) * size;
+        const endY = y + (Math.random() - 0.5) * size;
+        
+        ctx.quadraticCurveTo(controlX, controlY, endX, endY);
       }
+      
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2 - (layer * 0.5);
+      ctx.stroke();
     }
     
-    ctx.closePath();
-    ctx.fillStyle = color;
-    ctx.globalAlpha = 0.7;
-    ctx.fill();
-    ctx.globalAlpha = 1;
+    ctx.restore();
   };
   
   const handleDownload = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     
-    // Create a temporary link
     const link = document.createElement('a');
     link.download = `mood-art-${timeFrame}-${new Date().toISOString().split('T')[0]}.png`;
     link.href = canvas.toDataURL('image/png');
@@ -230,7 +342,6 @@ const MoodArt = () => {
         }
       }
       
-      // Fallback if Web Share API is not available
       alert('Sharing is not supported on this browser. You can download the image instead.');
     });
   };
@@ -242,7 +353,7 @@ const MoodArt = () => {
       <Card className="overflow-hidden">
         <CardContent className="p-6">
           <p className="text-sm text-muted-foreground mb-4">
-            Your unique mood fingerprint visualized as art. This generative artwork is created based on your emotional patterns.
+            Your unique mood fingerprint visualized as stunning generative art.
           </p>
           
           <Tabs defaultValue="today" className="mb-4" onValueChange={(value) => setTimeFrame(value as any)}>
@@ -254,17 +365,11 @@ const MoodArt = () => {
             </TabsList>
           </Tabs>
           
-          <div className="text-xs text-muted-foreground flex items-center gap-2 mb-4">
-            <span className="i-lucide-calendar text-sm"></span>
-            Showing your mood art for {timeFrame}
-          </div>
-          
-          <div className="rounded-md overflow-hidden border mb-4 bg-white">
+          <div className="rounded-md overflow-hidden border mb-4 bg-black">
             <canvas 
               ref={canvasRef} 
-              className="w-full h-64"
-              width={600}
-              height={300}
+              className="w-full max-w-full"
+              style={{ aspectRatio: '8/5' }}
             />
           </div>
           
@@ -286,14 +391,16 @@ const MoodArt = () => {
           <h2 className="text-xl font-semibold mb-4">About Your Mood Canvas</h2>
           
           <p className="text-muted-foreground mb-4">
-            Your mood data is transformed into a unique piece of generative art. The colors, shapes, and patterns all represent different aspects of your emotional state.
+            Your emotional journey transformed into a mesmerizing work of art. Each mood creates unique visual patterns that flow together to tell your story.
           </p>
           
           <ul className="space-y-2 list-disc pl-5">
-            <li><span className="font-medium">Colors:</span> Derived directly from your mood selections</li>
-            <li><span className="font-medium">Shapes:</span> Fluid shapes represent calm/sad moods, while angular shapes represent energetic/angry moods</li>
-            <li><span className="font-medium">Complexity:</span> Based on the diversity of your emotions</li>
-            <li><span className="font-medium">Patterns:</span> Influenced by your creative and energetic moods</li>
+            <li><span className="font-medium">Angry:</span> Sharp, jagged bursts of energy</li>
+            <li><span className="font-medium">Energetic:</span> Radiating lines and bright centers</li>
+            <li><span className="font-medium">Happy:</span> Glowing bubbles of light</li>
+            <li><span className="font-medium">Sad:</span> Flowing teardrops and gentle streams</li>
+            <li><span className="font-medium">Calm:</span> Smooth, wave-like patterns</li>
+            <li><span className="font-medium">Anxious:</span> Chaotic, overlapping curves</li>
           </ul>
         </CardContent>
       </Card>

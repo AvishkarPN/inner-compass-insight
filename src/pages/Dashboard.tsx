@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import MoodSelector from '@/components/MoodSelector';
@@ -9,7 +10,7 @@ import { useMood } from '@/contexts/MoodContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
-import { ChevronRight, Sprout, History, Paintbrush } from 'lucide-react';
+import { ChevronRight, Sprout, History } from 'lucide-react';
 
 const Dashboard = () => {
   const [selectedMood, setSelectedMood] = useState<MoodType | undefined>();
@@ -41,11 +42,12 @@ const Dashboard = () => {
   };
   
   return (
-    <div className="space-y-8">
-      <div className="grid gap-6 lg:grid-cols-5">
-        <div className="lg:col-span-3 space-y-6">
+    <div className="space-y-6">
+      <div className="grid gap-6 lg:grid-cols-3">
+        {/* Main content area - spans 2 columns on large screens */}
+        <div className="lg:col-span-2 space-y-6">
           <Card className="border shadow-md overflow-hidden bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm">
-            <CardHeader className="pb-2 border-b bg-muted/30">
+            <CardHeader className="pb-3 border-b bg-muted/30">
               <CardTitle className="text-lg font-medium">How are you feeling today?</CardTitle>
             </CardHeader>
             <CardContent className="p-6">
@@ -54,7 +56,7 @@ const Dashboard = () => {
           </Card>
           
           <Card className="border shadow-md bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm">
-            <CardHeader className="pb-2 border-b bg-muted/30">
+            <CardHeader className="pb-3 border-b bg-muted/30">
               <CardTitle className="text-lg font-medium">Journal Entry</CardTitle>
             </CardHeader>
             <CardContent className="p-6">
@@ -63,9 +65,10 @@ const Dashboard = () => {
           </Card>
         </div>
         
-        <div className="lg:col-span-2 space-y-6">
-          <Card className="border shadow-md h-[300px] bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm">
-            <CardHeader className="pb-2 border-b bg-muted/30">
+        {/* Sidebar content - spans 1 column on large screens */}
+        <div className="space-y-6">
+          <Card className="border shadow-md h-[320px] bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm">
+            <CardHeader className="pb-3 border-b bg-muted/30">
               <CardTitle className="flex justify-between items-center">
                 <span className="flex items-center gap-1.5">
                   <Sprout size={18} className="text-green-500" />
@@ -76,13 +79,13 @@ const Dashboard = () => {
                 </Link>
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-0 h-[calc(300px-56px)]"> {/* Adjusted for header height */}
+            <CardContent className="p-0 h-[calc(320px-65px)]">
               <MoodGarden />
             </CardContent>
           </Card>
           
           <Card className="border shadow-md bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm">
-            <CardHeader className="pb-2 border-b bg-muted/30">
+            <CardHeader className="pb-3 border-b bg-muted/30">
               <CardTitle className="flex justify-between items-center">
                 <span className="flex items-center gap-1.5">
                   <History size={18} />
@@ -91,9 +94,9 @@ const Dashboard = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="p-4">
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {recentMoods.length > 0 ? (
-                  recentMoods.map(entry => (
+                  recentMoods.slice(0, 3).map(entry => (
                     <MoodEntryCard key={entry.id} entry={entry} />
                   ))
                 ) : (
@@ -105,32 +108,10 @@ const Dashboard = () => {
               </div>
               
               <div className="mt-4 text-center">
-                <Button variant="outline" asChild className="shadow-sm">
+                <Button variant="outline" asChild className="shadow-sm w-full">
                   <Link to="/history">View All Entries</Link>
                 </Button>
               </div>
-            </CardContent>
-          </Card>
-          
-          <Card className="border shadow-md bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm overflow-hidden">
-            <CardHeader className="pb-2 border-b bg-muted/30">
-              <CardTitle className="flex justify-between items-center">
-                <span>Mood Canvas</span>
-                <Link to="/mood-art" className="text-sm text-primary flex items-center hover:underline">
-                  View Full Art <ChevronRight size={16} />
-                </Link>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-0 h-[300px] flex items-center justify-center">
-              <Link to="/mood-art" className="text-muted-foreground hover:text-primary transition-colors">
-                <div className="text-center p-6">
-                  <div className="mx-auto w-16 h-16 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 mb-4 flex items-center justify-center">
-                    <Paintbrush className="h-8 w-8 text-white" />
-                  </div>
-                  <p className="font-medium">View Your Mood Art</p>
-                  <p className="text-xs mt-1">See your emotions visualized as art</p>
-                </div>
-              </Link>
             </CardContent>
           </Card>
         </div>
