@@ -8,7 +8,7 @@ const moodColorMap: Record<MoodType, string> = {
   angry: '#ff6b6b',
   energetic: '#ffa502',
   happy: '#feca57',
-  peaceful: '#2ecc71',
+  sad: '#74b9ff',
   calm: '#3498db',
   anxious: '#9b59b6',
 };

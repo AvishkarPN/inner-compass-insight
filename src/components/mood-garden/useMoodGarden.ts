@@ -90,7 +90,7 @@ export const useMoodGarden = () => {
     // Determine dominant mood
     const moodCounts: Record<MoodType, number> = {
       angry: 0, energetic: 0, happy: 0, 
-      peaceful: 0, calm: 0, anxious: 0
+      sad: 0, calm: 0, anxious: 0
     };
     
     // Count moods from last 7 entries
