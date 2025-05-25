@@ -63,12 +63,13 @@ const MoodArt = () => {
     link.click();
   };
   
-  // Handle share functionality
+  // Handle share functionality (dummy implementation)
   const handleShare = () => {
     if (navigator.share) {
       navigator.share({
         title: 'My Mood Art',
         text: `Check out my mood art for ${timePeriod}!`,
+        // In a real implementation, we'd generate a shareable URL
         url: window.location.href,
       }).catch(err => {
         console.log('Error sharing:', err);
@@ -87,7 +88,7 @@ const MoodArt = () => {
       <Card className="overflow-hidden">
         <CardContent className="p-6">
           <p className="text-sm text-muted-foreground mb-4">
-            Your unique mood fingerprint visualized as stunning generative art.
+            Your unique mood fingerprint visualized as art. This generative artwork is created based on your emotional patterns.
           </p>
           
           <Tabs defaultValue="week" className="mb-6" onValueChange={(value) => setTimeFrame(value as any)}>
@@ -138,7 +139,7 @@ const MoodArt = () => {
           </p>
           <ul className="list-disc pl-5 text-muted-foreground space-y-2">
             <li><strong>Colors:</strong> Derived directly from your mood selections</li>
-            <li><strong>Shapes:</strong> Fluid shapes represent calm/sad moods, while angular shapes represent energetic/angry moods</li>
+            <li><strong>Shapes:</strong> Fluid shapes represent calm/peaceful moods, while angular shapes represent energetic/angry moods</li>
             <li><strong>Complexity:</strong> Based on the diversity of your emotions</li>
             <li><strong>Patterns:</strong> Influenced by your creative and energetic moods</li>
           </ul>
