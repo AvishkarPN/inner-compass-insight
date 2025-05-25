@@ -99,10 +99,19 @@ export const getTimePeriodDescription = (entries: MoodEntry[]): string => {
   
   const now = new Date();
   const oldest = new Date(Math.min(...entries.map(e => new Date(e.timestamp).getTime())));
-  const diffDays = Math.floor((now.getTime() - oldest.getTime()) / (1000 * 60 * 60 * 24));
+  const newest = new Date(Math.max(...entries.map(e => new Date(e.timestamp).getTime())));
   
-  if (diffDays < 1) return "today";
-  if (diffDays < 7) return "this week";
-  if (diffDays < 31) return "this month";
+  const diffDays = Math.floor((now.getTime() - oldest.getTime()) / (1000 * 60 * 60 * 24));
+  const newestDiffDays = Math.floor((now.getTime() - newest.getTime()) / (1000 * 60 * 60 * 24));
+  
+  // Check if all entries are from today
+  if (newestDiffDays === 0 && diffDays === 0) return "today";
+  
+  // Check if entries span within the last week
+  if (diffDays <= 7) return "this week";
+  
+  // Check if entries span within the last month
+  if (diffDays <= 31) return "this month";
+  
   return "your mood journey";
 };

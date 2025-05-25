@@ -22,7 +22,7 @@ const MoodArt = () => {
     
     switch (timeFrame) {
       case 'day':
-        cutoffDate.setDate(now.getDate() - 1);
+        cutoffDate.setHours(0, 0, 0, 0); // Start of today
         break;
       case 'week':
         cutoffDate.setDate(now.getDate() - 7);
@@ -46,17 +46,17 @@ const MoodArt = () => {
     if (!canvas) return;
     
     const link = document.createElement('a');
-    link.download = `mood-art-${timeFrame}-${new Date().toISOString().slice(0, 10)}.png`;
+    link.download = `mood-canvas-${timeFrame}-${new Date().toISOString().slice(0, 10)}.png`;
     link.href = canvas.toDataURL('image/png');
     link.click();
   };
   
-  // Handle share functionality (dummy implementation)
+  // Handle share functionality
   const handleShare = () => {
     if (navigator.share) {
       navigator.share({
-        title: 'My Mood Art',
-        text: `Check out my mood art for ${timePeriod}!`,
+        title: 'My Mood Canvas',
+        text: `Check out my mood canvas for ${timePeriod}!`,
         url: window.location.href,
       }).catch(err => {
         console.log('Error sharing:', err);
@@ -88,7 +88,7 @@ const MoodArt = () => {
             
             <div className="mt-4 bg-muted/50 p-2 rounded text-sm text-muted-foreground flex items-center">
               <Calendar className="w-4 h-4 mr-2" />
-              <span>Showing your mood art for <strong>{timePeriod}</strong></span>
+              <span>Showing your mood canvas for <strong>{timePeriod}</strong></span>
             </div>
           </Tabs>
           

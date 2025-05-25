@@ -17,7 +17,7 @@ const MoodCanvas: React.FC<MoodCanvasProps> = ({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   
   useEffect(() => {
-    if (!canvasRef.current || entries.length === 0) return;
+    if (!canvasRef.current) return;
     
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
@@ -25,6 +25,12 @@ const MoodCanvas: React.FC<MoodCanvasProps> = ({
     
     // Clear canvas
     ctx.clearRect(0, 0, width, height);
+    
+    // If no entries, show a default art piece
+    if (entries.length === 0) {
+      drawDefaultArt(ctx, width, height);
+      return;
+    }
     
     // Get art parameters based on mood entries
     const { 
@@ -40,6 +46,27 @@ const MoodCanvas: React.FC<MoodCanvasProps> = ({
     // Use the parameters to create a unique generative art piece
     drawGenerativeArt(ctx, width, height, colors, complexity, fluidity, brightness, patterns, seed);
   }, [entries, width, height]);
+  
+  // Function to draw default art when no entries exist
+  const drawDefaultArt = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
+    const gradient = ctx.createLinearGradient(0, 0, width, height);
+    gradient.addColorStop(0, '#e3f2fd');
+    gradient.addColorStop(1, '#f8f9fa');
+    
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, width, height);
+    
+    // Add some subtle shapes
+    ctx.globalAlpha = 0.1;
+    ctx.fillStyle = '#2196f3';
+    ctx.beginPath();
+    ctx.arc(width * 0.3, height * 0.4, 50, 0, Math.PI * 2);
+    ctx.fill();
+    
+    ctx.beginPath();
+    ctx.arc(width * 0.7, height * 0.6, 30, 0, Math.PI * 2);
+    ctx.fill();
+  };
   
   // Function to create generative art
   const drawGenerativeArt = (
@@ -60,9 +87,9 @@ const MoodCanvas: React.FC<MoodCanvasProps> = ({
       return currentSeed / 233280;
     };
     
-    // Background
+    // Background with vibrant gradient
     const gradientColors = colors.length >= 2 ? colors : [...colors, '#ffffff'];
-    const gradient = ctx.createLinearGradient(0, 0, width, height);
+    const gradient = ctx.createRadialGradient(width/2, height/2, 0, width/2, height/2, Math.max(width, height)/2);
     gradientColors.forEach((color, i) => {
       gradient.addColorStop(i / (gradientColors.length - 1), color);
     });
@@ -70,19 +97,24 @@ const MoodCanvas: React.FC<MoodCanvasProps> = ({
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, width, height);
     
-    // Number of shapes based on complexity
-    const numShapes = Math.floor(10 + complexity * 40);
+    // Ensure minimum vibrant parameters
+    const vibrantComplexity = Math.max(complexity, 0.3);
+    const vibrantBrightness = Math.max(brightness, 0.4);
+    const vibrantPatterns = Math.max(patterns, 0.2);
     
-    // Draw shapes
+    // Number of shapes based on complexity
+    const numShapes = Math.floor(15 + vibrantComplexity * 50);
+    
+    // Draw main shapes with vibrant colors
     for (let i = 0; i < numShapes; i++) {
       const color = colors[Math.floor(seededRandom() * colors.length)];
       ctx.fillStyle = color;
       ctx.strokeStyle = color;
-      ctx.globalAlpha = 0.2 + (brightness * 0.5);
+      ctx.globalAlpha = 0.3 + (vibrantBrightness * 0.6); // Ensure minimum visibility
       
       const x = seededRandom() * width;
       const y = seededRandom() * height;
-      const size = 10 + seededRandom() * 50 * patterns;
+      const size = 15 + seededRandom() * 60 * vibrantPatterns;
       
       // Different shapes based on fluidity
       if (seededRandom() < fluidity) {
@@ -96,30 +128,30 @@ const MoodCanvas: React.FC<MoodCanvasProps> = ({
       }
       
       // Add connecting lines for complexity
-      if (i > 0 && seededRandom() < complexity) {
+      if (i > 0 && seededRandom() < vibrantComplexity) {
         const prevX = seededRandom() * width;
         const prevY = seededRandom() * height;
         ctx.beginPath();
         ctx.moveTo(prevX, prevY);
         ctx.lineTo(x, y);
-        ctx.lineWidth = 1 + seededRandom() * 3;
-        ctx.globalAlpha = 0.1 + (complexity * 0.2);
+        ctx.lineWidth = 1 + seededRandom() * 4;
+        ctx.globalAlpha = 0.2 + (vibrantComplexity * 0.3);
         ctx.stroke();
       }
     }
     
-    // Add patterns
-    if (patterns > 0.3) {
-      const patternCount = Math.floor(patterns * 20);
+    // Add decorative patterns
+    if (vibrantPatterns > 0.2) {
+      const patternCount = Math.floor(vibrantPatterns * 30);
       for (let i = 0; i < patternCount; i++) {
         const x = seededRandom() * width;
         const y = seededRandom() * height;
-        const radius = 5 + seededRandom() * 20;
+        const radius = 5 + seededRandom() * 25;
         
         ctx.beginPath();
         ctx.arc(x, y, radius, 0, Math.PI * 2);
-        ctx.lineWidth = 1;
-        ctx.globalAlpha = 0.2;
+        ctx.lineWidth = 2;
+        ctx.globalAlpha = 0.3;
         ctx.stroke();
       }
     }

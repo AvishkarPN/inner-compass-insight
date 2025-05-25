@@ -2,13 +2,11 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import MoodSelector from '@/components/MoodSelector';
-import JournalEditor from '@/components/JournalEditor';
 import MoodEntryCard from '@/components/MoodEntryCard';
 import MoodGarden from '@/components/MoodGarden';
 import { MoodType } from '@/types/mood';
 import { useMood } from '@/contexts/MoodContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
 import { ChevronRight, Sprout, History } from 'lucide-react';
 
@@ -19,26 +17,16 @@ const Dashboard = () => {
   
   const handleMoodSelect = (mood: MoodType) => {
     setSelectedMood(mood);
-  };
-  
-  const handleSaveJournal = (journalText: string) => {
-    if (!selectedMood) {
-      toast({
-        title: 'Mood Required',
-        description: 'Please select a mood before saving your journal entry.',
-        variant: 'destructive'
-      });
-      return;
-    }
     
-    addMoodEntry(selectedMood, journalText);
+    // Automatically save the mood without requiring journal entry
+    addMoodEntry(mood, '');
     toast({
-      title: 'Entry Saved',
-      description: 'Your mood and journal entry have been saved!',
+      title: 'Mood Logged',
+      description: `Your ${mood} mood has been recorded!`,
     });
     
-    // Reset the form
-    setSelectedMood(undefined);
+    // Reset the selection after a brief moment
+    setTimeout(() => setSelectedMood(undefined), 500);
   };
   
   return (
@@ -54,15 +42,6 @@ const Dashboard = () => {
               <MoodSelector onMoodSelect={handleMoodSelect} selectedMood={selectedMood} />
             </CardContent>
           </Card>
-          
-          <Card className="border shadow-md bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm">
-            <CardHeader className="pb-3 border-b bg-muted/30">
-              <CardTitle className="text-lg font-medium">Journal Entry</CardTitle>
-            </CardHeader>
-            <CardContent className="p-6">
-              <JournalEditor onSave={handleSaveJournal} />
-            </CardContent>
-          </Card>
         </div>
         
         {/* Sidebar content - spans 1 column on large screens */}
@@ -72,7 +51,7 @@ const Dashboard = () => {
               <CardTitle className="flex justify-between items-center">
                 <span className="flex items-center gap-1.5">
                   <Sprout size={18} className="text-green-500" />
-                  Your Companion
+                  Your Garden
                 </span>
                 <Link to="/insights" className="text-sm text-primary flex items-center hover:underline">
                   View Insights <ChevronRight size={16} />
@@ -105,12 +84,6 @@ const Dashboard = () => {
                     <p className="text-sm mt-1">Start tracking your mood to see your entries here</p>
                   </div>
                 )}
-              </div>
-              
-              <div className="mt-4 text-center">
-                <Button variant="outline" asChild className="shadow-sm w-full">
-                  <Link to="/history">View All Entries</Link>
-                </Button>
               </div>
             </CardContent>
           </Card>

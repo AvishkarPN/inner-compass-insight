@@ -1,16 +1,39 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import WeeklyMoodChart from '@/components/WeeklyMoodChart';
 import { useMood } from '@/contexts/MoodContext';
 import MoodDistributionChart from '@/components/MoodDistributionChart';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { BarChart, PieChart, BookOpen, Brain } from 'lucide-react';
+import { BarChart, PieChart, BookOpen, Brain, Download } from 'lucide-react';
 import JournalInsights from '@/components/JournalInsights';
 
 const Insights = () => {
   const { getWeeklyMoodData, moodEntries } = useMood();
   const weeklyData = getWeeklyMoodData();
+  
+  // Handle export insights as JSON
+  const handleExportInsights = () => {
+    const insights = {
+      weeklyData,
+      totalEntries: moodEntries.length,
+      exportDate: new Date().toISOString(),
+      moodEntries: moodEntries.map(entry => ({
+        mood: entry.mood,
+        timestamp: entry.timestamp,
+        sentimentScore: entry.sentimentScore
+      }))
+    };
+    
+    const dataStr = JSON.stringify(insights, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    
+    const link = document.createElement('a');
+    link.download = `mood-insights-${new Date().toISOString().slice(0, 10)}.json`;
+    link.href = URL.createObjectURL(dataBlob);
+    link.click();
+  };
   
   return (
     <div className="space-y-8">
@@ -19,6 +42,10 @@ const Insights = () => {
           <h1 className="text-2xl font-bold">Your Mood Insights</h1>
           <p className="text-muted-foreground">Analyze your mood patterns and journal entries</p>
         </div>
+        <Button onClick={handleExportInsights} className="flex items-center gap-2">
+          <Download className="w-4 h-4" />
+          Export Insights
+        </Button>
       </div>
       
       <Tabs defaultValue="charts" className="space-y-6">
