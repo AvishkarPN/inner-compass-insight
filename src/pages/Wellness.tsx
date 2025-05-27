@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -19,7 +20,8 @@ import {
   Award,
   Activity,
   Lightbulb,
-  BookOpen
+  BookOpen,
+  Phone
 } from 'lucide-react';
 
 const Wellness = () => {
@@ -37,59 +39,95 @@ const Wellness = () => {
     return entryDate >= weekAgo;
   });
 
+  // Calculate positive entries for use in multiple places
+  const positiveEntries = moodEntries.filter(entry => 
+    ['happy', 'energetic', 'calm'].includes(entry.mood)
+  );
+
   // More complex wellness score calculation
   const calculateWellnessScore = () => {
     if (totalEntries === 0) return 0;
     
-    // Score components
+    // Score components with more nuanced weighting
     let score = 0;
     const weights = {
-      consistency: 0.3,    // 30% - how consistently they log
-      positivity: 0.25,    // 25% - ratio of positive moods
-      balance: 0.2,        // 20% - mood diversity (balanced emotions)
-      recent: 0.15,        // 15% - recent trend (last 7 days)
-      engagement: 0.1      // 10% - journal entry quality
+      consistency: 0.25,     // 25% - how consistently they log
+      moodBalance: 0.20,     // 20% - balanced mood distribution
+      journalQuality: 0.15,  // 15% - depth of reflection
+      positivity: 0.15,      // 15% - positive mood ratio
+      recentTrend: 0.15,     // 15% - recent improvement
+      streakBonus: 0.10      // 10% - streak maintenance
     };
     
-    // 1. Consistency score (based on recent entries)
+    // 1. Consistency score (based on recent entries vs target)
     const consistencyScore = Math.min((recentEntries.length / 7) * 100, 100);
     
-    // 2. Positivity score
-    const positiveEntries = moodEntries.filter(entry => 
-      ['happy', 'energetic', 'calm'].includes(entry.mood)
-    );
-    const positivityScore = (positiveEntries.length / totalEntries) * 100;
-    
-    // 3. Balance score (diversity of emotions)
+    // 2. Mood balance score (variety and distribution)
     const moodCounts = moodEntries.reduce((acc, entry) => {
       acc[entry.mood] = (acc[entry.mood] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
+    
     const uniqueMoods = Object.keys(moodCounts).length;
-    const balanceScore = Math.min((uniqueMoods / 6) * 100, 100); // Max 6 mood types
+    const moodVariety = Math.min((uniqueMoods / 6) * 100, 100);
     
-    // 4. Recent trend score
-    const recentPositive = recentEntries.filter(entry => 
-      ['happy', 'energetic', 'calm'].includes(entry.mood)
-    );
-    const recentScore = recentEntries.length > 0 ? 
-      (recentPositive.length / recentEntries.length) * 100 : 0;
+    // Calculate mood distribution balance (closer to equal = better balance)
+    const avgCount = totalEntries / uniqueMoods;
+    const variance = Object.values(moodCounts).reduce((acc, count) => 
+      acc + Math.pow(count - avgCount, 2), 0) / uniqueMoods;
+    const balanceScore = Math.max(0, 100 - (variance / avgCount) * 10);
     
-    // 5. Engagement score (average journal length)
+    const moodBalanceScore = (moodVariety + balanceScore) / 2;
+    
+    // 3. Journal quality score (length and frequency of meaningful entries)
     const avgJournalLength = moodEntries.reduce((acc, entry) => 
       acc + entry.journalText.length, 0) / totalEntries;
-    const engagementScore = Math.min((avgJournalLength / 100) * 100, 100); // 100 chars = 100%
+    const meaningfulEntries = moodEntries.filter(entry => 
+      entry.journalText.length > 20).length; // More than 20 chars
+    const qualityRatio = meaningfulEntries / totalEntries;
+    const journalQualityScore = Math.min(
+      (avgJournalLength / 150) * 50 + qualityRatio * 50, 100
+    );
+    
+    // 4. Positivity score (but not overwhelming)
+    const positivityRatio = positiveEntries.length / totalEntries;
+    // Optimal range is 40-70% positive moods (realistic and healthy)
+    const positivityScore = positivityRatio <= 0.7 ? 
+      (positivityRatio / 0.7) * 100 : 
+      100 - ((positivityRatio - 0.7) / 0.3) * 20;
+    
+    // 5. Recent trend score (last 7 days vs previous 7 days)
+    const previousWeekEntries = moodEntries.filter(entry => {
+      const entryDate = new Date(entry.timestamp);
+      const twoWeeksAgo = new Date();
+      const oneWeekAgo = new Date();
+      twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
+      oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+      return entryDate >= twoWeeksAgo && entryDate < oneWeekAgo;
+    });
+    
+    const recentPositiveRatio = recentEntries.length > 0 ? 
+      recentEntries.filter(entry => positiveEntries.some(pe => pe.id === entry.id)).length / recentEntries.length : 0;
+    const previousPositiveRatio = previousWeekEntries.length > 0 ?
+      previousWeekEntries.filter(entry => positiveEntries.some(pe => pe.id === entry.id)).length / previousWeekEntries.length : 0;
+    
+    const trendImprovement = recentPositiveRatio - previousPositiveRatio;
+    const recentTrendScore = Math.max(0, Math.min(100, 50 + trendImprovement * 100));
+    
+    // 6. Streak bonus (consistency over time)
+    const streakBonusScore = Math.min(recentEntries.length * 15, 100);
     
     // Calculate weighted score
     score = (
       consistencyScore * weights.consistency +
+      moodBalanceScore * weights.moodBalance +
+      journalQualityScore * weights.journalQuality +
       positivityScore * weights.positivity +
-      balanceScore * weights.balance +
-      recentScore * weights.recent +
-      engagementScore * weights.engagement
+      recentTrendScore * weights.recentTrend +
+      streakBonusScore * weights.streakBonus
     );
     
-    return Math.round(score);
+    return Math.round(Math.max(0, Math.min(100, score)));
   };
 
   const wellnessScore = calculateWellnessScore();
