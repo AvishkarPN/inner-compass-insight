@@ -91,15 +91,6 @@ const Wellness = () => {
           <h1 className="text-3xl font-bold">Wellness Hub</h1>
           <p className="text-muted-foreground">Your comprehensive mental health companion</p>
         </div>
-        
-        <Button 
-          onClick={handleCrisisCall}
-          variant="destructive" 
-          className="bg-red-600 hover:bg-red-700"
-        >
-          <Phone className="w-4 h-4 mr-2" />
-          Crisis Support
-        </Button>
       </div>
 
       <Tabs defaultValue="overview" className="space-y-6">

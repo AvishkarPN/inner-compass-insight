@@ -1,7 +1,6 @@
 
 import React from 'react';
-import { isToday } from 'date-fns';
-import { plantStages } from './constants';
+import { differenceInDays, format } from 'date-fns';
 
 interface PlantStatusInfoProps {
   streak: number;
@@ -10,46 +9,54 @@ interface PlantStatusInfoProps {
   lastEntryDate: Date | null;
 }
 
-const PlantStatusInfo: React.FC<PlantStatusInfoProps> = ({ 
-  streak, 
-  plantStage, 
-  plantHealth, 
-  lastEntryDate 
+const PlantStatusInfo: React.FC<PlantStatusInfoProps> = ({
+  streak,
+  plantStage,
+  plantHealth,
+  lastEntryDate
 }) => {
+  const getStatusMessage = () => {
+    if (plantHealth === 100) return "Thriving";
+    if (plantHealth >= 80) return "Healthy";
+    if (plantHealth >= 60) return "Growing";
+    if (plantHealth >= 40) return "Needs care";
+    if (plantHealth >= 20) return "Struggling";
+    return "Wilting";
+  };
+
+  const getDaysSinceLastEntry = () => {
+    if (!lastEntryDate) return 0;
+    return differenceInDays(new Date(), lastEntryDate);
+  };
+
+  const daysSince = getDaysSinceLastEntry();
+
   return (
-    <>
-      {/* Info panel */}
-      <div className="mb-4 bg-white/80 dark:bg-gray-800/80 p-3 rounded-lg shadow-sm backdrop-blur-sm">
-        <div className="flex justify-between text-sm">
-          <span className="font-medium flex items-center gap-1">
-            <span className="inline-block w-2 h-2 bg-green-500 rounded-full"></span> 
-            Streak: <span className="font-bold">{streak} day{streak !== 1 ? 's' : ''}</span>
-          </span>
-          <span className="font-medium">
-            Health: <span className="font-bold">{plantHealth}%</span>
-          </span>
-        </div>
-        <div className="w-full bg-muted rounded-full h-2 mt-2 overflow-hidden">
-          <div 
-            className="bg-gradient-to-r from-green-400 to-green-500 h-2 rounded-full transition-all duration-1000"
-            style={{ width: `${plantHealth}%` }}
-          />
-        </div>
-      </div>
-      
-      {/* Plant stage info */}
-      <div className="absolute bottom-2 inset-x-0 text-center text-xs font-medium">
-        <div className="bg-white/70 dark:bg-gray-800/70 mx-auto max-w-fit px-3 py-1 rounded-full shadow-sm backdrop-blur-sm">
-          {plantStages[plantStage].description}
+    <div className="absolute top-2 left-2 right-2 z-10">
+      <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-lg p-3 shadow-sm border">
+        <div className="flex justify-between items-center text-sm">
+          <div className="flex items-center gap-2">
+            <span className="font-medium text-green-600 dark:text-green-400">
+              {getStatusMessage()}
+            </span>
+            <span className="text-xs text-muted-foreground">
+              {streak} day streak
+            </span>
+          </div>
+          <div className="text-xs text-muted-foreground">
+            {daysSince === 0 ? 'Logged today' : 
+             daysSince === 1 ? 'Logged yesterday' : 
+             `${daysSince} days ago`}
+          </div>
         </div>
         
-        {lastEntryDate && !isToday(lastEntryDate) && (
-          <div className="text-amber-600 dark:text-amber-400 mt-1 font-medium bg-white/70 dark:bg-gray-800/70 mx-auto max-w-fit px-2 py-0.5 rounded-full text-[10px] animate-pulse shadow-sm">
-            {plantHealth < 70 ? 'Your companion needs attention!' : 'Journal today to maintain your streak!'}
+        {plantStage === 0 && (
+          <div className="mt-2 text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 px-2 py-1 rounded">
+            Just planted! Keep journaling to help it grow.
           </div>
         )}
       </div>
-    </>
+    </div>
   );
 };
 

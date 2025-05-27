@@ -8,42 +8,52 @@ import JournalEditor from '@/components/JournalEditor';
 import { MoodType } from '@/types/mood';
 import { useMood } from '@/contexts/MoodContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
-import { ChevronRight, Sprout, History, BookOpen } from 'lucide-react';
+import { ChevronRight, Sprout, History, Save } from 'lucide-react';
 
 const Dashboard = () => {
   const [selectedMood, setSelectedMood] = useState<MoodType | undefined>();
+  const [journalText, setJournalText] = useState('');
   const { addMoodEntry, recentMoods } = useMood();
   const { toast } = useToast();
   
   const handleMoodSelect = (mood: MoodType) => {
     setSelectedMood(mood);
-    
-    // Automatically save the mood without requiring journal entry
-    addMoodEntry(mood, '');
-    toast({
-      title: 'Mood Logged',
-      description: `Your ${mood} mood has been recorded!`,
-    });
-    
-    // Reset the selection after a brief moment
-    setTimeout(() => setSelectedMood(undefined), 500);
   };
 
-  const handleJournalSave = (text: string) => {
-    if (selectedMood) {
-      addMoodEntry(selectedMood, text);
+  const handleJournalChange = (text: string) => {
+    setJournalText(text);
+  };
+
+  const handleSaveEntry = () => {
+    if (!selectedMood) {
       toast({
-        title: 'Entry Saved',
-        description: 'Your mood and journal entry have been saved!',
-      });
-    } else {
-      toast({
-        title: 'Please select a mood first',
-        description: 'Choose how you\'re feeling before writing your entry.',
+        title: 'Please select a mood',
+        description: 'Choose how you\'re feeling before saving your entry.',
         variant: 'destructive'
       });
+      return;
     }
+
+    if (!journalText.trim()) {
+      toast({
+        title: 'Please add a journal entry',
+        description: 'Write something about your day before saving.',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    addMoodEntry(selectedMood, journalText);
+    toast({
+      title: 'Entry Saved',
+      description: 'Your mood and journal entry have been saved!',
+    });
+
+    // Reset form
+    setSelectedMood(undefined);
+    setJournalText('');
   };
   
   return (
@@ -61,14 +71,23 @@ const Dashboard = () => {
           </Card>
 
           <Card className="border shadow-md overflow-hidden bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm">
-            <CardHeader className="pb-3 border-b bg-muted/30">
-              <CardTitle className="text-lg font-medium flex items-center gap-2">
-                <BookOpen size={18} />
-                Journal Entry
-              </CardTitle>
+            <CardHeader className="pb-3 border-b bg-muted/30 flex flex-row items-center justify-between">
+              <CardTitle className="text-lg font-medium">Journal Entry</CardTitle>
+              <Button 
+                onClick={handleSaveEntry}
+                disabled={!selectedMood || !journalText.trim()}
+                className="flex items-center gap-2"
+              >
+                <Save size={16} />
+                Save Entry
+              </Button>
             </CardHeader>
             <CardContent className="p-6">
-              <JournalEditor onSave={handleJournalSave} />
+              <JournalEditor 
+                value={journalText}
+                onChange={handleJournalChange}
+                placeholder="Write about your day..."
+              />
             </CardContent>
           </Card>
         </div>

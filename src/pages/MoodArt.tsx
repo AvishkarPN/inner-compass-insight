@@ -4,17 +4,16 @@ import { useMood } from '@/contexts/MoodContext';
 import { MoodEntry } from '@/types/mood';
 import MoodCanvas from '@/components/MoodCanvas';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
 import { Share2, Download, Calendar } from 'lucide-react';
-import { getTimePeriodDescription } from '@/utils/artUtils';
 
 const MoodArt = () => {
   const { moodEntries } = useMood();
   const [timeFrame, setTimeFrame] = useState<'day' | 'week' | 'month' | 'all'>('week');
   
   // Filter entries based on selected timeframe
-  const getFilteredEntries = () => {
+  const getFilteredEntries = (): MoodEntry[] => {
     if (timeFrame === 'all') return moodEntries;
     
     const now = new Date();
@@ -22,13 +21,13 @@ const MoodArt = () => {
     
     switch (timeFrame) {
       case 'day':
-        cutoffDate.setHours(0, 0, 0, 0); // Start of today
+        cutoffDate.setHours(0, 0, 0, 0);
         break;
       case 'week':
         cutoffDate.setDate(now.getDate() - 7);
         break;
       case 'month':
-        cutoffDate.setMonth(now.getMonth() - 1);
+        cutoffDate.setDate(now.getDate() - 30);
         break;
       default:
         cutoffDate.setDate(now.getDate() - 7);
@@ -36,9 +35,24 @@ const MoodArt = () => {
     
     return moodEntries.filter(entry => new Date(entry.timestamp) >= cutoffDate);
   };
+
+  const getTimePeriodDescription = (timeFrame: string): string => {
+    switch (timeFrame) {
+      case 'day':
+        return 'today';
+      case 'week':
+        return 'the past week';
+      case 'month':
+        return 'the past month';
+      case 'all':
+        return 'all time';
+      default:
+        return 'the selected period';
+    }
+  };
   
   const filteredEntries = getFilteredEntries();
-  const timePeriod = getTimePeriodDescription(filteredEntries);
+  const timePeriod = getTimePeriodDescription(timeFrame);
   
   // Handle download canvas as image
   const handleDownload = () => {
@@ -78,7 +92,7 @@ const MoodArt = () => {
             Your unique mood fingerprint visualized as art. This generative artwork is created based on your emotional patterns.
           </p>
           
-          <Tabs defaultValue="week" className="mb-6" onValueChange={(value) => setTimeFrame(value as any)}>
+          <Tabs value={timeFrame} onValueChange={(value) => setTimeFrame(value as any)} className="mb-6">
             <TabsList className="grid grid-cols-4">
               <TabsTrigger value="day">Today</TabsTrigger>
               <TabsTrigger value="week">Week</TabsTrigger>
@@ -88,7 +102,7 @@ const MoodArt = () => {
             
             <div className="mt-4 bg-muted/50 p-2 rounded text-sm text-muted-foreground flex items-center">
               <Calendar className="w-4 h-4 mr-2" />
-              <span>Showing your mood canvas for <strong>{timePeriod}</strong></span>
+              <span>Showing your Mood Canvas for <strong>{timePeriod}</strong></span>
             </div>
           </Tabs>
           
@@ -99,7 +113,7 @@ const MoodArt = () => {
             </div>
           ) : (
             <>
-              <div className="mb-6">
+              <div className="mb-6" key={`canvas-${timeFrame}-${filteredEntries.length}`}>
                 <MoodCanvas entries={filteredEntries} width={600} height={400} />
               </div>
               
