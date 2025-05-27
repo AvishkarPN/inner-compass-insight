@@ -4,11 +4,12 @@ import { Link } from 'react-router-dom';
 import MoodSelector from '@/components/MoodSelector';
 import MoodEntryCard from '@/components/MoodEntryCard';
 import MoodGarden from '@/components/MoodGarden';
+import JournalEditor from '@/components/JournalEditor';
 import { MoodType } from '@/types/mood';
 import { useMood } from '@/contexts/MoodContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/components/ui/use-toast';
-import { ChevronRight, Sprout, History } from 'lucide-react';
+import { ChevronRight, Sprout, History, BookOpen } from 'lucide-react';
 
 const Dashboard = () => {
   const [selectedMood, setSelectedMood] = useState<MoodType | undefined>();
@@ -28,6 +29,22 @@ const Dashboard = () => {
     // Reset the selection after a brief moment
     setTimeout(() => setSelectedMood(undefined), 500);
   };
+
+  const handleJournalSave = (text: string) => {
+    if (selectedMood) {
+      addMoodEntry(selectedMood, text);
+      toast({
+        title: 'Entry Saved',
+        description: 'Your mood and journal entry have been saved!',
+      });
+    } else {
+      toast({
+        title: 'Please select a mood first',
+        description: 'Choose how you\'re feeling before writing your entry.',
+        variant: 'destructive'
+      });
+    }
+  };
   
   return (
     <div className="space-y-6">
@@ -40,6 +57,18 @@ const Dashboard = () => {
             </CardHeader>
             <CardContent className="p-6">
               <MoodSelector onMoodSelect={handleMoodSelect} selectedMood={selectedMood} />
+            </CardContent>
+          </Card>
+
+          <Card className="border shadow-md overflow-hidden bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm">
+            <CardHeader className="pb-3 border-b bg-muted/30">
+              <CardTitle className="text-lg font-medium flex items-center gap-2">
+                <BookOpen size={18} />
+                Journal Entry
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-6">
+              <JournalEditor onSave={handleJournalSave} />
             </CardContent>
           </Card>
         </div>
@@ -58,7 +87,7 @@ const Dashboard = () => {
                 </Link>
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-0 h-[calc(320px-65px)]">
+            <CardContent className="p-0 h-[calc(320px-65px)] relative">
               <MoodGarden />
             </CardContent>
           </Card>

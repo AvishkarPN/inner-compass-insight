@@ -102,7 +102,6 @@ const JournalEditor: React.FC<JournalEditorProps> = ({ onSave, initialText = '' 
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between mb-2">
-        <h3 className="text-lg font-medium">Journal Entry</h3>
         <Button 
           variant={isRecording ? "destructive" : "secondary"} 
           size="sm" 

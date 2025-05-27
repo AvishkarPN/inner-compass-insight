@@ -1,5 +1,6 @@
+
 import React, { ReactNode } from 'react';
-import { Calendar, Home, LineChart, Clock, Paintbrush } from 'lucide-react';
+import { Calendar, Home, LineChart, Clock, Paintbrush, Heart } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 
@@ -22,12 +23,12 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
           </div>
           
           <nav>
-            <ul className="flex gap-2 md:gap-6">
+            <ul className="flex gap-1 md:gap-4">
               <li>
                 <Link 
                   to="/" 
                   className={cn(
-                    "flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-primary/10",
+                    "flex items-center gap-1.5 px-2 md:px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-primary/10",
                     location.pathname === "/" ? "bg-primary/10 text-primary" : "text-muted-foreground"
                   )}
                 >
@@ -39,7 +40,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
                 <Link 
                   to="/insights" 
                   className={cn(
-                    "flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-primary/10",
+                    "flex items-center gap-1.5 px-2 md:px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-primary/10",
                     location.pathname === "/insights" ? "bg-primary/10 text-primary" : "text-muted-foreground"
                   )}
                 >
@@ -49,9 +50,21 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
               </li>
               <li>
                 <Link 
+                  to="/wellness" 
+                  className={cn(
+                    "flex items-center gap-1.5 px-2 md:px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-primary/10",
+                    location.pathname === "/wellness" ? "bg-primary/10 text-primary" : "text-muted-foreground"
+                  )}
+                >
+                  <Heart size={16} />
+                  <span className="hidden md:inline">Wellness</span>
+                </Link>
+              </li>
+              <li>
+                <Link 
                   to="/history" 
                   className={cn(
-                    "flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-primary/10",
+                    "flex items-center gap-1.5 px-2 md:px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-primary/10",
                     location.pathname === "/history" ? "bg-primary/10 text-primary" : "text-muted-foreground"
                   )}
                 >
@@ -63,12 +76,12 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
                 <Link 
                   to="/mood-art" 
                   className={cn(
-                    "flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-primary/10",
+                    "flex items-center gap-1.5 px-2 md:px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-primary/10",
                     location.pathname === "/mood-art" ? "bg-primary/10 text-primary" : "text-muted-foreground"
                   )}
                 >
                   <Paintbrush size={16} />
-                  <span className="hidden md:inline">Mood Art</span>
+                  <span className="hidden md:inline">Mood Canvas</span>
                 </Link>
               </li>
             </ul>
