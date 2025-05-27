@@ -51,16 +51,21 @@ const PlantStatusInfo: React.FC<PlantStatusInfoProps> = ({
           </div>
         </div>
         
-        {/* Health Bar */}
+        {/* Green Health Bar with proper styling */}
         <div className="mb-2">
           <div className="flex justify-between text-xs text-muted-foreground mb-1">
             <span>Health</span>
             <span>{Math.round(plantHealth)}%</span>
           </div>
-          <Progress 
-            value={plantHealth} 
-            className="h-2" 
-          />
+          <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
+            <div 
+              className="h-full bg-gradient-to-r from-green-400 to-green-600 transition-all duration-500 ease-out rounded-full"
+              style={{ 
+                width: `${plantHealth}%`,
+                boxShadow: plantHealth > 50 ? '0 0 8px rgba(34, 197, 94, 0.4)' : 'none'
+              }}
+            />
+          </div>
         </div>
         
         {plantStage === 0 && (

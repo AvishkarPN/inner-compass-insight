@@ -17,6 +17,7 @@ const moodColorMap = {
   peaceful: '#2ecc71',
   calm: '#3498db',
   anxious: '#9b59b6',
+  sad: '#6366f1', // Added sad mood color
 };
 
 const MoodEntryCard: React.FC<MoodEntryCardProps> = ({ entry }) => {
