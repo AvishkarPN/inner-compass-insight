@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { differenceInDays, format } from 'date-fns';
+import { Progress } from '@/components/ui/progress';
 
 interface PlantStatusInfoProps {
   streak: number;
@@ -34,7 +35,7 @@ const PlantStatusInfo: React.FC<PlantStatusInfoProps> = ({
   return (
     <div className="absolute top-2 left-2 right-2 z-10">
       <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-lg p-3 shadow-sm border">
-        <div className="flex justify-between items-center text-sm">
+        <div className="flex justify-between items-center text-sm mb-2">
           <div className="flex items-center gap-2">
             <span className="font-medium text-green-600 dark:text-green-400">
               {getStatusMessage()}
@@ -50,8 +51,20 @@ const PlantStatusInfo: React.FC<PlantStatusInfoProps> = ({
           </div>
         </div>
         
+        {/* Health Bar */}
+        <div className="mb-2">
+          <div className="flex justify-between text-xs text-muted-foreground mb-1">
+            <span>Health</span>
+            <span>{Math.round(plantHealth)}%</span>
+          </div>
+          <Progress 
+            value={plantHealth} 
+            className="h-2" 
+          />
+        </div>
+        
         {plantStage === 0 && (
-          <div className="mt-2 text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 px-2 py-1 rounded">
+          <div className="text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 px-2 py-1 rounded">
             Just planted! Keep journaling to help it grow.
           </div>
         )}

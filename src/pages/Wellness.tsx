@@ -9,13 +9,13 @@ import GuidedMeditation from '@/components/wellness/GuidedMeditation';
 import BreathingExercise from '@/components/wellness/BreathingExercise';
 import GratitudeJournal from '@/components/wellness/GratitudeJournal';
 import EducationalResource from '@/components/wellness/EducationalResource';
+import { achievements } from '@/components/mood-garden/constants';
 import { 
   TrendingUp, 
   Target, 
   Calendar, 
   Brain, 
-  Heart, 
-  Phone,
+  Heart,
   Award,
   Activity,
   Lightbulb,
@@ -37,12 +37,99 @@ const Wellness = () => {
     return entryDate >= weekAgo;
   });
 
-  const positiveEntries = moodEntries.filter(entry => 
-    ['happy', 'energetic', 'calm', 'creative'].includes(entry.mood)
-  );
-  
-  const wellnessScore = totalEntries > 0 ? Math.round((positiveEntries.length / totalEntries) * 100) : 0;
+  // More complex wellness score calculation
+  const calculateWellnessScore = () => {
+    if (totalEntries === 0) return 0;
+    
+    // Score components
+    let score = 0;
+    const weights = {
+      consistency: 0.3,    // 30% - how consistently they log
+      positivity: 0.25,    // 25% - ratio of positive moods
+      balance: 0.2,        // 20% - mood diversity (balanced emotions)
+      recent: 0.15,        // 15% - recent trend (last 7 days)
+      engagement: 0.1      // 10% - journal entry quality
+    };
+    
+    // 1. Consistency score (based on recent entries)
+    const consistencyScore = Math.min((recentEntries.length / 7) * 100, 100);
+    
+    // 2. Positivity score
+    const positiveEntries = moodEntries.filter(entry => 
+      ['happy', 'energetic', 'calm'].includes(entry.mood)
+    );
+    const positivityScore = (positiveEntries.length / totalEntries) * 100;
+    
+    // 3. Balance score (diversity of emotions)
+    const moodCounts = moodEntries.reduce((acc, entry) => {
+      acc[entry.mood] = (acc[entry.mood] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+    const uniqueMoods = Object.keys(moodCounts).length;
+    const balanceScore = Math.min((uniqueMoods / 6) * 100, 100); // Max 6 mood types
+    
+    // 4. Recent trend score
+    const recentPositive = recentEntries.filter(entry => 
+      ['happy', 'energetic', 'calm'].includes(entry.mood)
+    );
+    const recentScore = recentEntries.length > 0 ? 
+      (recentPositive.length / recentEntries.length) * 100 : 0;
+    
+    // 5. Engagement score (average journal length)
+    const avgJournalLength = moodEntries.reduce((acc, entry) => 
+      acc + entry.journalText.length, 0) / totalEntries;
+    const engagementScore = Math.min((avgJournalLength / 100) * 100, 100); // 100 chars = 100%
+    
+    // Calculate weighted score
+    score = (
+      consistencyScore * weights.consistency +
+      positivityScore * weights.positivity +
+      balanceScore * weights.balance +
+      recentScore * weights.recent +
+      engagementScore * weights.engagement
+    );
+    
+    return Math.round(score);
+  };
+
+  const wellnessScore = calculateWellnessScore();
   const streakDays = Math.min(recentEntries.length, 7);
+
+  // Calculate current streak
+  const calculateStreak = () => {
+    if (moodEntries.length === 0) return 0;
+    
+    const sortedEntries = [...moodEntries].sort((a, b) => 
+      new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+    );
+    
+    let streak = 0;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    for (let i = 0; i < sortedEntries.length; i++) {
+      const entryDate = new Date(sortedEntries[i].timestamp);
+      entryDate.setHours(0, 0, 0, 0);
+      
+      const expectedDate = new Date(today);
+      expectedDate.setDate(today.getDate() - streak);
+      
+      if (entryDate.getTime() === expectedDate.getTime()) {
+        streak++;
+      } else if (entryDate.getTime() < expectedDate.getTime()) {
+        break;
+      }
+    }
+    
+    return streak;
+  };
+
+  const currentStreak = calculateStreak();
+
+  // Get earned achievements
+  const earnedAchievements = achievements.filter(achievement => 
+    achievement.requirement(totalEntries, currentStreak)
+  );
 
   const handleCrisisCall = () => {
     window.open('tel:988', '_self'); // National Suicide Prevention Lifeline
@@ -121,8 +208,8 @@ const Wellness = () => {
                 <Activity className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{streakDays}</div>
-                <p className="text-xs text-muted-foreground">days this week</p>
+                <div className="text-2xl font-bold">{currentStreak}</div>
+                <p className="text-xs text-muted-foreground">consecutive days</p>
               </CardContent>
             </Card>
 
@@ -154,29 +241,21 @@ const Wellness = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Award className="h-5 w-5" />
-                  Recent Achievements
+                  Achievements ({earnedAchievements.length}/{achievements.length})
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3">
-                {streakDays >= 7 && (
-                  <div className="flex items-center gap-2">
-                    <Badge variant="secondary">🔥 Week Warrior</Badge>
-                    <span className="text-sm">7-day logging streak!</span>
-                  </div>
-                )}
-                {totalEntries >= 10 && (
-                  <div className="flex items-center gap-2">
-                    <Badge variant="secondary">📚 Dedicated Logger</Badge>
-                    <span className="text-sm">10+ mood entries</span>
-                  </div>
-                )}
-                {wellnessScore >= 70 && (
-                  <div className="flex items-center gap-2">
-                    <Badge variant="secondary">😊 Positivity Champion</Badge>
-                    <span className="text-sm">High positive mood ratio</span>
-                  </div>
-                )}
-                {totalEntries === 0 && (
+              <CardContent className="space-y-3 max-h-60 overflow-y-auto">
+                {earnedAchievements.length > 0 ? (
+                  earnedAchievements.map(achievement => (
+                    <div key={achievement.id} className="flex items-center gap-2">
+                      <Badge variant="secondary" className="flex items-center gap-1">
+                        <span>{achievement.icon}</span>
+                        {achievement.title}
+                      </Badge>
+                      <span className="text-sm text-muted-foreground">{achievement.description}</span>
+                    </div>
+                  ))
+                ) : (
                   <p className="text-sm text-muted-foreground">Start logging moods to earn achievements!</p>
                 )}
               </CardContent>

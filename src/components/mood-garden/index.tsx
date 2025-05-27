@@ -45,6 +45,7 @@ const MoodGarden = () => {
           dominantMood={dominantMood}
           plantSize={plantSize}
           plantHealth={plantHealth}
+          streak={streak}
         />
       </div>
     </div>

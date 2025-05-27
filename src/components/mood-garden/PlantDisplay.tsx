@@ -1,21 +1,23 @@
 
 import React from 'react';
 import { MoodType } from '@/types/mood';
-import { moodPlantMap } from './constants';
+import { moodPlantMap, getStreakColor } from './constants';
 
 interface PlantDisplayProps {
   dominantMood: MoodType;
   plantSize: number;
   plantHealth: number;
+  streak: number;
 }
 
-const PlantDisplay: React.FC<PlantDisplayProps> = ({ dominantMood, plantSize, plantHealth }) => {
+const PlantDisplay: React.FC<PlantDisplayProps> = ({ dominantMood, plantSize, plantHealth, streak }) => {
   // Plant appearance affected by health
   const getOpacity = () => {
     return 0.9 + (plantHealth / 1000); // Better range from 0.9 to 1.0
   };
 
   const plantEmoji = moodPlantMap[dominantMood];
+  const streakColor = getStreakColor(streak);
 
   return (
     <div className="absolute inset-0 flex justify-center items-end">
@@ -24,8 +26,9 @@ const PlantDisplay: React.FC<PlantDisplayProps> = ({ dominantMood, plantSize, pl
         style={{
           fontSize: `${plantSize}px`,
           opacity: getOpacity(),
-          filter: `saturate(${Math.min(plantHealth / 100 * 2, 2.5)}) brightness(${Math.min(plantHealth / 100 * 1.3, 1.4)})`,
-          textShadow: '0 4px 12px rgba(0,0,0,0.2)',
+          filter: `saturate(${Math.min(plantHealth / 100 * 2, 2.5)}) brightness(${Math.min(plantHealth / 100 * 1.3, 1.4)}) hue-rotate(${streak >= 10 ? '20deg' : '0deg'})`,
+          textShadow: `0 4px 12px ${streakColor}40`,
+          color: streakColor,
         }}
       >
         <div className="relative">
@@ -53,12 +56,12 @@ const PlantDisplay: React.FC<PlantDisplayProps> = ({ dominantMood, plantSize, pl
             <span className="text-lg opacity-70">🪨</span>
           </div>
           
-          {/* Subtle glow effect for healthy plants with better z-index */}
+          {/* Streak-based glow effect */}
           {plantHealth > 80 && (
             <div 
               className="absolute inset-0 rounded-full opacity-25 animate-pulse z-0"
               style={{
-                background: `radial-gradient(circle, rgba(34, 197, 94, 0.4) 0%, transparent 70%)`,
+                background: `radial-gradient(circle, ${streakColor}40 0%, transparent 70%)`,
                 transform: 'scale(2)',
               }}
             />
