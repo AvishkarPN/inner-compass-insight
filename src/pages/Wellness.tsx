@@ -1,11 +1,14 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useMood } from '@/contexts/MoodContext';
+import GuidedMeditation from '@/components/wellness/GuidedMeditation';
+import BreathingExercise from '@/components/wellness/BreathingExercise';
+import GratitudeJournal from '@/components/wellness/GratitudeJournal';
+import EducationalResource from '@/components/wellness/EducationalResource';
 import { 
   TrendingUp, 
   Target, 
@@ -21,9 +24,11 @@ import {
 
 const Wellness = () => {
   const { moodEntries, getWeeklyMoodData } = useMood();
-  const weeklyData = getWeeklyMoodData();
+  const [activeComponent, setActiveComponent] = useState<string | null>(null);
+  const [selectedTopic, setSelectedTopic] = useState<'anxiety' | 'depression' | 'stress' | 'sleep'>('anxiety');
 
   // Calculate wellness metrics
+  const weeklyData = getWeeklyMoodData();
   const totalEntries = moodEntries.length;
   const recentEntries = moodEntries.filter(entry => {
     const entryDate = new Date(entry.timestamp);
@@ -43,8 +48,44 @@ const Wellness = () => {
     window.open('tel:988', '_self'); // National Suicide Prevention Lifeline
   };
 
+  const handleQuickAction = (action: string) => {
+    setActiveComponent(action);
+  };
+
+  const handleEducationalResource = (topic: 'anxiety' | 'depression' | 'stress' | 'sleep') => {
+    setSelectedTopic(topic);
+    setActiveComponent('educational');
+  };
+
+  // Render active component as overlay
+  const renderActiveComponent = () => {
+    if (!activeComponent) return null;
+
+    return (
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+        {activeComponent === 'meditation' && (
+          <GuidedMeditation onClose={() => setActiveComponent(null)} />
+        )}
+        {activeComponent === 'breathing' && (
+          <BreathingExercise onClose={() => setActiveComponent(null)} />
+        )}
+        {activeComponent === 'gratitude' && (
+          <GratitudeJournal onClose={() => setActiveComponent(null)} />
+        )}
+        {activeComponent === 'educational' && (
+          <EducationalResource 
+            topic={selectedTopic} 
+            onClose={() => setActiveComponent(null)} 
+          />
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className="space-y-6">
+      {renderActiveComponent()}
+      
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-3xl font-bold">Wellness Hub</h1>
@@ -158,15 +199,27 @@ const Wellness = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
-                <Button variant="outline" className="w-full justify-start">
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-start"
+                  onClick={() => handleQuickAction('meditation')}
+                >
                   <Brain className="w-4 h-4 mr-2" />
                   5-Minute Meditation
                 </Button>
-                <Button variant="outline" className="w-full justify-start">
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-start"
+                  onClick={() => handleQuickAction('breathing')}
+                >
                   <Heart className="w-4 h-4 mr-2" />
                   Breathing Exercise
                 </Button>
-                <Button variant="outline" className="w-full justify-start">
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-start"
+                  onClick={() => handleQuickAction('gratitude')}
+                >
                   <BookOpen className="w-4 h-4 mr-2" />
                   Gratitude Journal
                 </Button>
@@ -298,14 +351,24 @@ const Wellness = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Heart className="h-5 w-5" />
-                  Self-Care Tools
+                  Interactive Self-Care
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
-                <Button variant="outline" size="sm" className="w-full justify-start">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="w-full justify-start"
+                  onClick={() => handleQuickAction('meditation')}
+                >
                   Guided Meditation
                 </Button>
-                <Button variant="outline" size="sm" className="w-full justify-start">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="w-full justify-start"
+                  onClick={() => handleQuickAction('breathing')}
+                >
                   Breathing Exercises
                 </Button>
                 <Button variant="outline" size="sm" className="w-full justify-start">
@@ -325,16 +388,36 @@ const Wellness = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
-                <Button variant="outline" size="sm" className="w-full justify-start">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="w-full justify-start"
+                  onClick={() => handleEducationalResource('anxiety')}
+                >
                   Understanding Anxiety
                 </Button>
-                <Button variant="outline" size="sm" className="w-full justify-start">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="w-full justify-start"
+                  onClick={() => handleEducationalResource('depression')}
+                >
                   Coping with Depression
                 </Button>
-                <Button variant="outline" size="sm" className="w-full justify-start">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="w-full justify-start"
+                  onClick={() => handleEducationalResource('stress')}
+                >
                   Stress Management
                 </Button>
-                <Button variant="outline" size="sm" className="w-full justify-start">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="w-full justify-start"
+                  onClick={() => handleEducationalResource('sleep')}
+                >
                   Sleep Hygiene
                 </Button>
               </CardContent>
