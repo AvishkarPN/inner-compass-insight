@@ -134,5 +134,48 @@ export const achievements = [
     description: 'Log 1000 mood entries',
     icon: '🚀',
     requirement: (entries: number, streak: number) => entries >= 1000
+  },
+  // Streak Milestone Achievements that affect plant appearance
+  {
+    id: 'streak_milestone_10',
+    title: 'Blue Aura',
+    description: 'Reach a 10-day streak to unlock blue plant glow',
+    icon: '💙',
+    requirement: (entries: number, streak: number) => streak >= 10
+  },
+  {
+    id: 'streak_milestone_25',
+    title: 'Purple Power',
+    description: 'Reach a 25-day streak to unlock purple plant glow',
+    icon: '💜',
+    requirement: (entries: number, streak: number) => streak >= 25
+  },
+  {
+    id: 'streak_milestone_50',
+    title: 'Golden Garden',
+    description: 'Reach a 50-day streak to unlock golden plant glow',
+    icon: '🌟',
+    requirement: (entries: number, streak: number) => streak >= 50
+  },
+  {
+    id: 'streak_milestone_100',
+    title: 'Ruby Radiance',
+    description: 'Reach a 100-day streak to unlock ruby plant glow',
+    icon: '❤️',
+    requirement: (entries: number, streak: number) => streak >= 100
+  },
+  {
+    id: 'streak_milestone_365',
+    title: 'Emerald Excellence',
+    description: 'Reach a 365-day streak to unlock emerald plant glow',
+    icon: '💚',
+    requirement: (entries: number, streak: number) => streak >= 365
+  },
+  {
+    id: 'streak_milestone_500',
+    title: 'Indigo Illumination',
+    description: 'Reach a 500-day streak to unlock indigo plant glow',
+    icon: '🔮',
+    requirement: (entries: number, streak: number) => streak >= 500
   }
 ];

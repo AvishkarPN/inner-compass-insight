@@ -8,7 +8,7 @@ const moodColorMap = {
   angry: '#ff6b6b',
   energetic: '#ffa502',
   happy: '#feca57',
-  sad: '#74b9ff',
+  sad: '#74b9ff', // Fixed to match MoodSelector
   calm: '#3498db',
   anxious: '#9b59b6',
 };
