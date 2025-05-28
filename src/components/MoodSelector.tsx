@@ -61,12 +61,12 @@ export default function MoodSelector({ onMoodSelect, selectedMood }: MoodSelecto
   
   return (
     <div className="w-full">
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3">
         {moodOptions.map((mood) => (
           <button
             key={mood.value}
             className={cn(
-              "rounded-xl p-4 h-24 flex flex-col items-center justify-center gap-2",
+              "rounded-xl p-3 sm:p-4 h-20 sm:h-24 flex flex-col items-center justify-center gap-1 sm:gap-2",
               "transition-all duration-300 ease-in-out", // Smoother transition
               selectedMood === mood.value 
                 ? "ring-2 ring-offset-1 ring-offset-background scale-[1.02] shadow-md" // More subtle selected state
@@ -81,16 +81,16 @@ export default function MoodSelector({ onMoodSelect, selectedMood }: MoodSelecto
             onMouseLeave={() => setHoverMood(null)}
             onClick={() => handleMoodClick(mood.value)}
           >
-            <span className="font-semibold text-white drop-shadow-sm">{mood.label}</span>
+            <span className="font-semibold text-white drop-shadow-sm text-sm sm:text-base">{mood.label}</span>
           </button>
         ))}
       </div>
       
       {/* Fixed height container for mood descriptions to prevent layout shift */}
-      <div className="h-8 mt-3">
+      <div className="h-6 sm:h-8 mt-2 sm:mt-3">
         <div 
           className={cn(
-            "text-sm text-muted-foreground",
+            "text-xs sm:text-sm text-muted-foreground text-center sm:text-left",
             "transition-opacity duration-300",
             hoverMood ? "opacity-100" : "opacity-0"
           )}

@@ -6,71 +6,103 @@ import WeeklyMoodChart from '@/components/WeeklyMoodChart';
 import { useMood } from '@/contexts/MoodContext';
 import MoodDistributionChart from '@/components/MoodDistributionChart';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { BarChart, PieChart, BookOpen, Brain, Download } from 'lucide-react';
+import { BarChart, PieChart, BookOpen, Brain, Download, Trophy } from 'lucide-react';
 import JournalInsights from '@/components/JournalInsights';
+import AchievementsDisplay from '@/components/AchievementsDisplay';
+import jsPDF from 'jspdf';
 
 const Insights = () => {
   const { getWeeklyMoodData, moodEntries } = useMood();
   const weeklyData = getWeeklyMoodData();
   
-  // Handle export insights as JSON
+  // Handle export insights as PDF
   const handleExportInsights = () => {
-    const insights = {
-      weeklyData,
-      totalEntries: moodEntries.length,
-      exportDate: new Date().toISOString(),
-      moodEntries: moodEntries.map(entry => ({
-        mood: entry.mood,
-        timestamp: entry.timestamp,
-        sentimentScore: entry.sentimentScore
-      }))
-    };
+    const pdf = new jsPDF();
     
-    const dataStr = JSON.stringify(insights, null, 2);
-    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    // Add title
+    pdf.setFontSize(20);
+    pdf.text('Mood Insights Report', 20, 20);
     
-    const link = document.createElement('a');
-    link.download = `mood-insights-${new Date().toISOString().slice(0, 10)}.json`;
-    link.href = URL.createObjectURL(dataBlob);
-    link.click();
+    // Add date
+    pdf.setFontSize(12);
+    pdf.text(`Generated on: ${new Date().toLocaleDateString()}`, 20, 35);
+    
+    // Add summary
+    pdf.setFontSize(14);
+    pdf.text('Summary', 20, 55);
+    pdf.setFontSize(10);
+    pdf.text(`Total Entries: ${moodEntries.length}`, 20, 70);
+    
+    // Add mood distribution
+    const moodCounts: Record<string, number> = {};
+    moodEntries.forEach(entry => {
+      moodCounts[entry.mood] = (moodCounts[entry.mood] || 0) + 1;
+    });
+    
+    let yPos = 85;
+    pdf.text('Mood Distribution:', 20, yPos);
+    yPos += 10;
+    
+    Object.entries(moodCounts).forEach(([mood, count]) => {
+      const percentage = ((count / moodEntries.length) * 100).toFixed(1);
+      pdf.text(`${mood}: ${count} entries (${percentage}%)`, 25, yPos);
+      yPos += 8;
+    });
+    
+    // Add weekly insights
+    yPos += 10;
+    pdf.text('Recent Weekly Data:', 20, yPos);
+    yPos += 10;
+    
+    weeklyData.forEach(day => {
+      pdf.text(`${day.day}: ${day.mood || 'No entry'}`, 25, yPos);
+      yPos += 8;
+    });
+    
+    // Save the PDF
+    pdf.save(`mood-insights-${new Date().toISOString().slice(0, 10)}.pdf`);
   };
   
   return (
-    <div className="space-y-8">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+    <div className="space-y-6 md:space-y-8">
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold">Your Mood Insights</h1>
-          <p className="text-muted-foreground">Analyze your mood patterns and journal entries</p>
+          <h1 className="text-2xl md:text-3xl font-bold">Your Mood Insights</h1>
+          <p className="text-muted-foreground text-sm md:text-base">Analyze your mood patterns and journal entries</p>
         </div>
-        <Button onClick={handleExportInsights} className="flex items-center gap-2">
+        <Button onClick={handleExportInsights} className="flex items-center gap-2 w-full sm:w-auto">
           <Download className="w-4 h-4" />
-          Export Insights
+          Export as PDF
         </Button>
       </div>
       
       <Tabs defaultValue="charts" className="space-y-6">
-        <div className="bg-white dark:bg-gray-900 p-1 rounded-lg shadow-sm w-fit">
-          <TabsList>
-            <TabsTrigger value="charts" className="flex gap-1.5 items-center">
+        <div className="bg-white dark:bg-gray-900 p-1 rounded-lg shadow-sm w-full overflow-x-auto">
+          <TabsList className="grid w-full grid-cols-3 lg:w-fit lg:grid-cols-3">
+            <TabsTrigger value="charts" className="flex gap-1.5 items-center text-xs sm:text-sm">
               <BarChart size={16} />
-              <span>Charts</span>
+              <span className="hidden sm:inline">Charts</span>
             </TabsTrigger>
-            <TabsTrigger value="analysis" className="flex gap-1.5 items-center">
+            <TabsTrigger value="analysis" className="flex gap-1.5 items-center text-xs sm:text-sm">
               <Brain size={16} />
-              <span>Analysis</span>
+              <span className="hidden sm:inline">Analysis</span>
+            </TabsTrigger>
+            <TabsTrigger value="achievements" className="flex gap-1.5 items-center text-xs sm:text-sm">
+              <Trophy size={16} />
+              <span className="hidden sm:inline">Achievements</span>
             </TabsTrigger>
           </TabsList>
         </div>
         
         <TabsContent value="charts" className="space-y-6">
-          <div className="grid gap-6 md:grid-cols-2">
+          <div className="grid gap-6 lg:grid-cols-2">
             <Card className="shadow-md bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2 text-lg md:text-xl">
                   <BarChart size={18} className="text-primary" />
                   Weekly Mood Overview
                 </CardTitle>
-                <CardDescription>Your mood trends over the past 7 days</CardDescription>
+                <CardDescription className="text-sm">Your mood trends over the past 7 days</CardDescription>
               </CardHeader>
               <CardContent>
                 <WeeklyMoodChart data={weeklyData} />
@@ -79,11 +111,11 @@ const Insights = () => {
             
             <Card className="shadow-md bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2 text-lg md:text-xl">
                   <PieChart size={18} className="text-primary" />
                   Mood Distribution
                 </CardTitle>
-                <CardDescription>Breakdown of your recorded moods</CardDescription>
+                <CardDescription className="text-sm">Breakdown of your recorded moods</CardDescription>
               </CardHeader>
               <CardContent>
                 <MoodDistributionChart />
@@ -95,14 +127,29 @@ const Insights = () => {
         <TabsContent value="analysis" className="space-y-6">
           <Card className="shadow-md bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-lg md:text-xl">
                 <BookOpen size={18} className="text-primary" />
                 Journal Analysis
               </CardTitle>
-              <CardDescription>Insights derived from your journal entries</CardDescription>
+              <CardDescription className="text-sm">Insights derived from your journal entries</CardDescription>
             </CardHeader>
             <CardContent>
               <JournalInsights />
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="achievements" className="space-y-6">
+          <Card className="shadow-md bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-lg md:text-xl">
+                <Trophy size={18} className="text-primary" />
+                Your Achievements
+              </CardTitle>
+              <CardDescription className="text-sm">Track your progress and unlock new milestones</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <AchievementsDisplay />
             </CardContent>
           </Card>
         </TabsContent>
