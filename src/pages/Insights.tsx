@@ -19,45 +19,185 @@ const Insights = () => {
   const handleExportInsights = () => {
     const pdf = new jsPDF();
     
-    // Add title
-    pdf.setFontSize(20);
-    pdf.text('Mood Insights Report', 20, 20);
+    // Set up colors and styling
+    const primaryColor = [99, 102, 241]; // Indigo
+    const secondaryColor = [156, 163, 175]; // Gray
+    const accentColor = [34, 197, 94]; // Green
     
-    // Add date
+    // Add decorative header
+    pdf.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+    pdf.rect(0, 0, 210, 40, 'F');
+    
+    // Add title with white text
+    pdf.setTextColor(255, 255, 255);
+    pdf.setFontSize(24);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text('Mood Insights Report', 20, 25);
+    
+    // Add subtitle
     pdf.setFontSize(12);
-    pdf.text(`Generated on: ${new Date().toLocaleDateString()}`, 20, 35);
+    pdf.setFont('helvetica', 'normal');
+    pdf.text(`Generated on ${new Date().toLocaleDateString()}`, 20, 35);
     
-    // Add summary
+    // Reset text color to black
+    pdf.setTextColor(0, 0, 0);
+    
+    // Add summary section with background
+    let yPos = 60;
+    pdf.setFillColor(249, 250, 251); // Light gray background
+    pdf.rect(15, yPos - 10, 180, 30, 'F');
+    
+    pdf.setFontSize(16);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text('📊 Summary', 20, yPos);
+    
+    yPos += 15;
+    pdf.setFontSize(11);
+    pdf.setFont('helvetica', 'normal');
+    pdf.text(`Total Mood Entries: ${moodEntries.length}`, 25, yPos);
+    
+    // Calculate streak
+    const calculateStreak = () => {
+      if (!moodEntries.length) return 0;
+      
+      const sortedEntries = [...moodEntries].sort((a, b) => 
+        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+      );
+      
+      let currentStreak = 0;
+      let previousDate = null;
+      
+      for (const entry of sortedEntries) {
+        const entryDate = new Date(entry.timestamp);
+        entryDate.setHours(0, 0, 0, 0);
+        
+        if (!previousDate) {
+          currentStreak = 1;
+          previousDate = entryDate;
+          continue;
+        }
+        
+        const diffDays = Math.floor((previousDate.getTime() - entryDate.getTime()) / (1000 * 60 * 60 * 24));
+        
+        if (diffDays === 1) {
+          currentStreak++;
+          previousDate = entryDate;
+        } else if (diffDays > 1) {
+          break;
+        } else {
+          previousDate = entryDate;
+        }
+      }
+      
+      return currentStreak;
+    };
+    
+    yPos += 10;
+    pdf.text(`Current Streak: ${calculateStreak()} days`, 25, yPos);
+    
+    // Add mood distribution section
+    yPos += 25;
+    pdf.setFillColor(accentColor[0], accentColor[1], accentColor[2]);
+    pdf.rect(15, yPos - 5, 180, 8, 'F');
+    
+    pdf.setTextColor(255, 255, 255);
     pdf.setFontSize(14);
-    pdf.text('Summary', 20, 55);
-    pdf.setFontSize(10);
-    pdf.text(`Total Entries: ${moodEntries.length}`, 20, 70);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text('💭 Mood Distribution', 20, yPos);
     
-    // Add mood distribution
-    const moodCounts: Record<string, number> = {};
+    pdf.setTextColor(0, 0, 0);
+    yPos += 15;
+    
+    // Calculate mood distribution
+    const moodCounts = {};
     moodEntries.forEach(entry => {
       moodCounts[entry.mood] = (moodCounts[entry.mood] || 0) + 1;
     });
     
-    let yPos = 85;
-    pdf.text('Mood Distribution:', 20, yPos);
-    yPos += 10;
+    // Sort moods by frequency
+    const sortedMoods = Object.entries(moodCounts).sort((a, b) => b[1] - a[1]);
     
-    Object.entries(moodCounts).forEach(([mood, count]) => {
+    sortedMoods.forEach(([mood, count]) => {
       const percentage = ((count / moodEntries.length) * 100).toFixed(1);
-      pdf.text(`${mood}: ${count} entries (${percentage}%)`, 25, yPos);
+      pdf.setFont('helvetica', 'normal');
+      pdf.text(`${mood.charAt(0).toUpperCase() + mood.slice(1)}: ${count} entries (${percentage}%)`, 25, yPos);
+      
+      // Add a small colored circle for each mood
+      const moodColors = {
+        angry: [255, 107, 107],
+        energetic: [255, 165, 2],
+        happy: [254, 202, 87],
+        peaceful: [46, 204, 113],
+        calm: [52, 152, 219],
+        anxious: [155, 89, 182],
+        sad: [116, 185, 255]
+      };
+      
+      if (moodColors[mood]) {
+        pdf.setFillColor(...moodColors[mood]);
+        pdf.circle(22, yPos - 2, 1.5, 'F');
+      }
+      
       yPos += 8;
     });
     
-    // Add weekly insights
-    yPos += 10;
-    pdf.text('Recent Weekly Data:', 20, yPos);
-    yPos += 10;
+    // Add weekly trends section
+    yPos += 15;
+    pdf.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+    pdf.rect(15, yPos - 5, 180, 8, 'F');
+    
+    pdf.setTextColor(255, 255, 255);
+    pdf.setFontSize(14);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text('📈 Weekly Trends', 20, yPos);
+    
+    pdf.setTextColor(0, 0, 0);
+    yPos += 15;
     
     weeklyData.forEach(day => {
-      pdf.text(`${day.day}: ${day.mood || 'No entry'}`, 25, yPos);
+      pdf.setFont('helvetica', 'normal');
+      pdf.text(`${day.day}: ${day.mood ? day.mood.charAt(0).toUpperCase() + day.mood.slice(1) : 'No entry'}`, 25, yPos);
       yPos += 8;
     });
+    
+    // Add journal insights if available
+    const journalEntries = moodEntries.filter(entry => entry.journalText.trim().length > 0);
+    
+    if (journalEntries.length > 0) {
+      yPos += 15;
+      pdf.setFillColor(249, 115, 22); // Orange
+      pdf.rect(15, yPos - 5, 180, 8, 'F');
+      
+      pdf.setTextColor(255, 255, 255);
+      pdf.setFontSize(14);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text('📝 Journal Insights', 20, yPos);
+      
+      pdf.setTextColor(0, 0, 0);
+      yPos += 15;
+      
+      const totalWords = journalEntries.reduce((total, entry) => {
+        return total + entry.journalText.split(/\s+/).filter(Boolean).length;
+      }, 0);
+      
+      const avgLength = Math.round(totalWords / journalEntries.length);
+      
+      pdf.setFont('helvetica', 'normal');
+      pdf.text(`Journal Entries: ${journalEntries.length}`, 25, yPos);
+      yPos += 8;
+      pdf.text(`Average Entry Length: ${avgLength} words`, 25, yPos);
+      yPos += 8;
+      pdf.text(`Total Words Written: ${totalWords}`, 25, yPos);
+    }
+    
+    // Add footer
+    pdf.setFillColor(249, 250, 251);
+    pdf.rect(0, 270, 210, 27, 'F');
+    
+    pdf.setTextColor(secondaryColor[0], secondaryColor[1], secondaryColor[2]);
+    pdf.setFontSize(10);
+    pdf.setFont('helvetica', 'italic');
+    pdf.text('Generated by Your Mood Tracker - Keep tracking for better insights!', 20, 285);
     
     // Save the PDF
     pdf.save(`mood-insights-${new Date().toISOString().slice(0, 10)}.pdf`);

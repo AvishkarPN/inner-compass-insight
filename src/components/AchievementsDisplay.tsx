@@ -54,14 +54,14 @@ const AchievementsDisplay: React.FC = () => {
       return 100;
     }
     
-    // Calculate progress based on requirement type
+    // Extract target number from description
+    const target = parseInt(achievement.description.match(/\d+/)?.[0] || '0');
+    
+    // Calculate progress based on achievement type
     if (achievement.id.includes('streak') || achievement.id.includes('day')) {
-      // Extract target number from description
-      const target = parseInt(achievement.description.match(/\d+/)?.[0] || '0');
       return Math.min((currentStreak / target) * 100, 100);
     } else {
       // Entry-based achievements
-      const target = parseInt(achievement.description.match(/\d+/)?.[0] || '0');
       return Math.min((totalEntries / target) * 100, 100);
     }
   };
