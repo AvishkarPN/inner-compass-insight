@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import { Textarea } from '@/components/ui/textarea';
+import VoiceRecorder from './VoiceRecorder';
 
 interface JournalEditorProps {
   value?: string;
@@ -28,6 +29,16 @@ const JournalEditor: React.FC<JournalEditorProps> = ({
     }
   };
 
+  const handleVoiceTranscript = (transcript: string) => {
+    // Append voice transcript to existing text
+    const newText = currentText + (currentText ? ' ' : '') + transcript;
+    if (onChange) {
+      onChange(newText);
+    } else {
+      setInternalText(newText);
+    }
+  };
+
   const handleSave = () => {
     if (onSave) {
       onSave(currentText);
@@ -39,6 +50,11 @@ const JournalEditor: React.FC<JournalEditorProps> = ({
 
   return (
     <div className="space-y-4">
+      <div className="flex justify-between items-center">
+        <div className="flex gap-2">
+          <VoiceRecorder onTranscript={handleVoiceTranscript} />
+        </div>
+      </div>
       <Textarea
         value={currentText}
         onChange={handleTextChange}

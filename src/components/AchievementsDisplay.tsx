@@ -50,15 +50,18 @@ const AchievementsDisplay: React.FC = () => {
   const currentStreak = calculateStreak();
   
   const getProgress = (achievement: any) => {
-    if (achievement.requirement(totalEntries, currentStreak)) {
+    const isCompleted = achievement.requirement(totalEntries, currentStreak);
+    
+    // If completed, always return 100%
+    if (isCompleted) {
       return 100;
     }
     
-    // Extract target number from description
+    // Extract target number from achievement description
     const target = parseInt(achievement.description.match(/\d+/)?.[0] || '0');
     
-    // Calculate progress based on achievement type
-    if (achievement.id.includes('streak') || achievement.id.includes('day')) {
+    // Calculate progress based on achievement type (streak vs entry-based)
+    if (achievement.id.includes('streak') || achievement.id.includes('day') || achievement.id === 'weekly-warrior' || achievement.id === 'daily-habit' || achievement.id === 'streak-master' || achievement.id === 'consistency-champion') {
       return Math.min((currentStreak / target) * 100, 100);
     } else {
       // Entry-based achievements
@@ -67,7 +70,15 @@ const AchievementsDisplay: React.FC = () => {
   };
   
   const getCurrentValue = (achievement: any) => {
-    if (achievement.id.includes('streak') || achievement.id.includes('day')) {
+    const isCompleted = achievement.requirement(totalEntries, currentStreak);
+    
+    // If completed, show the target value
+    if (isCompleted) {
+      return parseInt(achievement.description.match(/\d+/)?.[0] || '0');
+    }
+    
+    // Check if it's a streak-based achievement
+    if (achievement.id.includes('streak') || achievement.id.includes('day') || achievement.id === 'weekly-warrior' || achievement.id === 'daily-habit' || achievement.id === 'streak-master' || achievement.id === 'consistency-champion') {
       return currentStreak;
     } else {
       return totalEntries;
