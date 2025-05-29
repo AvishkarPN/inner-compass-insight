@@ -23,6 +23,15 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onTranscript, disabled })
   }, []);
 
   const startRecording = async () => {
+    if (!isSupported) {
+      toast({
+        title: 'Voice Recognition Not Supported',
+        description: 'Your browser does not support voice recognition. Please try Chrome, Edge, or Safari.',
+        variant: 'destructive'
+      });
+      return;
+    }
+
     try {
       // Request microphone permission
       await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -97,10 +106,6 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onTranscript, disabled })
     });
   };
 
-  if (!isSupported) {
-    return null; // Don't show the button if not supported
-  }
-
   return (
     <Button
       type="button"
@@ -109,6 +114,7 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onTranscript, disabled })
       onClick={isRecording ? stopRecording : startRecording}
       disabled={disabled}
       className="flex items-center gap-2"
+      title={!isSupported ? 'Voice recognition not supported in this browser' : 'Click to start voice recording'}
     >
       {isRecording ? (
         <>
@@ -118,7 +124,7 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onTranscript, disabled })
       ) : (
         <>
           <Mic className="h-4 w-4" />
-          Voice
+          {!isSupported ? 'Voice (Unsupported)' : 'Voice'}
         </>
       )}
     </Button>
