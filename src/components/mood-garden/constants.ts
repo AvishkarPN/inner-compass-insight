@@ -115,5 +115,61 @@ export const achievements = [
     description: 'Maintain a 30-day streak',
     icon: '👑',
     requirement: (totalEntries: number, currentStreak: number) => currentStreak >= 30
+  },
+  {
+    id: 'plant-colorful',
+    title: 'Colorful Garden',
+    description: 'Experience all 7 different plant colors',
+    icon: '🌈',
+    requirement: (totalEntries: number, currentStreak: number, uniqueMoods: number = 0) => uniqueMoods >= 7
+  },
+  {
+    id: 'mood-explorer',
+    title: 'Mood Explorer',
+    description: 'Log all 6 different mood types',
+    icon: '🧭',
+    requirement: (totalEntries: number, currentStreak: number, uniqueMoods: number = 0) => uniqueMoods >= 6
+  },
+  {
+    id: 'century-club',
+    title: 'Century Club',
+    description: 'Log 100 mood entries',
+    icon: '💯',
+    requirement: (totalEntries: number, currentStreak: number) => totalEntries >= 100
+  },
+  {
+    id: 'marathon-runner',
+    title: 'Marathon Runner',
+    description: 'Maintain a 60-day streak',
+    icon: '🏃‍♂️',
+    requirement: (totalEntries: number, currentStreak: number) => currentStreak >= 60
+  },
+  {
+    id: 'zen-master',
+    title: 'Zen Master',
+    description: 'Log 200 mood entries',
+    icon: '🧘‍♀️',
+    requirement: (totalEntries: number, currentStreak: number) => totalEntries >= 200
+  },
+  {
+    id: 'legendary-tracker',
+    title: 'Legendary Tracker',
+    description: 'Maintain a 100-day streak',
+    icon: '🏅',
+    requirement: (totalEntries: number, currentStreak: number) => currentStreak >= 100
+  },
+  {
+    id: 'garden-master',
+    title: 'Garden Master',
+    description: 'Achieve maximum plant growth',
+    icon: '🌳',
+    requirement: (totalEntries: number, currentStreak: number) => currentStreak >= 15 && totalEntries >= 50
+  },
+  {
+    id: 'mood-sage',
+    title: 'Mood Sage',
+    description: 'Log 365 mood entries (full year)',
+    icon: '🌅',
+    requirement: (totalEntries: number, currentStreak: number) => totalEntries >= 365
   }
 ];
