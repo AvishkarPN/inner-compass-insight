@@ -46,11 +46,18 @@ const AchievementsDisplay: React.FC = () => {
     return currentStreak;
   };
   
+  // Calculate unique moods used
+  const calculateUniqueMoods = () => {
+    const uniqueMoodsSet = new Set(moodEntries.map(entry => entry.mood));
+    return uniqueMoodsSet.size;
+  };
+  
   const totalEntries = moodEntries.length;
   const currentStreak = calculateStreak();
+  const uniqueMoods = calculateUniqueMoods();
   
   const getProgress = (achievement: any) => {
-    const isCompleted = achievement.requirement(totalEntries, currentStreak);
+    const isCompleted = achievement.requirement(totalEntries, currentStreak, uniqueMoods);
     
     // If completed, always return 100%
     if (isCompleted) {
@@ -60,8 +67,24 @@ const AchievementsDisplay: React.FC = () => {
     // Extract target number from achievement description
     const target = parseInt(achievement.description.match(/\d+/)?.[0] || '0');
     
+    // Handle special achievements
+    if (achievement.id === 'plant-colorful') {
+      return Math.min((uniqueMoods / 7) * 100, 100);
+    }
+    
+    if (achievement.id === 'mood-explorer') {
+      return Math.min((uniqueMoods / 6) * 100, 100);
+    }
+    
+    if (achievement.id === 'garden-master') {
+      // Need both streak >= 15 AND entries >= 50
+      const streakProgress = Math.min(currentStreak / 15, 1);
+      const entryProgress = Math.min(totalEntries / 50, 1);
+      return Math.min(streakProgress, entryProgress) * 100;
+    }
+    
     // Calculate progress based on achievement type (streak vs entry-based)
-    if (achievement.id.includes('streak') || achievement.id.includes('day') || achievement.id === 'weekly-warrior' || achievement.id === 'daily-habit' || achievement.id === 'streak-master' || achievement.id === 'consistency-champion') {
+    if (achievement.id.includes('streak') || achievement.id.includes('day') || achievement.id === 'weekly-warrior' || achievement.id === 'daily-habit' || achievement.id === 'streak-master' || achievement.id === 'consistency-champion' || achievement.id === 'marathon-runner' || achievement.id === 'legendary-tracker') {
       return Math.min((currentStreak / target) * 100, 100);
     } else {
       // Entry-based achievements
@@ -70,15 +93,41 @@ const AchievementsDisplay: React.FC = () => {
   };
   
   const getCurrentValue = (achievement: any) => {
-    const isCompleted = achievement.requirement(totalEntries, currentStreak);
+    const isCompleted = achievement.requirement(totalEntries, currentStreak, uniqueMoods);
+    
+    // Special handling for specific achievements
+    if (achievement.id === 'plant-colorful') {
+      return isCompleted ? 7 : uniqueMoods;
+    }
+    
+    if (achievement.id === 'mood-explorer') {
+      return isCompleted ? 6 : uniqueMoods;
+    }
+    
+    if (achievement.id === 'garden-master') {
+      // Show the limiting factor (streak or entries)
+      const streakTarget = 15;
+      const entryTarget = 50;
+      const streakProgress = currentStreak / streakTarget;
+      const entryProgress = totalEntries / entryTarget;
+      
+      if (streakProgress <= entryProgress) {
+        return `${currentStreak}/${streakTarget} streak`;
+      } else {
+        return `${totalEntries}/${entryTarget} entries`;
+      }
+    }
+    
+    // Extract target from description
+    const target = parseInt(achievement.description.match(/\d+/)?.[0] || '0');
     
     // If completed, show the target value
     if (isCompleted) {
-      return parseInt(achievement.description.match(/\d+/)?.[0] || '0');
+      return target;
     }
     
     // Check if it's a streak-based achievement
-    if (achievement.id.includes('streak') || achievement.id.includes('day') || achievement.id === 'weekly-warrior' || achievement.id === 'daily-habit' || achievement.id === 'streak-master' || achievement.id === 'consistency-champion') {
+    if (achievement.id.includes('streak') || achievement.id.includes('day') || achievement.id === 'weekly-warrior' || achievement.id === 'daily-habit' || achievement.id === 'streak-master' || achievement.id === 'consistency-champion' || achievement.id === 'marathon-runner' || achievement.id === 'legendary-tracker') {
       return currentStreak;
     } else {
       return totalEntries;
@@ -86,6 +135,10 @@ const AchievementsDisplay: React.FC = () => {
   };
   
   const getTargetValue = (achievement: any) => {
+    if (achievement.id === 'plant-colorful') return 7;
+    if (achievement.id === 'mood-explorer') return 6;
+    if (achievement.id === 'garden-master') return 'Both targets';
+    
     return parseInt(achievement.description.match(/\d+/)?.[0] || '0');
   };
   
@@ -93,7 +146,7 @@ const AchievementsDisplay: React.FC = () => {
     <div className="space-y-6">
       <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
         {achievements.map((achievement) => {
-          const isCompleted = achievement.requirement(totalEntries, currentStreak);
+          const isCompleted = achievement.requirement(totalEntries, currentStreak, uniqueMoods);
           const progress = getProgress(achievement);
           const currentValue = getCurrentValue(achievement);
           const targetValue = getTargetValue(achievement);
