@@ -19,6 +19,32 @@ export const moodColors = {
   peaceful: '#A7F3D0'
 };
 
+export const moodPlantMap = {
+  happy: '🌻',
+  sad: '🌧️',
+  anxious: '🌪️',
+  calm: '🌿',
+  energetic: '🌟',
+  angry: '🔥',
+  peaceful: '🕊️'
+};
+
+export const plantStages = [
+  { name: 'Seed', size: 16, emoji: '🌱' },
+  { name: 'Sprout', size: 24, emoji: '🌿' },
+  { name: 'Sapling', size: 32, emoji: '🌳' },
+  { name: 'Young Tree', size: 40, emoji: '🌲' },
+  { name: 'Mature Tree', size: 48, emoji: '🌴' }
+];
+
+export const getStreakColor = (streak: number): string => {
+  if (streak >= 30) return '#10B981'; // Green-500
+  if (streak >= 14) return '#3B82F6'; // Blue-500
+  if (streak >= 7) return '#8B5CF6';  // Purple-500
+  if (streak >= 3) return '#F59E0B';  // Amber-500
+  return '#6B7280'; // Gray-500
+};
+
 export const achievements = [
   {
     id: 'first-step',
