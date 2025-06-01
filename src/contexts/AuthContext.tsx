@@ -42,13 +42,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, []);
 
   const signUp = async (email: string, password: string, fullName?: string) => {
-    const redirectUrl = `${window.location.origin}/`;
-    
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        emailRedirectTo: redirectUrl,
         data: {
           full_name: fullName || ''
         }
@@ -61,10 +58,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         description: error.message,
         variant: 'destructive'
       });
-    } else {
+    } else if (data.user) {
       toast({
-        title: 'Check your email',
-        description: 'Please check your email for a confirmation link.'
+        title: 'Account created successfully!',
+        description: 'You are now signed in to your new account.'
       });
     }
 

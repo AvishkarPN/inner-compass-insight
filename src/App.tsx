@@ -15,6 +15,7 @@ import MoodArt from "./pages/MoodArt";
 import Wellness from "./pages/Wellness";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
+import PWAInstallPrompt from "./components/PWAInstallPrompt";
 
 const queryClient = new QueryClient();
 
@@ -26,6 +27,7 @@ const App = () => (
           <TooltipProvider>
             <Toaster />
             <Sonner />
+            <PWAInstallPrompt />
             <Routes>
               <Route path="/auth" element={<Auth />} />
               <Route path="/*" element={
