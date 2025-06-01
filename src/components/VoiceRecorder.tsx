@@ -38,44 +38,36 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onTranscript, disabled })
       const recognition = new SpeechRecognition();
       
       // Enhanced configuration for better cross-platform support
-      recognition.continuous = true;
-      recognition.interimResults = true;
+      recognition.continuous = false; // Changed to false for better reliability
+      recognition.interimResults = false; // Changed to false for simpler handling
       recognition.lang = 'en-US';
       recognition.maxAlternatives = 1;
       
       // Add timeout handling for better reliability
       let timeoutId: NodeJS.Timeout;
       
-      let finalTranscript = '';
-      
       recognition.onstart = () => {
         console.log('Speech recognition started');
         setIsRecording(true);
         
-        // Set a timeout to automatically stop after 30 seconds
+        // Set a shorter timeout for better UX
         timeoutId = setTimeout(() => {
           if (recognitionRef.current) {
             recognitionRef.current.stop();
           }
-        }, 30000);
+        }, 10000); // Reduced to 10 seconds
       };
       
       recognition.onresult = (event) => {
-        let interimTranscript = '';
-        
-        for (let i = event.resultIndex; i < event.results.length; i++) {
-          const transcript = event.results[i][0].transcript;
-          if (event.results[i].isFinal) {
-            finalTranscript += transcript + ' ';
-          } else {
-            interimTranscript += transcript;
+        if (event.results.length > 0) {
+          const transcript = event.results[0][0].transcript;
+          if (transcript.trim()) {
+            onTranscript(transcript);
+            toast({
+              title: 'Voice Captured',
+              description: 'Your voice has been converted to text successfully.'
+            });
           }
-        }
-        
-        // Send the current transcript (final + interim) to parent
-        const fullTranscript = finalTranscript + interimTranscript;
-        if (fullTranscript.trim()) {
-          onTranscript(fullTranscript);
         }
       };
       
@@ -84,22 +76,28 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onTranscript, disabled })
         setIsRecording(false);
         clearTimeout(timeoutId);
         
-        let errorMessage = 'There was an issue with voice recognition. Please try again.';
+        let errorMessage = 'Voice recognition failed. Please try typing instead.';
         
         // Provide more specific error messages
         switch (event.error) {
           case 'not-allowed':
-            errorMessage = 'Microphone access denied. Please allow microphone access and try again.';
+            errorMessage = 'Microphone access denied. Please allow microphone access in your browser settings.';
             break;
           case 'no-speech':
             errorMessage = 'No speech detected. Please speak clearly and try again.';
             break;
           case 'network':
-            errorMessage = 'Network error. Please check your connection and try again.';
+            errorMessage = 'Network error. Voice recognition requires an internet connection.';
             break;
           case 'service-not-allowed':
-            errorMessage = 'Speech recognition service not available. Please try again later.';
+            errorMessage = 'Voice recognition service not available. Please try again later.';
             break;
+          case 'audio-capture':
+            errorMessage = 'Microphone not available. Please check your microphone and try again.';
+            break;
+          case 'aborted':
+            // Don't show error for user-initiated stops
+            return;
         }
         
         toast({
@@ -119,8 +117,8 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onTranscript, disabled })
       recognition.start();
       
       toast({
-        title: 'Recording Started',
-        description: 'Speak into your microphone. Recording will stop automatically after 30 seconds.'
+        title: 'Listening...',
+        description: 'Speak now. Recording will stop automatically when you finish speaking.'
       });
     } catch (error) {
       console.error('Error starting voice recording:', error);
@@ -130,12 +128,16 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onTranscript, disabled })
       
       if (error instanceof Error) {
         if (error.message.includes('not supported')) {
-          errorMessage = 'Voice recognition is not supported in this browser. Try using Chrome or Safari.';
+          errorMessage = 'Voice recognition is not supported in this browser. Try using Chrome, Safari, or Edge.';
+        } else if (error.name === 'NotAllowedError') {
+          errorMessage = 'Microphone access denied. Please allow microphone access in your browser settings.';
+        } else if (error.name === 'NotFoundError') {
+          errorMessage = 'No microphone found. Please connect a microphone and try again.';
         }
       }
       
       toast({
-        title: 'Permission Denied',
+        title: 'Microphone Error',
         description: errorMessage,
         variant: 'destructive'
       });

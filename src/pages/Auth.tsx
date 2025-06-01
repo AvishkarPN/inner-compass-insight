@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -30,7 +31,8 @@ const Auth = () => {
     setLoading(true);
     const { error } = await signIn(signInData.email, signInData.password);
     if (!error) {
-      navigate('/');
+      // Redirect will happen automatically via useEffect when user state updates
+      setTimeout(() => navigate('/'), 100);
     }
     setLoading(false);
   };
@@ -39,10 +41,11 @@ const Auth = () => {
     e.preventDefault();
     setLoading(true);
     const { error } = await signUp(signUpData.email, signUpData.password, signUpData.fullName);
-    setLoading(false);
     if (!error) {
-      // Keep user on auth page to check email
+      // Redirect will happen automatically via useEffect when user state updates
+      setTimeout(() => navigate('/'), 100);
     }
+    setLoading(false);
   };
 
   return (
