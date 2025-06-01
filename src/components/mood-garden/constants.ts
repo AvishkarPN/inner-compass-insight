@@ -117,7 +117,35 @@ export const achievements = [
     requirement: (totalEntries: number, currentStreak: number) => currentStreak >= 30
   },
   {
-    id: 'plant-colorful',
+    id: 'happy-gardener',
+    title: 'Happy Gardener',
+    description: 'Log 10 happy moods',
+    icon: '🌻',
+    requirement: (totalEntries: number, currentStreak: number, uniqueMoods: number = 0, moodCounts: Record<string, number> = {}) => (moodCounts.happy || 0) >= 10
+  },
+  {
+    id: 'calm-spirit',
+    title: 'Calm Spirit',
+    description: 'Log 10 calm moods',
+    icon: '🌿',
+    requirement: (totalEntries: number, currentStreak: number, uniqueMoods: number = 0, moodCounts: Record<string, number> = {}) => (moodCounts.calm || 0) >= 10
+  },
+  {
+    id: 'energy-master',
+    title: 'Energy Master',
+    description: 'Log 10 energetic moods',
+    icon: '⚡',
+    requirement: (totalEntries: number, currentStreak: number, uniqueMoods: number = 0, moodCounts: Record<string, number> = {}) => (moodCounts.energetic || 0) >= 10
+  },
+  {
+    id: 'peaceful-soul',
+    title: 'Peaceful Soul',
+    description: 'Log 10 peaceful moods',
+    icon: '🕊️',
+    requirement: (totalEntries: number, currentStreak: number, uniqueMoods: number = 0, moodCounts: Record<string, number> = {}) => (moodCounts.peaceful || 0) >= 10
+  },
+  {
+    id: 'colorful-garden',
     title: 'Colorful Garden',
     description: 'Experience all 7 different plant colors',
     icon: '🌈',

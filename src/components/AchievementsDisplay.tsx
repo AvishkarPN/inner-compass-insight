@@ -52,23 +52,47 @@ const AchievementsDisplay: React.FC = () => {
     return uniqueMoodsSet.size;
   };
   
+  // Calculate mood counts
+  const calculateMoodCounts = () => {
+    const counts: Record<string, number> = {};
+    moodEntries.forEach(entry => {
+      counts[entry.mood] = (counts[entry.mood] || 0) + 1;
+    });
+    return counts;
+  };
+  
   const totalEntries = moodEntries.length;
   const currentStreak = calculateStreak();
   const uniqueMoods = calculateUniqueMoods();
+  const moodCounts = calculateMoodCounts();
   
   const getProgress = (achievement: any) => {
-    const isCompleted = achievement.requirement(totalEntries, currentStreak, uniqueMoods);
+    const isCompleted = achievement.requirement(totalEntries, currentStreak, uniqueMoods, moodCounts);
     
     // If completed, always return 100%
     if (isCompleted) {
       return 100;
     }
     
+    // Handle mood-specific achievements
+    if (achievement.id === 'happy-gardener') {
+      return Math.min(((moodCounts.happy || 0) / 10) * 100, 100);
+    }
+    if (achievement.id === 'calm-spirit') {
+      return Math.min(((moodCounts.calm || 0) / 10) * 100, 100);
+    }
+    if (achievement.id === 'energy-master') {
+      return Math.min(((moodCounts.energetic || 0) / 10) * 100, 100);
+    }
+    if (achievement.id === 'peaceful-soul') {
+      return Math.min(((moodCounts.peaceful || 0) / 10) * 100, 100);
+    }
+    
     // Extract target number from achievement description
     const target = parseInt(achievement.description.match(/\d+/)?.[0] || '0');
     
     // Handle special achievements
-    if (achievement.id === 'plant-colorful') {
+    if (achievement.id === 'colorful-garden') {
       return Math.min((uniqueMoods / 7) * 100, 100);
     }
     
@@ -93,10 +117,24 @@ const AchievementsDisplay: React.FC = () => {
   };
   
   const getCurrentValue = (achievement: any) => {
-    const isCompleted = achievement.requirement(totalEntries, currentStreak, uniqueMoods);
+    const isCompleted = achievement.requirement(totalEntries, currentStreak, uniqueMoods, moodCounts);
+    
+    // Handle mood-specific achievements
+    if (achievement.id === 'happy-gardener') {
+      return isCompleted ? 10 : (moodCounts.happy || 0);
+    }
+    if (achievement.id === 'calm-spirit') {
+      return isCompleted ? 10 : (moodCounts.calm || 0);
+    }
+    if (achievement.id === 'energy-master') {
+      return isCompleted ? 10 : (moodCounts.energetic || 0);
+    }
+    if (achievement.id === 'peaceful-soul') {
+      return isCompleted ? 10 : (moodCounts.peaceful || 0);
+    }
     
     // Special handling for specific achievements
-    if (achievement.id === 'plant-colorful') {
+    if (achievement.id === 'colorful-garden') {
       return isCompleted ? 7 : uniqueMoods;
     }
     
@@ -135,7 +173,8 @@ const AchievementsDisplay: React.FC = () => {
   };
   
   const getTargetValue = (achievement: any) => {
-    if (achievement.id === 'plant-colorful') return 7;
+    if (achievement.id === 'happy-gardener' || achievement.id === 'calm-spirit' || achievement.id === 'energy-master' || achievement.id === 'peaceful-soul') return 10;
+    if (achievement.id === 'colorful-garden') return 7;
     if (achievement.id === 'mood-explorer') return 6;
     if (achievement.id === 'garden-master') return 'Both targets';
     
@@ -146,7 +185,7 @@ const AchievementsDisplay: React.FC = () => {
     <div className="space-y-6">
       <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
         {achievements.map((achievement) => {
-          const isCompleted = achievement.requirement(totalEntries, currentStreak, uniqueMoods);
+          const isCompleted = achievement.requirement(totalEntries, currentStreak, uniqueMoods, moodCounts);
           const progress = getProgress(achievement);
           const currentValue = getCurrentValue(achievement);
           const targetValue = getTargetValue(achievement);

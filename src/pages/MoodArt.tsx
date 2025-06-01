@@ -1,8 +1,8 @@
-
 import React, { useState } from 'react';
 import { useMood } from '@/contexts/MoodContext';
 import { MoodEntry } from '@/types/mood';
 import MoodCanvas from '@/components/MoodCanvas';
+import MoodInsights from '@/components/MoodInsights';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
@@ -131,6 +131,8 @@ const MoodArt = () => {
           )}
         </CardContent>
       </Card>
+
+      <MoodInsights entries={filteredEntries} timeFrame={timeFrame} />
       
       <Card>
         <CardContent className="p-6">
