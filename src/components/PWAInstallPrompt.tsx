@@ -30,26 +30,37 @@ const PWAInstallPrompt = () => {
       e.preventDefault();
       setDeferredPrompt(e as BeforeInstallPromptEvent);
       
-      // Only show if not already dismissed and not in standalone mode
-      const dismissed = localStorage.getItem('pwa-install-dismissed');
-      if (!dismissed && !isStandalone) {
-        setShowPrompt(true);
+      // Check if user has dismissed before and reduce frequency
+      const lastDismissed = localStorage.getItem('pwa-install-last-dismissed');
+      const now = Date.now();
+      const daysSinceLastDismiss = lastDismissed ? 
+        Math.floor((now - parseInt(lastDismissed)) / (1000 * 60 * 60 * 24)) : 999;
+      
+      // Only show if not recently dismissed (wait 7 days) and not in standalone mode
+      if (daysSinceLastDismiss >= 7 && !isStandalone) {
+        // Delay showing the prompt to reduce frequency
+        setTimeout(() => {
+          setShowPrompt(true);
+        }, 10000); // Show after 10 seconds instead of 3
       }
     };
 
     // Listen for the beforeinstallprompt event
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
 
-    // For iOS Safari, show install prompt if criteria are met
+    // For iOS Safari, show install prompt less frequently
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
     const isInStandaloneMode = (window.navigator as any).standalone;
-    const dismissed = localStorage.getItem('pwa-install-dismissed');
+    const lastDismissed = localStorage.getItem('pwa-install-last-dismissed');
+    const now = Date.now();
+    const daysSinceLastDismiss = lastDismissed ? 
+      Math.floor((now - parseInt(lastDismissed)) / (1000 * 60 * 60 * 24)) : 999;
     
-    if (isIOS && !isInStandaloneMode && !dismissed) {
-      // Show iOS-specific install instructions after a delay
+    if (isIOS && !isInStandaloneMode && daysSinceLastDismiss >= 7) {
+      // Show iOS-specific install instructions after a longer delay
       setTimeout(() => {
         setShowPrompt(true);
-      }, 3000);
+      }, 15000); // Show after 15 seconds for iOS
     }
 
     return () => {
@@ -61,7 +72,7 @@ const PWAInstallPrompt = () => {
     if (!deferredPrompt) {
       // For iOS or browsers that don't support the prompt
       setShowPrompt(false);
-      localStorage.setItem('pwa-install-dismissed', 'true');
+      localStorage.setItem('pwa-install-last-dismissed', Date.now().toString());
       return;
     }
 
@@ -74,19 +85,22 @@ const PWAInstallPrompt = () => {
       if (outcome === 'accepted') {
         setDeferredPrompt(null);
         setShowPrompt(false);
+      } else {
+        localStorage.setItem('pwa-install-last-dismissed', Date.now().toString());
       }
     } catch (error) {
       console.error('Error during install prompt:', error);
       setShowPrompt(false);
+      localStorage.setItem('pwa-install-last-dismissed', Date.now().toString());
     }
   };
 
   const handleDismiss = () => {
     setShowPrompt(false);
-    localStorage.setItem('pwa-install-dismissed', 'true');
+    localStorage.setItem('pwa-install-last-dismissed', Date.now().toString());
   };
 
-  // Don't show if in standalone mode or if dismissed
+  // Don't show if in standalone mode or if dismissed recently
   if (!showPrompt || isStandalone) return null;
 
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);

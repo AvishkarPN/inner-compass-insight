@@ -13,22 +13,34 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onTranscript, disabled })
   const [isRecording, setIsRecording] = useState(false);
   const [isSupported, setIsSupported] = useState(true);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
+  const mediaStreamRef = useRef<MediaStream | null>(null);
   const { toast } = useToast();
 
   React.useEffect(() => {
-    // Check if speech recognition is supported with more comprehensive detection
+    // Check if speech recognition is supported
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
       setIsSupported(false);
     }
+
+    // Cleanup on unmount
+    return () => {
+      stopRecording();
+    };
   }, []);
 
   const startRecording = async () => {
     try {
-      // Request microphone permission first
-      await navigator.mediaDevices.getUserMedia({ audio: true });
+      // Request microphone permission and get media stream
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true
+        } 
+      });
+      mediaStreamRef.current = stream;
       
-      // Use more comprehensive speech recognition detection
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
       
       if (!SpeechRecognition) {
@@ -37,67 +49,82 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onTranscript, disabled })
       
       const recognition = new SpeechRecognition();
       
-      // Enhanced configuration for better cross-platform support
-      recognition.continuous = false; // Changed to false for better reliability
-      recognition.interimResults = false; // Changed to false for simpler handling
+      // Configure for continuous listening
+      recognition.continuous = true;
+      recognition.interimResults = true;
       recognition.lang = 'en-US';
       recognition.maxAlternatives = 1;
       
-      // Add timeout handling for better reliability
-      let timeoutId: NodeJS.Timeout;
+      let finalTranscript = '';
+      let lastSpeechTime = Date.now();
+      let silenceTimer: NodeJS.Timeout;
       
       recognition.onstart = () => {
         console.log('Speech recognition started');
         setIsRecording(true);
+        lastSpeechTime = Date.now();
         
-        // Set a shorter timeout for better UX
-        timeoutId = setTimeout(() => {
-          if (recognitionRef.current) {
-            recognitionRef.current.stop();
-          }
-        }, 10000); // Reduced to 10 seconds
+        toast({
+          title: 'Listening...',
+          description: 'Speak continuously. Recording will stop after 3 seconds of silence.'
+        });
       };
       
       recognition.onresult = (event) => {
-        if (event.results.length > 0) {
-          const transcript = event.results[0][0].transcript;
-          if (transcript.trim()) {
-            onTranscript(transcript);
-            toast({
-              title: 'Voice Captured',
-              description: 'Your voice has been converted to text successfully.'
-            });
+        lastSpeechTime = Date.now();
+        
+        // Clear any existing silence timer
+        if (silenceTimer) {
+          clearTimeout(silenceTimer);
+        }
+        
+        let interimTranscript = '';
+        
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const transcript = event.results[i][0].transcript;
+          
+          if (event.results[i].isFinal) {
+            finalTranscript += transcript + ' ';
+          } else {
+            interimTranscript += transcript;
           }
         }
+        
+        // Set silence timer to stop after 3 seconds of no speech
+        silenceTimer = setTimeout(() => {
+          const timeSinceLastSpeech = Date.now() - lastSpeechTime;
+          if (timeSinceLastSpeech >= 3000) {
+            recognition.stop();
+          }
+        }, 3000);
       };
       
       recognition.onerror = (event) => {
         console.error('Speech recognition error:', event.error);
+        
+        // Don't show error for user-initiated stops or no-speech
+        if (event.error === 'aborted' || event.error === 'no-speech') {
+          return;
+        }
+        
         setIsRecording(false);
-        clearTimeout(timeoutId);
+        stopMediaStream();
         
-        let errorMessage = 'Voice recognition failed. Please try typing instead.';
+        let errorMessage = 'Voice recognition failed. Please try again.';
         
-        // Provide more specific error messages
         switch (event.error) {
           case 'not-allowed':
-            errorMessage = 'Microphone access denied. Please allow microphone access in your browser settings.';
-            break;
-          case 'no-speech':
-            errorMessage = 'No speech detected. Please speak clearly and try again.';
+            errorMessage = 'Microphone access denied. Please allow microphone access.';
             break;
           case 'network':
-            errorMessage = 'Network error. Voice recognition requires an internet connection.';
+            errorMessage = 'Network error. Please check your internet connection.';
             break;
           case 'service-not-allowed':
-            errorMessage = 'Voice recognition service not available. Please try again later.';
+            errorMessage = 'Voice recognition service not available.';
             break;
           case 'audio-capture':
-            errorMessage = 'Microphone not available. Please check your microphone and try again.';
+            errorMessage = 'Microphone not available. Please check your microphone.';
             break;
-          case 'aborted':
-            // Don't show error for user-initiated stops
-            return;
         }
         
         toast({
@@ -110,29 +137,40 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onTranscript, disabled })
       recognition.onend = () => {
         console.log('Speech recognition ended');
         setIsRecording(false);
-        clearTimeout(timeoutId);
+        stopMediaStream();
+        
+        // Process final transcript
+        if (finalTranscript.trim()) {
+          onTranscript(finalTranscript.trim());
+          toast({
+            title: 'Voice Captured',
+            description: 'Your voice has been converted to text successfully.'
+          });
+        }
+        
+        // Clear any remaining timer
+        if (silenceTimer) {
+          clearTimeout(silenceTimer);
+        }
       };
       
       recognitionRef.current = recognition;
       recognition.start();
       
-      toast({
-        title: 'Listening...',
-        description: 'Speak now. Recording will stop automatically when you finish speaking.'
-      });
     } catch (error) {
       console.error('Error starting voice recording:', error);
       setIsRecording(false);
+      stopMediaStream();
       
       let errorMessage = 'Please allow microphone access to use voice-to-text.';
       
       if (error instanceof Error) {
-        if (error.message.includes('not supported')) {
-          errorMessage = 'Voice recognition is not supported in this browser. Try using Chrome, Safari, or Edge.';
-        } else if (error.name === 'NotAllowedError') {
+        if (error.name === 'NotAllowedError') {
           errorMessage = 'Microphone access denied. Please allow microphone access in your browser settings.';
         } else if (error.name === 'NotFoundError') {
           errorMessage = 'No microphone found. Please connect a microphone and try again.';
+        } else if (error.name === 'NotSupportedError') {
+          errorMessage = 'Voice recognition is not supported in this browser.';
         }
       }
       
@@ -149,16 +187,43 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onTranscript, disabled })
       recognitionRef.current.stop();
       recognitionRef.current = null;
     }
+    stopMediaStream();
     setIsRecording(false);
-    
-    toast({
-      title: 'Recording Stopped',
-      description: 'Voice recording has been stopped.'
-    });
   };
 
+  const stopMediaStream = () => {
+    if (mediaStreamRef.current) {
+      mediaStreamRef.current.getTracks().forEach(track => {
+        track.stop();
+      });
+      mediaStreamRef.current = null;
+    }
+  };
+
+  // Handle page unload to cleanup microphone access
+  React.useEffect(() => {
+    const handleBeforeUnload = () => {
+      stopRecording();
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.hidden && isRecording) {
+        stopRecording();
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      stopRecording();
+    };
+  }, [isRecording]);
+
   if (!isSupported) {
-    return null; // Don't show the button if not supported
+    return null;
   }
 
   return (
