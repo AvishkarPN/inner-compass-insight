@@ -1,7 +1,7 @@
 
 import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { Mic, MicOff, Square } from 'lucide-react';
+import { Mic, Square } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 
 interface VoiceRecorderProps {
@@ -31,7 +31,7 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onTranscript, disabled })
 
   const startRecording = async () => {
     try {
-      // Request microphone permission and get media stream
+      // Request microphone permission
       const stream = await navigator.mediaDevices.getUserMedia({ 
         audio: {
           echoCancellation: true,
@@ -49,35 +49,25 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onTranscript, disabled })
       
       const recognition = new SpeechRecognition();
       
-      // Configure for continuous listening
+      // Configure recognition
       recognition.continuous = true;
       recognition.interimResults = true;
       recognition.lang = 'en-US';
       recognition.maxAlternatives = 1;
       
       let finalTranscript = '';
-      let lastSpeechTime = Date.now();
-      let silenceTimer: NodeJS.Timeout;
       
       recognition.onstart = () => {
         console.log('Speech recognition started');
         setIsRecording(true);
-        lastSpeechTime = Date.now();
         
         toast({
-          title: 'Listening...',
-          description: 'Speak continuously. Recording will stop after 3 seconds of silence.'
+          title: 'Recording Started',
+          description: 'Speak now. Click Stop when finished.'
         });
       };
       
       recognition.onresult = (event) => {
-        lastSpeechTime = Date.now();
-        
-        // Clear any existing silence timer
-        if (silenceTimer) {
-          clearTimeout(silenceTimer);
-        }
-        
         let interimTranscript = '';
         
         for (let i = event.resultIndex; i < event.results.length; i++) {
@@ -90,20 +80,15 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onTranscript, disabled })
           }
         }
         
-        // Set silence timer to stop after 3 seconds of no speech
-        silenceTimer = setTimeout(() => {
-          const timeSinceLastSpeech = Date.now() - lastSpeechTime;
-          if (timeSinceLastSpeech >= 3000) {
-            recognition.stop();
-          }
-        }, 3000);
+        console.log('Interim:', interimTranscript);
+        console.log('Final so far:', finalTranscript);
       };
       
       recognition.onerror = (event) => {
         console.error('Speech recognition error:', event.error);
         
-        // Don't show error for user-initiated stops or no-speech
-        if (event.error === 'aborted' || event.error === 'no-speech') {
+        // Don't show error for user-initiated stops
+        if (event.error === 'aborted') {
           return;
         }
         
@@ -119,11 +104,14 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onTranscript, disabled })
           case 'network':
             errorMessage = 'Network error. Please check your internet connection.';
             break;
-          case 'service-not-allowed':
-            errorMessage = 'Voice recognition service not available.';
+          case 'no-speech':
+            errorMessage = 'No speech detected. Please try speaking louder.';
             break;
           case 'audio-capture':
             errorMessage = 'Microphone not available. Please check your microphone.';
+            break;
+          case 'service-not-allowed':
+            errorMessage = 'Voice recognition service not available.';
             break;
         }
         
@@ -143,14 +131,15 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onTranscript, disabled })
         if (finalTranscript.trim()) {
           onTranscript(finalTranscript.trim());
           toast({
-            title: 'Voice Captured',
-            description: 'Your voice has been converted to text successfully.'
+            title: 'Recording Complete',
+            description: 'Your speech has been converted to text.'
           });
-        }
-        
-        // Clear any remaining timer
-        if (silenceTimer) {
-          clearTimeout(silenceTimer);
+        } else {
+          toast({
+            title: 'No Speech Detected',
+            description: 'Please try again and speak clearly.',
+            variant: 'destructive'
+          });
         }
       };
       
