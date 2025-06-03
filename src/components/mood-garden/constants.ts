@@ -154,9 +154,9 @@ export const achievements = [
   {
     id: 'mood-explorer',
     title: 'Mood Explorer',
-    description: 'Log all 6 different mood types',
+    description: 'Log all 7 different mood types',
     icon: '🧭',
-    requirement: (totalEntries: number, currentStreak: number, uniqueMoods: number = 0) => uniqueMoods >= 6
+    requirement: (totalEntries: number, currentStreak: number, uniqueMoods: number = 0) => uniqueMoods >= 7
   },
   {
     id: 'century-club',
