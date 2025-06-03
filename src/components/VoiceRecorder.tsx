@@ -13,10 +13,10 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onTranscript, disabled })
   const [isRecording, setIsRecording] = useState(false);
   const [isSupported, setIsSupported] = useState(true);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
+  const lastProcessedRef = useRef<string>('');
   const { toast } = useToast();
 
   React.useEffect(() => {
-    // Check if speech recognition is supported
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
       setIsSupported(false);
@@ -34,29 +34,48 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onTranscript, disabled })
       
       const recognition = new SpeechRecognition();
       
-      // Enhanced configuration for better cross-device compatibility
+      // Optimized settings for minimal lag
       recognition.continuous = true;
-      recognition.interimResults = false;
+      recognition.interimResults = true; // Enable interim results for real-time feedback
       recognition.lang = 'en-US';
       recognition.maxAlternatives = 1;
+      
+      // Reset the last processed text
+      lastProcessedRef.current = '';
       
       recognition.onstart = () => {
         setIsRecording(true);
       };
       
       recognition.onresult = (event) => {
+        let interimTranscript = '';
+        let finalTranscript = '';
+        
+        // Process all results for real-time updates
         for (let i = event.resultIndex; i < event.results.length; i++) {
+          const transcript = event.results[i][0].transcript;
+          
           if (event.results[i].isFinal) {
-            const transcript = event.results[i][0].transcript;
-            if (transcript.trim()) {
-              onTranscript(transcript);
-            }
+            finalTranscript += transcript;
+          } else {
+            interimTranscript += transcript;
           }
         }
+        
+        // Send final results immediately when available
+        if (finalTranscript && finalTranscript !== lastProcessedRef.current) {
+          lastProcessedRef.current = finalTranscript;
+          onTranscript(finalTranscript);
+        }
+        
+        // For interim results, we can optionally show them (uncomment if needed)
+        // if (interimTranscript && !finalTranscript) {
+        //   onTranscript(interimTranscript);
+        // }
       };
       
       recognition.onerror = (event) => {
-        // Only show error for critical issues, ignore common non-critical errors
+        // Only show critical errors, ignore common ones for smoother experience
         if (event.error === 'not-allowed') {
           toast({
             title: 'Microphone Access Required',
@@ -64,8 +83,8 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onTranscript, disabled })
             variant: 'destructive'
           });
         }
-        // Silently handle other errors like 'no-speech', 'network', etc.
-        setIsRecording(false);
+        // Silently handle other errors to prevent interruptions
+        console.log('Speech recognition error:', event.error);
       };
       
       recognition.onend = () => {
@@ -77,7 +96,6 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onTranscript, disabled })
       
     } catch (error) {
       setIsRecording(false);
-      // Only show critical errors
       if (error instanceof Error && error.name === 'NotAllowedError') {
         toast({
           title: 'Microphone Access Required',
@@ -94,6 +112,7 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onTranscript, disabled })
       recognitionRef.current = null;
     }
     setIsRecording(false);
+    lastProcessedRef.current = '';
   };
 
   if (!isSupported) {
