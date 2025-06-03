@@ -29,7 +29,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
             <h1 className="text-lg sm:text-xl font-semibold">Mood Journal</h1>
           </div>
           
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 sm:gap-2">
             <nav className="overflow-x-auto">
               <ul className="flex gap-0.5 sm:gap-1 md:gap-4">
                 <li>
@@ -98,8 +98,8 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
             
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="flex items-center gap-1">
-                  <User size={16} />
+                <Button variant="ghost" size="sm" className="flex items-center gap-1 px-2">
+                  <User size={14} className="sm:w-4 sm:h-4" />
                   <span className="hidden sm:inline">Profile</span>
                 </Button>
               </DropdownMenuTrigger>

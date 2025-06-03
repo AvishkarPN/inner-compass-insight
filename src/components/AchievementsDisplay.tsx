@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -69,12 +68,10 @@ const AchievementsDisplay: React.FC = () => {
   const getProgress = (achievement: any) => {
     const isCompleted = achievement.requirement(totalEntries, currentStreak, uniqueMoods, moodCounts);
     
-    // If completed, always return 100%
     if (isCompleted) {
       return 100;
     }
     
-    // Handle mood-specific achievements
     if (achievement.id === 'happy-gardener') {
       return Math.min(((moodCounts.happy || 0) / 10) * 100, 100);
     }
@@ -88,10 +85,8 @@ const AchievementsDisplay: React.FC = () => {
       return Math.min(((moodCounts.peaceful || 0) / 10) * 100, 100);
     }
     
-    // Extract target number from achievement description
     const target = parseInt(achievement.description.match(/\d+/)?.[0] || '0');
     
-    // Handle special achievements
     if (achievement.id === 'colorful-garden') {
       return Math.min((uniqueMoods / 7) * 100, 100);
     }
@@ -101,17 +96,21 @@ const AchievementsDisplay: React.FC = () => {
     }
     
     if (achievement.id === 'garden-master') {
-      // Need both streak >= 15 AND entries >= 50
-      const streakProgress = Math.min(currentStreak / 15, 1);
-      const entryProgress = Math.min(totalEntries / 50, 1);
-      return Math.min(streakProgress, entryProgress) * 100;
+      const streakTarget = 15;
+      const entryTarget = 50;
+      const streakProgress = currentStreak / streakTarget;
+      const entryProgress = totalEntries / entryTarget;
+      
+      if (streakProgress <= entryProgress) {
+        return `${currentStreak}/${streakTarget} streak`;
+      } else {
+        return `${totalEntries}/${entryTarget} entries`;
+      }
     }
     
-    // Calculate progress based on achievement type (streak vs entry-based)
     if (achievement.id.includes('streak') || achievement.id.includes('day') || achievement.id === 'weekly-warrior' || achievement.id === 'daily-habit' || achievement.id === 'streak-master' || achievement.id === 'consistency-champion' || achievement.id === 'marathon-runner' || achievement.id === 'legendary-tracker') {
       return Math.min((currentStreak / target) * 100, 100);
     } else {
-      // Entry-based achievements
       return Math.min((totalEntries / target) * 100, 100);
     }
   };
@@ -119,7 +118,6 @@ const AchievementsDisplay: React.FC = () => {
   const getCurrentValue = (achievement: any) => {
     const isCompleted = achievement.requirement(totalEntries, currentStreak, uniqueMoods, moodCounts);
     
-    // Handle mood-specific achievements
     if (achievement.id === 'happy-gardener') {
       return isCompleted ? 10 : (moodCounts.happy || 0);
     }
@@ -133,7 +131,6 @@ const AchievementsDisplay: React.FC = () => {
       return isCompleted ? 10 : (moodCounts.peaceful || 0);
     }
     
-    // Special handling for specific achievements
     if (achievement.id === 'colorful-garden') {
       return isCompleted ? 7 : uniqueMoods;
     }
@@ -143,7 +140,6 @@ const AchievementsDisplay: React.FC = () => {
     }
     
     if (achievement.id === 'garden-master') {
-      // Show the limiting factor (streak or entries)
       const streakTarget = 15;
       const entryTarget = 50;
       const streakProgress = currentStreak / streakTarget;
@@ -156,15 +152,12 @@ const AchievementsDisplay: React.FC = () => {
       }
     }
     
-    // Extract target from description
     const target = parseInt(achievement.description.match(/\d+/)?.[0] || '0');
     
-    // If completed, show the target value
     if (isCompleted) {
       return target;
     }
     
-    // Check if it's a streak-based achievement
     if (achievement.id.includes('streak') || achievement.id.includes('day') || achievement.id === 'weekly-warrior' || achievement.id === 'daily-habit' || achievement.id === 'streak-master' || achievement.id === 'consistency-champion' || achievement.id === 'marathon-runner' || achievement.id === 'legendary-tracker') {
       return currentStreak;
     } else {
