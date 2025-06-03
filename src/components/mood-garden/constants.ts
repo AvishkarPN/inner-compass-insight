@@ -77,14 +77,14 @@ export const achievements = [
   {
     id: 'daily-habit',
     title: 'Daily Habit',
-    description: 'Maintain a 3-day streak - Unlocks amber plant color! 🟡',
+    description: 'Maintain a 3-day streak',
     icon: '🔥',
     requirement: (totalEntries: number, currentStreak: number) => currentStreak >= 3
   },
   {
     id: 'weekly-warrior',
     title: 'Weekly Warrior',
-    description: 'Maintain a 7-day streak - Unlocks purple plant color! 🟣',
+    description: 'Maintain a 7-day streak',
     icon: '🏆',
     requirement: (totalEntries: number, currentStreak: number) => currentStreak >= 7
   },
@@ -98,7 +98,7 @@ export const achievements = [
   {
     id: 'streak-master',
     title: 'Streak Master',
-    description: 'Maintain a 14-day streak - Unlocks blue plant color! 🔵',
+    description: 'Maintain a 14-day streak',
     icon: '⚡',
     requirement: (totalEntries: number, currentStreak: number) => currentStreak >= 14
   },
@@ -112,49 +112,49 @@ export const achievements = [
   {
     id: 'consistency-champion',
     title: 'Consistency Champion',
-    description: 'Maintain a 30-day streak - Unlocks green plant color! 🟢',
+    description: 'Maintain a 30-day streak',
     icon: '👑',
     requirement: (totalEntries: number, currentStreak: number) => currentStreak >= 30
   },
   {
     id: 'happy-gardener',
     title: 'Happy Gardener',
-    description: 'Log 10 happy moods - Unlocks sunny yellow plant glow! ☀️',
+    description: 'Log 10 happy moods',
     icon: '🌻',
     requirement: (totalEntries: number, currentStreak: number, uniqueMoods: number = 0, moodCounts: Record<string, number> = {}) => (moodCounts.happy || 0) >= 10
   },
   {
     id: 'calm-spirit',
     title: 'Calm Spirit',
-    description: 'Log 10 calm moods - Unlocks serene green plant aura! 🌿',
+    description: 'Log 10 calm moods',
     icon: '🌿',
     requirement: (totalEntries: number, currentStreak: number, uniqueMoods: number = 0, moodCounts: Record<string, number> = {}) => (moodCounts.calm || 0) >= 10
   },
   {
     id: 'energy-master',
     title: 'Energy Master',
-    description: 'Log 10 energetic moods - Unlocks electric plant sparks! ⚡',
+    description: 'Log 10 energetic moods',
     icon: '⚡',
     requirement: (totalEntries: number, currentStreak: number, uniqueMoods: number = 0, moodCounts: Record<string, number> = {}) => (moodCounts.energetic || 0) >= 10
   },
   {
     id: 'peaceful-soul',
     title: 'Peaceful Soul',
-    description: 'Log 10 peaceful moods - Unlocks tranquil plant essence! 🕊️',
+    description: 'Log 10 peaceful moods',
     icon: '🕊️',
     requirement: (totalEntries: number, currentStreak: number, uniqueMoods: number = 0, moodCounts: Record<string, number> = {}) => (moodCounts.peaceful || 0) >= 10
   },
   {
     id: 'colorful-garden',
     title: 'Colorful Garden',
-    description: 'Experience all 7 different plant colors - Complete the rainbow! 🌈',
+    description: 'Experience all 7 different plant colors',
     icon: '🌈',
     requirement: (totalEntries: number, currentStreak: number, uniqueMoods: number = 0) => uniqueMoods >= 7
   },
   {
     id: 'mood-explorer',
     title: 'Mood Explorer',
-    description: 'Log all 6 different mood types - Unlock the full spectrum! 🧭',
+    description: 'Log all 6 different mood types',
     icon: '🧭',
     requirement: (totalEntries: number, currentStreak: number, uniqueMoods: number = 0) => uniqueMoods >= 6
   },
@@ -168,7 +168,7 @@ export const achievements = [
   {
     id: 'marathon-runner',
     title: 'Marathon Runner',
-    description: 'Maintain a 60-day streak - Unlocks premium plant variations! 🌟',
+    description: 'Maintain a 60-day streak',
     icon: '🏃‍♂️',
     requirement: (totalEntries: number, currentStreak: number) => currentStreak >= 60
   },
@@ -182,21 +182,21 @@ export const achievements = [
   {
     id: 'legendary-tracker',
     title: 'Legendary Tracker',
-    description: 'Maintain a 100-day streak - Unlocks legendary plant aura! ✨',
+    description: 'Maintain a 100-day streak',
     icon: '🏅',
     requirement: (totalEntries: number, currentStreak: number) => currentStreak >= 100
   },
   {
     id: 'garden-master',
     title: 'Garden Master',
-    description: 'Achieve maximum plant growth - Master all plant colors! 🌳',
+    description: 'Achieve maximum plant growth',
     icon: '🌳',
     requirement: (totalEntries: number, currentStreak: number) => currentStreak >= 15 && totalEntries >= 50
   },
   {
     id: 'mood-sage',
     title: 'Mood Sage',
-    description: 'Log 365 mood entries (full year) - Unlock eternal plant glow! ✨',
+    description: 'Log 365 mood entries (full year)',
     icon: '🌅',
     requirement: (totalEntries: number, currentStreak: number) => totalEntries >= 365
   }

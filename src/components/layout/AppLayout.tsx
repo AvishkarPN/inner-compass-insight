@@ -29,14 +29,14 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
             <h1 className="text-lg sm:text-xl font-semibold">Mood Journal</h1>
           </div>
           
-          <div className="flex items-center gap-1 sm:gap-2">
+          <div className="flex items-center gap-2">
             <nav className="overflow-x-auto">
-              <ul className="flex gap-0.5 sm:gap-1 md:gap-2">
+              <ul className="flex gap-0.5 sm:gap-1 md:gap-4">
                 <li>
                   <Link 
                     to="/" 
                     className={cn(
-                      "flex items-center gap-1 px-1.5 sm:px-2 md:px-3 py-2 rounded-md text-xs sm:text-sm font-medium transition-colors hover:bg-primary/10",
+                      "flex items-center gap-1 sm:gap-1.5 px-1.5 sm:px-2 md:px-3 py-2 rounded-md text-xs sm:text-sm font-medium transition-colors hover:bg-primary/10",
                       location.pathname === "/" ? "bg-primary/10 text-primary" : "text-muted-foreground"
                     )}
                   >
@@ -48,7 +48,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
                   <Link 
                     to="/insights" 
                     className={cn(
-                      "flex items-center gap-1 px-1.5 sm:px-2 md:px-3 py-2 rounded-md text-xs sm:text-sm font-medium transition-colors hover:bg-primary/10",
+                      "flex items-center gap-1 sm:gap-1.5 px-1.5 sm:px-2 md:px-3 py-2 rounded-md text-xs sm:text-sm font-medium transition-colors hover:bg-primary/10",
                       location.pathname === "/insights" ? "bg-primary/10 text-primary" : "text-muted-foreground"
                     )}
                   >
@@ -60,7 +60,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
                   <Link 
                     to="/wellness" 
                     className={cn(
-                      "flex items-center gap-1 px-1.5 sm:px-2 md:px-3 py-2 rounded-md text-xs sm:text-sm font-medium transition-colors hover:bg-primary/10",
+                      "flex items-center gap-1 sm:gap-1.5 px-1.5 sm:px-2 md:px-3 py-2 rounded-md text-xs sm:text-sm font-medium transition-colors hover:bg-primary/10",
                       location.pathname === "/wellness" ? "bg-primary/10 text-primary" : "text-muted-foreground"
                     )}
                   >
@@ -72,7 +72,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
                   <Link 
                     to="/history" 
                     className={cn(
-                      "flex items-center gap-1 px-1.5 sm:px-2 md:px-3 py-2 rounded-md text-xs sm:text-sm font-medium transition-colors hover:bg-primary/10",
+                      "flex items-center gap-1 sm:gap-1.5 px-1.5 sm:px-2 md:px-3 py-2 rounded-md text-xs sm:text-sm font-medium transition-colors hover:bg-primary/10",
                       location.pathname === "/history" ? "bg-primary/10 text-primary" : "text-muted-foreground"
                     )}
                   >
@@ -84,7 +84,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
                   <Link 
                     to="/mood-art" 
                     className={cn(
-                      "flex items-center gap-1 px-1.5 sm:px-2 md:px-3 py-2 rounded-md text-xs sm:text-sm font-medium transition-colors hover:bg-primary/10",
+                      "flex items-center gap-1 sm:gap-1.5 px-1.5 sm:px-2 md:px-3 py-2 rounded-md text-xs sm:text-sm font-medium transition-colors hover:bg-primary/10",
                       location.pathname === "/mood-art" ? "bg-primary/10 text-primary" : "text-muted-foreground"
                     )}
                   >
@@ -98,8 +98,8 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
             
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="flex items-center gap-1 px-1.5 sm:px-2">
-                  <User size={14} className="sm:w-4 sm:h-4" />
+                <Button variant="ghost" size="sm" className="flex items-center gap-1">
+                  <User size={16} />
                   <span className="hidden sm:inline">Profile</span>
                 </Button>
               </DropdownMenuTrigger>
