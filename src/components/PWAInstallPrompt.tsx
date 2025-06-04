@@ -17,13 +17,40 @@ const PWAInstallPrompt = () => {
   useEffect(() => {
     // Check if app is already installed/running in standalone mode
     const checkStandalone = () => {
-      const isStandaloneMode = window.matchMedia('(display-mode: standalone)').matches ||
-                              (window.navigator as any).standalone === true ||
-                              document.referrer.includes('android-app://');
+      const isStandaloneMode = 
+        window.matchMedia('(display-mode: standalone)').matches ||
+        (window.navigator as any).standalone === true ||
+        document.referrer.includes('android-app://') ||
+        window.location.search.includes('utm_source=homescreen') ||
+        window.location.search.includes('standalone=true');
+      
       setIsStandalone(isStandaloneMode);
+      
+      // If already installed, don't show prompt
+      if (isStandaloneMode) {
+        localStorage.setItem('pwa-install-dismissed', 'true');
+        setShowPrompt(false);
+      }
     };
 
     checkStandalone();
+
+    // Listen for changes in display mode
+    const mediaQuery = window.matchMedia('(display-mode: standalone)');
+    const handleDisplayModeChange = (e: MediaQueryListEvent) => {
+      if (e.matches) {
+        localStorage.setItem('pwa-install-dismissed', 'true');
+        setShowPrompt(false);
+        setIsStandalone(true);
+      }
+    };
+
+    if (mediaQuery.addEventListener) {
+      mediaQuery.addEventListener('change', handleDisplayModeChange);
+    } else {
+      // Fallback for older browsers
+      mediaQuery.addListener(handleDisplayModeChange);
+    }
 
     const handleBeforeInstallPrompt = (e: Event) => {
       console.log('beforeinstallprompt event fired');
@@ -32,8 +59,13 @@ const PWAInstallPrompt = () => {
       
       // Only show if not already dismissed and not in standalone mode
       const dismissed = localStorage.getItem('pwa-install-dismissed');
-      if (!dismissed && !isStandalone) {
-        setShowPrompt(true);
+      const permanentlyDismissed = localStorage.getItem('pwa-install-permanently-dismissed');
+      
+      if (!dismissed && !permanentlyDismissed && !isStandalone) {
+        // Show prompt after a short delay to avoid being intrusive
+        setTimeout(() => {
+          setShowPrompt(true);
+        }, 5000);
       }
     };
 
@@ -44,16 +76,33 @@ const PWAInstallPrompt = () => {
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
     const isInStandaloneMode = (window.navigator as any).standalone;
     const dismissed = localStorage.getItem('pwa-install-dismissed');
+    const permanentlyDismissed = localStorage.getItem('pwa-install-permanently-dismissed');
     
-    if (isIOS && !isInStandaloneMode && !dismissed) {
+    if (isIOS && !isInStandaloneMode && !dismissed && !permanentlyDismissed) {
       // Show iOS-specific install instructions after a delay
       setTimeout(() => {
         setShowPrompt(true);
-      }, 3000);
+      }, 8000);
     }
+
+    // Listen for appinstalled event
+    const handleAppInstalled = () => {
+      console.log('App was installed');
+      localStorage.setItem('pwa-install-dismissed', 'true');
+      setShowPrompt(false);
+      setDeferredPrompt(null);
+    };
+
+    window.addEventListener('appinstalled', handleAppInstalled);
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener('appinstalled', handleAppInstalled);
+      if (mediaQuery.removeEventListener) {
+        mediaQuery.removeEventListener('change', handleDisplayModeChange);
+      } else {
+        mediaQuery.removeListener(handleDisplayModeChange);
+      }
     };
   }, [isStandalone]);
 
@@ -72,7 +121,12 @@ const PWAInstallPrompt = () => {
       console.log('User choice:', outcome);
       
       if (outcome === 'accepted') {
+        localStorage.setItem('pwa-install-dismissed', 'true');
         setDeferredPrompt(null);
+        setShowPrompt(false);
+      } else {
+        // User declined, dismiss for this session only
+        localStorage.setItem('pwa-install-dismissed', 'true');
         setShowPrompt(false);
       }
     } catch (error) {
@@ -86,13 +140,18 @@ const PWAInstallPrompt = () => {
     localStorage.setItem('pwa-install-dismissed', 'true');
   };
 
-  // Don't show if in standalone mode or if dismissed
+  const handlePermanentDismiss = () => {
+    setShowPrompt(false);
+    localStorage.setItem('pwa-install-permanently-dismissed', 'true');
+  };
+
+  // Don't show if in standalone mode, dismissed, or no conditions met
   if (!showPrompt || isStandalone) return null;
 
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
 
   return (
-    <Card className="fixed bottom-4 left-4 right-4 z-50 mx-auto max-w-sm border-primary bg-background shadow-lg md:left-auto md:right-4 md:mx-0">
+    <Card className="fixed bottom-4 left-4 right-4 z-[9998] mx-auto max-w-sm border-primary bg-background shadow-xl md:left-auto md:right-4 md:mx-0 animate-fade-in">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="text-sm">Install Mood Journal</CardTitle>
@@ -106,24 +165,39 @@ const PWAInstallPrompt = () => {
           </Button>
         </div>
       </CardHeader>
-      <CardContent className="pt-0">
+      <CardContent className="pt-0 space-y-3">
         {isIOS ? (
           <>
             <p className="text-xs text-muted-foreground mb-3">
               To install: Tap the Share button in Safari, then "Add to Home Screen"
             </p>
-            <Button onClick={handleDismiss} className="w-full" size="sm">
-              Got it!
-            </Button>
+            <div className="flex gap-2">
+              <Button onClick={handleDismiss} variant="outline" size="sm" className="flex-1">
+                Got it!
+              </Button>
+              <Button onClick={handlePermanentDismiss} variant="ghost" size="sm" className="text-xs">
+                Don't ask again
+              </Button>
+            </div>
           </>
         ) : (
           <>
             <p className="text-xs text-muted-foreground mb-3">
               Install our app for quick access and a better experience!
             </p>
-            <Button onClick={handleInstallClick} className="w-full" size="sm">
-              <Download className="mr-2 h-4 w-4" />
-              Add to Home Screen
+            <div className="flex gap-2">
+              <Button onClick={handleInstallClick} size="sm" className="flex-1">
+                <Download className="mr-2 h-4 w-4" />
+                Add to Home Screen
+              </Button>
+            </div>
+            <Button 
+              onClick={handlePermanentDismiss} 
+              variant="ghost" 
+              size="sm" 
+              className="w-full text-xs"
+            >
+              Don't ask again
             </Button>
           </>
         )}

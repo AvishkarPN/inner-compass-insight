@@ -1,9 +1,11 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { Play, Pause, RotateCcw, Volume2 } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Slider } from '@/components/ui/slider';
+import { Play, Pause, RotateCcw, Volume2, VolumeX, Music, Waves, Zap, Leaf } from 'lucide-react';
 
 interface GuidedMeditationProps {
   onClose: () => void;
@@ -13,6 +15,10 @@ const GuidedMeditation: React.FC<GuidedMeditationProps> = ({ onClose }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [currentStep, setCurrentStep] = useState(0);
+  const [musicEnabled, setMusicEnabled] = useState(true);
+  const [musicVolume, setMusicVolume] = useState([50]);
+  const [selectedAmbience, setSelectedAmbience] = useState<'forest' | 'ocean' | 'rain' | 'silence'>('forest');
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const totalDuration = 300; // 5 minutes
 
   const meditationSteps = [
@@ -26,6 +32,39 @@ const GuidedMeditation: React.FC<GuidedMeditationProps> = ({ onClose }) => {
     { time: 300, instruction: "When ready, slowly open your eyes. Well done!" }
   ];
 
+  const ambienceOptions = [
+    { id: 'forest', name: 'Forest', icon: Leaf, color: 'bg-green-100 text-green-800' },
+    { id: 'ocean', name: 'Ocean', icon: Waves, color: 'bg-blue-100 text-blue-800' },
+    { id: 'rain', name: 'Rain', icon: Zap, color: 'bg-gray-100 text-gray-800' },
+    { id: 'silence', name: 'Silence', icon: VolumeX, color: 'bg-purple-100 text-purple-800' }
+  ];
+
+  // Create audio context for background music simulation
+  useEffect(() => {
+    if (musicEnabled && selectedAmbience !== 'silence') {
+      // In a real app, you would load actual audio files here
+      // For now, we'll simulate with a dummy audio element
+      if (!audioRef.current) {
+        audioRef.current = new Audio();
+        audioRef.current.loop = true;
+        audioRef.current.volume = musicVolume[0] / 100;
+      }
+    }
+
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+    };
+  }, [musicEnabled, selectedAmbience]);
+
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = musicVolume[0] / 100;
+    }
+  }, [musicVolume]);
+
   useEffect(() => {
     let interval: NodeJS.Timeout;
     if (isPlaying && currentTime < totalDuration) {
@@ -37,9 +76,22 @@ const GuidedMeditation: React.FC<GuidedMeditationProps> = ({ onClose }) => {
           return newTime;
         });
       }, 1000);
+
+      // Start background music
+      if (musicEnabled && selectedAmbience !== 'silence' && audioRef.current) {
+        audioRef.current.play().catch(() => {
+          // Handle autoplay restrictions
+          console.log('Autoplay prevented');
+        });
+      }
+    } else {
+      // Pause background music
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
     }
     return () => clearInterval(interval);
-  }, [isPlaying, currentTime]);
+  }, [isPlaying, currentTime, musicEnabled, selectedAmbience]);
 
   const handlePlayPause = () => {
     setIsPlaying(!isPlaying);
@@ -49,6 +101,10 @@ const GuidedMeditation: React.FC<GuidedMeditationProps> = ({ onClose }) => {
     setIsPlaying(false);
     setCurrentTime(0);
     setCurrentStep(0);
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
   };
 
   const formatTime = (seconds: number) => {
@@ -61,7 +117,7 @@ const GuidedMeditation: React.FC<GuidedMeditationProps> = ({ onClose }) => {
   const currentInstruction = meditationSteps[currentStep]?.instruction || meditationSteps[0].instruction;
 
   return (
-    <Card className="w-full max-w-md mx-auto">
+    <Card className="w-full max-w-2xl mx-auto">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Volume2 className="h-5 w-5" />
@@ -69,24 +125,85 @@ const GuidedMeditation: React.FC<GuidedMeditationProps> = ({ onClose }) => {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
-        <div className="text-center">
+        {/* Timer and Progress */}
+        <div className="text-center space-y-4">
           <div className="text-3xl font-mono mb-2">
             {formatTime(currentTime)} / {formatTime(totalDuration)}
           </div>
-          <Progress value={progress} className="w-full" />
+          <Progress value={progress} className="w-full h-2" />
+          <Badge variant="outline" className="text-sm">
+            Step {currentStep + 1} of {meditationSteps.length}
+          </Badge>
         </div>
 
-        <div className="bg-blue-50 p-4 rounded-lg min-h-[80px] flex items-center justify-center">
-          <p className="text-center text-blue-800 font-medium">
+        {/* Current Instruction */}
+        <div className="bg-blue-50 p-6 rounded-lg min-h-[100px] flex items-center justify-center">
+          <p className="text-center text-blue-800 font-medium leading-relaxed">
             {currentInstruction}
           </p>
         </div>
 
+        {/* Ambience Selection */}
+        <div className="space-y-3">
+          <h4 className="font-medium text-sm">Background Ambience</h4>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+            {ambienceOptions.map((option) => {
+              const IconComponent = option.icon;
+              return (
+                <Button
+                  key={option.id}
+                  variant={selectedAmbience === option.id ? "default" : "outline"}
+                  size="sm"
+                  className="h-auto py-3 flex flex-col items-center gap-2"
+                  onClick={() => setSelectedAmbience(option.id as any)}
+                >
+                  <IconComponent className="h-4 w-4" />
+                  <span className="text-xs">{option.name}</span>
+                </Button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Music Controls */}
+        <div className="space-y-4 p-4 bg-gray-50 rounded-lg">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Music className="h-4 w-4" />
+              <span className="text-sm font-medium">Background Music</span>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setMusicEnabled(!musicEnabled)}
+            >
+              {musicEnabled ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
+            </Button>
+          </div>
+          
+          {musicEnabled && selectedAmbience !== 'silence' && (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-sm">
+                <span>Volume</span>
+                <span>{musicVolume[0]}%</span>
+              </div>
+              <Slider
+                value={musicVolume}
+                onValueChange={setMusicVolume}
+                max={100}
+                step={5}
+                className="w-full"
+              />
+            </div>
+          )}
+        </div>
+
+        {/* Control Buttons */}
         <div className="flex justify-center gap-4">
           <Button onClick={handleReset} variant="outline" size="sm">
             <RotateCcw className="h-4 w-4" />
           </Button>
-          <Button onClick={handlePlayPause} size="lg">
+          <Button onClick={handlePlayPause} size="lg" className="px-8">
             {isPlaying ? <Pause className="h-4 w-4 mr-2" /> : <Play className="h-4 w-4 mr-2" />}
             {isPlaying ? 'Pause' : 'Start'}
           </Button>
@@ -94,6 +211,15 @@ const GuidedMeditation: React.FC<GuidedMeditationProps> = ({ onClose }) => {
             Close
           </Button>
         </div>
+
+        {/* Completion Message */}
+        {currentTime >= totalDuration && (
+          <div className="bg-green-50 p-4 rounded-lg border border-green-200 text-center">
+            <p className="text-green-800 font-medium">
+              🎉 Meditation complete! Take a moment to notice how you feel.
+            </p>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
