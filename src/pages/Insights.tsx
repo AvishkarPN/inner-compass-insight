@@ -85,140 +85,158 @@ const Insights = () => {
 
   const insights = calculateInsights();
   
-  // Enhanced PDF export with modern design and proper character encoding
+  // Enhanced PDF export with improved layout and page management
   const handleExportInsights = () => {
     const pdf = new jsPDF('p', 'mm', 'a4');
     
-    // Set proper font encoding to avoid symbol issues
+    // Set proper font encoding
     pdf.setFont('helvetica', 'normal');
     
     const pageWidth = 210;
     const pageHeight = 297;
+    const margin = 15;
+    const contentWidth = pageWidth - (margin * 2);
     let yPos = 25;
     
-    // Modern header with gradient effect
-    pdf.setFillColor(67, 56, 202); // Primary purple
-    pdf.rect(0, 0, pageWidth, 60, 'F');
+    // Helper function to check if content fits on current page
+    const checkPageSpace = (requiredHeight: number) => {
+      if (yPos + requiredHeight > pageHeight - 25) {
+        pdf.addPage();
+        yPos = 25;
+      }
+    };
     
-    // Add subtle pattern/texture effect
-    pdf.setFillColor(99, 102, 241); // Lighter purple
-    pdf.rect(0, 45, pageWidth, 15, 'F');
+    // Modern header with proper proportions
+    pdf.setFillColor(67, 56, 202);
+    pdf.rect(0, 0, pageWidth, 50, 'F');
     
-    // Title section
+    // Title section with better spacing
     pdf.setTextColor(255, 255, 255);
-    pdf.setFontSize(32);
+    pdf.setFontSize(28);
     pdf.setFont('helvetica', 'bold');
-    pdf.text('Mood Insights Report', 20, 25);
+    pdf.text('Mood Insights Report', margin, 20);
     
-    // Subtitle with proper date formatting
-    pdf.setFontSize(14);
+    // Subtitle
+    pdf.setFontSize(12);
     pdf.setFont('helvetica', 'normal');
     const reportDate = new Date().toLocaleDateString('en-US', { 
       year: 'numeric', 
       month: 'long', 
       day: 'numeric' 
     });
-    pdf.text(`Generated on ${reportDate}`, 20, 38);
+    pdf.text(`Generated on ${reportDate}`, margin, 33);
     
-    // Clean tagline
-    pdf.setFontSize(11);
+    // Tagline
+    pdf.setFontSize(10);
     pdf.setFont('helvetica', 'italic');
-    pdf.text('Your Personal Wellness Journey', 20, 50);
+    pdf.text('Your Personal Wellness Journey', margin, 42);
     
-    yPos = 80;
+    yPos = 65;
     
     if (!insights) {
-      // No data available section
+      // No data section with proper sizing
+      checkPageSpace(60);
+      
       pdf.setFillColor(248, 250, 252);
       pdf.setDrawColor(203, 213, 225);
       pdf.setLineWidth(1);
-      pdf.roundedRect(15, yPos - 10, 180, 50, 8, 8, 'FD');
+      pdf.roundedRect(margin, yPos, contentWidth, 50, 5, 5, 'FD');
       
       pdf.setTextColor(71, 85, 105);
-      pdf.setFontSize(18);
+      pdf.setFontSize(16);
       pdf.setFont('helvetica', 'bold');
-      pdf.text('No Data Available', 25, yPos + 5);
+      pdf.text('No Data Available', margin + 10, yPos + 15);
       
-      pdf.setFontSize(12);
+      pdf.setFontSize(11);
       pdf.setFont('helvetica', 'normal');
-      pdf.text('Start tracking your moods to unlock personalized insights', 25, yPos + 20);
-      pdf.text('and discover patterns in your emotional wellness journey.', 25, yPos + 30);
+      pdf.text('Start tracking your moods to unlock personalized insights', margin + 10, yPos + 28);
+      pdf.text('and discover patterns in your emotional wellness journey.', margin + 10, yPos + 38);
       
       pdf.save(`mood-insights-${new Date().toISOString().slice(0, 10)}.pdf`);
       return;
     }
     
-    // Overview Statistics Card
+    // Key Statistics Section with proper layout
+    checkPageSpace(85);
+    
     pdf.setFillColor(239, 246, 255);
     pdf.setDrawColor(59, 130, 246);
-    pdf.setLineWidth(2);
-    pdf.roundedRect(15, yPos - 10, 180, 80, 8, 8, 'FD');
+    pdf.setLineWidth(1.5);
+    pdf.roundedRect(margin, yPos, contentWidth, 75, 6, 6, 'FD');
     
-    // Card header
+    // Section header
     pdf.setTextColor(30, 64, 175);
-    pdf.setFontSize(16);
-    pdf.setFont('helvetica', 'bold');
-    pdf.text('Key Statistics', 25, yPos);
-    
-    // Statistics grid with proper spacing
-    const stats = [
-      { label: 'Total Entries', value: insights.totalEntries.toString(), icon: '●' },
-      { label: 'Current Streak', value: `${insights.currentStreak} days`, icon: '●' },
-      { label: 'Days Tracked', value: insights.uniqueDays.toString(), icon: '●' },
-      { label: 'Journal Rate', value: `${Math.round((insights.journalEntriesCount / insights.totalEntries) * 100)}%`, icon: '●' }
-    ];
-    
-    pdf.setTextColor(30, 64, 175);
-    pdf.setFontSize(10);
-    
-    stats.forEach((stat, index) => {
-      const x = 25 + (index % 2) * 90;
-      const y = yPos + 15 + Math.floor(index / 2) * 25;
-      
-      // Clean bullet point
-      pdf.setFont('helvetica', 'bold');
-      pdf.setFontSize(8);
-      pdf.text('•', x, y);
-      
-      // Label
-      pdf.setFont('helvetica', 'normal');
-      pdf.setFontSize(10);
-      pdf.text(stat.label, x + 5, y);
-      
-      // Value
-      pdf.setFont('helvetica', 'bold');
-      pdf.setFontSize(14);
-      pdf.setTextColor(67, 56, 202);
-      pdf.text(stat.value, x + 5, y + 8);
-      pdf.setTextColor(30, 64, 175);
-    });
-    
-    // Most common mood highlight
-    pdf.setTextColor(30, 64, 175);
-    pdf.setFont('helvetica', 'normal');
-    pdf.setFontSize(11);
-    pdf.text('Most Common Mood:', 25, yPos + 65);
-    pdf.setFont('helvetica', 'bold');
-    pdf.setFontSize(12);
-    pdf.setTextColor(67, 56, 202);
-    pdf.text(insights.mostCommonMood[0].charAt(0).toUpperCase() + insights.mostCommonMood[0].slice(1), 85, yPos + 65);
-    
-    yPos += 100;
-    
-    // Mood Distribution Section
-    pdf.setFillColor(240, 253, 244);
-    pdf.setDrawColor(34, 197, 94);
-    pdf.setLineWidth(2);
-    pdf.roundedRect(15, yPos - 10, 180, 20, 6, 6, 'FD');
-    
-    pdf.setFillColor(34, 197, 94);
-    pdf.rect(15, yPos - 10, 180, 20, 'F');
-    pdf.setTextColor(255, 255, 255);
     pdf.setFontSize(14);
     pdf.setFont('helvetica', 'bold');
-    pdf.text('Mood Distribution Analysis', 25, yPos - 2);
+    pdf.text('Key Statistics', margin + 10, yPos + 15);
+    
+    // Statistics in a clean 2x2 grid
+    const stats = [
+      { label: 'Total Entries', value: insights.totalEntries.toString() },
+      { label: 'Current Streak', value: `${insights.currentStreak} days` },
+      { label: 'Days Tracked', value: insights.uniqueDays.toString() },
+      { label: 'Journal Rate', value: `${Math.round((insights.journalEntriesCount / insights.totalEntries) * 100)}%` }
+    ];
+    
+    const statBoxWidth = (contentWidth - 30) / 2;
+    const statBoxHeight = 25;
+    
+    stats.forEach((stat, index) => {
+      const col = index % 2;
+      const row = Math.floor(index / 2);
+      const x = margin + 10 + (col * (statBoxWidth + 10));
+      const y = yPos + 25 + (row * (statBoxHeight + 5));
+      
+      // Stat box background
+      pdf.setFillColor(255, 255, 255);
+      pdf.setDrawColor(219, 234, 254);
+      pdf.setLineWidth(1);
+      pdf.roundedRect(x, y, statBoxWidth, statBoxHeight, 3, 3, 'FD');
+      
+      // Stat label
+      pdf.setTextColor(75, 85, 99);
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(9);
+      pdf.text(stat.label, x + 5, y + 8);
+      
+      // Stat value
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(12);
+      pdf.setTextColor(67, 56, 202);
+      pdf.text(stat.value, x + 5, y + 18);
+    });
+    
+    yPos += 85;
+    
+    // Most common mood highlight
+    checkPageSpace(20);
+    pdf.setTextColor(30, 64, 175);
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(10);
+    pdf.text('Most Common Mood:', margin + 10, yPos + 5);
+    pdf.setFont('helvetica', 'bold');
+    pdf.setFontSize(11);
+    pdf.setTextColor(67, 56, 202);
+    pdf.text(insights.mostCommonMood[0].charAt(0).toUpperCase() + insights.mostCommonMood[0].slice(1), margin + 60, yPos + 5);
     
     yPos += 25;
+    
+    // Mood Distribution Section
+    checkPageSpace(30 + (Object.keys(insights.moodCounts).length * 18));
+    
+    pdf.setFillColor(240, 253, 244);
+    pdf.setDrawColor(34, 197, 94);
+    pdf.setLineWidth(1.5);
+    pdf.roundedRect(margin, yPos, contentWidth, 18, 5, 5, 'FD');
+    
+    pdf.setFillColor(34, 197, 94);
+    pdf.rect(margin, yPos, contentWidth, 18, 'F');
+    pdf.setTextColor(255, 255, 255);
+    pdf.setFontSize(12);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text('Mood Distribution Analysis', margin + 10, yPos + 11);
+    
+    yPos += 30;
     
     const sortedMoods = Object.entries(insights.moodCounts).sort((a, b) => b[1] - a[1]);
     const moodColors: Record<string, number[]> = {
@@ -234,88 +252,91 @@ const Insights = () => {
     sortedMoods.forEach(([mood, count], index) => {
       const percentage = ((count / insights.totalEntries) * 100).toFixed(1);
       
-      // Mood entry card
+      // Mood entry with proper spacing
       pdf.setFillColor(255, 255, 255);
       pdf.setDrawColor(229, 231, 235);
       pdf.setLineWidth(0.5);
-      pdf.roundedRect(20, yPos - 5, 170, 18, 4, 4, 'FD');
+      pdf.roundedRect(margin + 5, yPos, contentWidth - 10, 15, 3, 3, 'FD');
       
       // Mood circle indicator
       const color = moodColors[mood] || [107, 114, 128];
       pdf.setFillColor(color[0], color[1], color[2]);
-      pdf.circle(30, yPos + 4, 4, 'F');
+      pdf.circle(margin + 15, yPos + 7.5, 3, 'F');
       
-      // Mood information
+      // Mood text
       pdf.setTextColor(31, 41, 55);
-      pdf.setFontSize(12);
+      pdf.setFontSize(10);
       pdf.setFont('helvetica', 'bold');
-      pdf.text(mood.charAt(0).toUpperCase() + mood.slice(1), 40, yPos + 2);
+      pdf.text(mood.charAt(0).toUpperCase() + mood.slice(1), margin + 25, yPos + 6);
       
       pdf.setFont('helvetica', 'normal');
-      pdf.setFontSize(10);
+      pdf.setFontSize(8);
       pdf.setTextColor(107, 114, 128);
-      pdf.text(`${count} entries (${percentage}%)`, 40, yPos + 10);
+      pdf.text(`${count} entries (${percentage}%)`, margin + 25, yPos + 12);
       
-      // Progress bar
-      const barWidth = Math.max((count / insights.totalEntries) * 60, 3);
+      // Progress bar with proper proportions
+      const progressBarWidth = 50;
+      const progressBarX = margin + contentWidth - 60;
+      const barFillWidth = Math.max((count / insights.totalEntries) * progressBarWidth, 2);
+      
+      // Progress bar background
       pdf.setFillColor(229, 231, 235);
-      pdf.roundedRect(120, yPos + 2, 60, 8, 2, 2, 'F');
+      pdf.roundedRect(progressBarX, yPos + 5, progressBarWidth, 6, 1.5, 1.5, 'F');
       
+      // Progress bar fill
       pdf.setFillColor(color[0], color[1], color[2]);
-      pdf.roundedRect(120, yPos + 2, barWidth, 8, 2, 2, 'F');
+      pdf.roundedRect(progressBarX, yPos + 5, barFillWidth, 6, 1.5, 1.5, 'F');
       
-      yPos += 22;
+      yPos += 18;
     });
     
     yPos += 15;
     
     // Weekly Pattern Analysis
-    if (yPos > 200) {
-      pdf.addPage();
-      yPos = 30;
-    }
+    checkPageSpace(40 + (weeklyData.length * 10));
     
     pdf.setFillColor(254, 249, 195);
     pdf.setDrawColor(251, 191, 36);
-    pdf.setLineWidth(2);
-    pdf.roundedRect(15, yPos - 10, 180, 20, 6, 6, 'FD');
+    pdf.setLineWidth(1.5);
+    pdf.roundedRect(margin, yPos, contentWidth, 18, 5, 5, 'FD');
     
     pdf.setFillColor(251, 191, 36);
-    pdf.rect(15, yPos - 10, 180, 20, 'F');
+    pdf.rect(margin, yPos, contentWidth, 18, 'F');
     pdf.setTextColor(255, 255, 255);
-    pdf.setFontSize(14);
+    pdf.setFontSize(12);
     pdf.setFont('helvetica', 'bold');
-    pdf.text('Weekly Mood Pattern', 25, yPos - 2);
+    pdf.text('Weekly Mood Pattern', margin + 10, yPos + 11);
     
-    yPos += 25;
+    yPos += 30;
     
-    // Weekly data in a clean table format
+    // Weekly data table with proper sizing
+    const tableHeight = (weeklyData.length * 10) + 20;
     pdf.setFillColor(248, 250, 252);
     pdf.setDrawColor(203, 213, 225);
     pdf.setLineWidth(1);
-    pdf.roundedRect(20, yPos - 10, 170, (weeklyData.length * 12) + 25, 6, 6, 'FD');
+    pdf.roundedRect(margin + 5, yPos, contentWidth - 10, tableHeight, 5, 5, 'FD');
     
     // Table header
     pdf.setFillColor(71, 85, 105);
-    pdf.rect(25, yPos - 5, 160, 15, 'F');
+    pdf.rect(margin + 5, yPos, contentWidth - 10, 12, 'F');
     pdf.setTextColor(255, 255, 255);
-    pdf.setFontSize(11);
+    pdf.setFontSize(9);
     pdf.setFont('helvetica', 'bold');
-    pdf.text('Day', 35, yPos + 4);
-    pdf.text('Mood Status', 80, yPos + 4);
-    pdf.text('Entries', 150, yPos + 4);
+    pdf.text('Day', margin + 15, yPos + 8);
+    pdf.text('Mood Status', margin + 60, yPos + 8);
+    pdf.text('Entries', margin + 130, yPos + 8);
     
-    yPos += 20;
+    yPos += 15;
     
     weeklyData.forEach((day, index) => {
       const bgColor = index % 2 === 0 ? [255, 255, 255] : [248, 250, 252];
       pdf.setFillColor(bgColor[0], bgColor[1], bgColor[2]);
-      pdf.rect(25, yPos - 3, 160, 12, 'F');
+      pdf.rect(margin + 5, yPos, contentWidth - 10, 10, 'F');
       
       pdf.setTextColor(31, 41, 55);
       pdf.setFont('helvetica', 'normal');
-      pdf.setFontSize(10);
-      pdf.text(day.day, 35, yPos + 3);
+      pdf.setFontSize(8);
+      pdf.text(day.day, margin + 15, yPos + 6);
       
       const moodText = day.mood ? 
         `${day.mood.charAt(0).toUpperCase() + day.mood.slice(1)}` : 
@@ -323,37 +344,34 @@ const Insights = () => {
       
       pdf.setFont('helvetica', day.mood ? 'bold' : 'italic');
       pdf.setTextColor(day.mood ? 31 : 156, day.mood ? 41 : 163, day.mood ? 55 : 175);
-      pdf.text(moodText, 80, yPos + 3);
+      pdf.text(moodText, margin + 60, yPos + 6);
       
       pdf.setFont('helvetica', 'normal');
       pdf.setTextColor(107, 114, 128);
-      pdf.text(day.mood ? '1' : '0', 150, yPos + 3);
+      pdf.text(day.mood ? '1' : '0', margin + 130, yPos + 6);
       
-      yPos += 12;
+      yPos += 10;
     });
     
     yPos += 20;
     
     // Journal Analytics (if applicable)
     if (insights.journalEntriesCount > 0) {
-      if (yPos > 220) {
-        pdf.addPage();
-        yPos = 30;
-      }
+      checkPageSpace(65);
       
       pdf.setFillColor(253, 244, 255);
       pdf.setDrawColor(147, 51, 234);
-      pdf.setLineWidth(2);
-      pdf.roundedRect(15, yPos - 10, 180, 20, 6, 6, 'FD');
+      pdf.setLineWidth(1.5);
+      pdf.roundedRect(margin, yPos, contentWidth, 18, 5, 5, 'FD');
       
       pdf.setFillColor(147, 51, 234);
-      pdf.rect(15, yPos - 10, 180, 20, 'F');
+      pdf.rect(margin, yPos, contentWidth, 18, 'F');
       pdf.setTextColor(255, 255, 255);
-      pdf.setFontSize(14);
+      pdf.setFontSize(12);
       pdf.setFont('helvetica', 'bold');
-      pdf.text('Journal Writing Analysis', 25, yPos - 2);
+      pdf.text('Journal Writing Analysis', margin + 10, yPos + 11);
       
-      yPos += 25;
+      yPos += 30;
       
       const journalStats = [
         { label: 'Journal Entries', value: insights.journalEntriesCount.toString() },
@@ -365,45 +383,45 @@ const Insights = () => {
       pdf.setFillColor(248, 250, 252);
       pdf.setDrawColor(203, 213, 225);
       pdf.setLineWidth(1);
-      pdf.roundedRect(20, yPos - 10, 170, 55, 6, 6, 'FD');
+      pdf.roundedRect(margin + 5, yPos, contentWidth - 10, 45, 5, 5, 'FD');
       
+      const statWidth = (contentWidth - 30) / 2;
       journalStats.forEach((stat, index) => {
-        const x = 30 + (index % 2) * 80;
-        const y = yPos + 5 + Math.floor(index / 2) * 25;
+        const col = index % 2;
+        const row = Math.floor(index / 2);
+        const x = margin + 15 + (col * (statWidth + 10));
+        const y = yPos + 10 + (row * 20);
         
         pdf.setTextColor(88, 28, 135);
         pdf.setFont('helvetica', 'normal');
-        pdf.setFontSize(10);
+        pdf.setFontSize(8);
         pdf.text(stat.label, x, y);
         
         pdf.setFont('helvetica', 'bold');
-        pdf.setFontSize(14);
+        pdf.setFontSize(11);
         pdf.setTextColor(147, 51, 234);
         pdf.text(stat.value, x, y + 8);
       });
       
-      yPos += 70;
+      yPos += 55;
     }
     
     // Personalized Insights Section
-    if (yPos > 200) {
-      pdf.addPage();
-      yPos = 30;
-    }
+    checkPageSpace(120);
     
     pdf.setFillColor(254, 242, 242);
     pdf.setDrawColor(239, 68, 68);
-    pdf.setLineWidth(2);
-    pdf.roundedRect(15, yPos - 10, 180, 20, 6, 6, 'FD');
+    pdf.setLineWidth(1.5);
+    pdf.roundedRect(margin, yPos, contentWidth, 18, 5, 5, 'FD');
     
     pdf.setFillColor(239, 68, 68);
-    pdf.rect(15, yPos - 10, 180, 20, 'F');
+    pdf.rect(margin, yPos, contentWidth, 18, 'F');
     pdf.setTextColor(255, 255, 255);
-    pdf.setFontSize(14);
+    pdf.setFontSize(12);
     pdf.setFont('helvetica', 'bold');
-    pdf.text('Personalized Insights', 25, yPos - 2);
+    pdf.text('Personalized Insights', margin + 10, yPos + 11);
     
-    yPos += 25;
+    yPos += 30;
     
     const personalizedInsights = [
       {
@@ -423,51 +441,54 @@ const Insights = () => {
     ];
     
     personalizedInsights.forEach((insight, index) => {
+      checkPageSpace(30);
+      
       pdf.setFillColor(255, 255, 255);
       pdf.setDrawColor(229, 231, 235);
       pdf.setLineWidth(1);
-      pdf.roundedRect(20, yPos - 5, 170, 30, 6, 6, 'FD');
+      pdf.roundedRect(margin + 5, yPos, contentWidth - 10, 25, 5, 5, 'FD');
       
       // Insight number indicator
       pdf.setFillColor(239, 68, 68);
-      pdf.circle(30, yPos + 5, 8, 'F');
+      pdf.circle(margin + 18, yPos + 12, 6, 'F');
       pdf.setTextColor(255, 255, 255);
-      pdf.setFontSize(12);
+      pdf.setFontSize(10);
       pdf.setFont('helvetica', 'bold');
-      pdf.text((index + 1).toString(), 27, yPos + 8);
+      pdf.text((index + 1).toString(), margin + 15.5, yPos + 14.5);
       
       pdf.setTextColor(153, 27, 27);
-      pdf.setFontSize(12);
+      pdf.setFontSize(10);
       pdf.setFont('helvetica', 'bold');
-      pdf.text(insight.title, 45, yPos + 5);
+      pdf.text(insight.title, margin + 30, yPos + 8);
       
       pdf.setFont('helvetica', 'normal');
-      pdf.setFontSize(9);
+      pdf.setFontSize(8);
       pdf.setTextColor(75, 85, 99);
       
-      const contentLines = pdf.splitTextToSize(insight.content, 140);
+      const maxWidth = contentWidth - 35;
+      const contentLines = pdf.splitTextToSize(insight.content, maxWidth);
       let lineY = yPos + 15;
       contentLines.forEach((line: string) => {
-        pdf.text(line, 45, lineY);
-        lineY += 5;
+        pdf.text(line, margin + 30, lineY);
+        lineY += 4;
       });
       
-      yPos += 35;
+      yPos += 30;
     });
     
     // Professional footer
-    const footerY = pageHeight - 25;
+    const footerY = pageHeight - 20;
     pdf.setFillColor(248, 250, 252);
-    pdf.rect(0, footerY, pageWidth, 25, 'F');
+    pdf.rect(0, footerY, pageWidth, 20, 'F');
     
     pdf.setDrawColor(203, 213, 225);
     pdf.setLineWidth(0.5);
-    pdf.line(15, footerY + 5, pageWidth - 15, footerY + 5);
+    pdf.line(margin, footerY + 3, pageWidth - margin, footerY + 3);
     
     pdf.setTextColor(107, 114, 128);
-    pdf.setFontSize(8);
+    pdf.setFontSize(7);
     pdf.setFont('helvetica', 'normal');
-    pdf.text('Generated by Mood Journal - Your Personal Wellness Companion', 20, footerY + 12);
+    pdf.text('Generated by Mood Journal - Your Personal Wellness Companion', margin, footerY + 9);
     
     const timestamp = new Date().toLocaleString('en-US', { 
       year: 'numeric', 
@@ -476,7 +497,7 @@ const Insights = () => {
       hour: '2-digit',
       minute: '2-digit'
     });
-    pdf.text(`Report generated: ${timestamp}`, 20, footerY + 18);
+    pdf.text(`Report generated: ${timestamp}`, margin, footerY + 15);
     
     // Save with clean filename
     const dateString = new Date().toISOString().slice(0, 10);
