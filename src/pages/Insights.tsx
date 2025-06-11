@@ -628,5 +628,3 @@ const Insights = () => {
 };
 
 export default Insights;
-
-</edits_to_apply>
