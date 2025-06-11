@@ -20,9 +20,7 @@ const PWAInstallPrompt = () => {
       const isStandaloneMode = 
         window.matchMedia('(display-mode: standalone)').matches ||
         (window.navigator as any).standalone === true ||
-        document.referrer.includes('android-app://') ||
-        window.location.search.includes('utm_source=homescreen') ||
-        window.location.search.includes('standalone=true');
+        document.referrer.includes('android-app://');
       
       setIsStandalone(isStandaloneMode);
       
@@ -35,25 +33,8 @@ const PWAInstallPrompt = () => {
 
     checkStandalone();
 
-    // Listen for changes in display mode
-    const mediaQuery = window.matchMedia('(display-mode: standalone)');
-    const handleDisplayModeChange = (e: MediaQueryListEvent) => {
-      if (e.matches) {
-        localStorage.setItem('pwa-install-dismissed', 'true');
-        setShowPrompt(false);
-        setIsStandalone(true);
-      }
-    };
-
-    if (mediaQuery.addEventListener) {
-      mediaQuery.addEventListener('change', handleDisplayModeChange);
-    } else {
-      // Fallback for older browsers
-      mediaQuery.addListener(handleDisplayModeChange);
-    }
-
     const handleBeforeInstallPrompt = (e: Event) => {
-      console.log('beforeinstallprompt event fired');
+      console.log('PWA: beforeinstallprompt event fired');
       e.preventDefault();
       setDeferredPrompt(e as BeforeInstallPromptEvent);
       
@@ -62,12 +43,16 @@ const PWAInstallPrompt = () => {
       const permanentlyDismissed = localStorage.getItem('pwa-install-permanently-dismissed');
       
       if (!dismissed && !permanentlyDismissed && !isStandalone) {
-        // Show prompt after a short delay to avoid being intrusive
+        console.log('PWA: Showing install prompt');
         setTimeout(() => {
           setShowPrompt(true);
-        }, 5000);
+        }, 3000); // Reduced delay for faster testing
       }
     };
+
+    // Clear previous dismissal for testing (remove this in production)
+    // localStorage.removeItem('pwa-install-dismissed');
+    // localStorage.removeItem('pwa-install-permanently-dismissed');
 
     // Listen for the beforeinstallprompt event
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
@@ -79,15 +64,23 @@ const PWAInstallPrompt = () => {
     const permanentlyDismissed = localStorage.getItem('pwa-install-permanently-dismissed');
     
     if (isIOS && !isInStandaloneMode && !dismissed && !permanentlyDismissed) {
-      // Show iOS-specific install instructions after a delay
+      console.log('PWA: iOS detected, showing install instructions');
       setTimeout(() => {
         setShowPrompt(true);
-      }, 8000);
+      }, 5000);
     }
+
+    // For testing purposes, show prompt after 10 seconds if no beforeinstallprompt
+    const testTimer = setTimeout(() => {
+      if (!deferredPrompt && !isStandalone && !dismissed && !permanentlyDismissed) {
+        console.log('PWA: No beforeinstallprompt detected, showing fallback');
+        setShowPrompt(true);
+      }
+    }, 10000);
 
     // Listen for appinstalled event
     const handleAppInstalled = () => {
-      console.log('App was installed');
+      console.log('PWA: App was installed');
       localStorage.setItem('pwa-install-dismissed', 'true');
       setShowPrompt(false);
       setDeferredPrompt(null);
@@ -98,13 +91,9 @@ const PWAInstallPrompt = () => {
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
       window.removeEventListener('appinstalled', handleAppInstalled);
-      if (mediaQuery.removeEventListener) {
-        mediaQuery.removeEventListener('change', handleDisplayModeChange);
-      } else {
-        mediaQuery.removeListener(handleDisplayModeChange);
-      }
+      clearTimeout(testTimer);
     };
-  }, [isStandalone]);
+  }, [isStandalone, deferredPrompt]);
 
   const handleInstallClick = async () => {
     if (!deferredPrompt) {
@@ -118,19 +107,18 @@ const PWAInstallPrompt = () => {
       deferredPrompt.prompt();
       const { outcome } = await deferredPrompt.userChoice;
       
-      console.log('User choice:', outcome);
+      console.log('PWA: User choice:', outcome);
       
       if (outcome === 'accepted') {
         localStorage.setItem('pwa-install-dismissed', 'true');
         setDeferredPrompt(null);
         setShowPrompt(false);
       } else {
-        // User declined, dismiss for this session only
         localStorage.setItem('pwa-install-dismissed', 'true');
         setShowPrompt(false);
       }
     } catch (error) {
-      console.error('Error during install prompt:', error);
+      console.error('PWA: Error during install prompt:', error);
       setShowPrompt(false);
     }
   };
@@ -145,7 +133,7 @@ const PWAInstallPrompt = () => {
     localStorage.setItem('pwa-install-permanently-dismissed', 'true');
   };
 
-  // Don't show if in standalone mode, dismissed, or no conditions met
+  // Don't show if in standalone mode or dismissed
   if (!showPrompt || isStandalone) return null;
 
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);

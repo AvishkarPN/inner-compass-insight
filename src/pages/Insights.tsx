@@ -536,7 +536,6 @@ const Insights = () => {
               >
                 <BarChart size={16} className="flex-shrink-0" />
                 <span className="hidden sm:inline truncate">Charts</span>
-                <span className="sm:hidden">📊</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="analysis" 
@@ -544,7 +543,6 @@ const Insights = () => {
               >
                 <Brain size={16} className="flex-shrink-0" />
                 <span className="hidden sm:inline truncate">Analysis</span>
-                <span className="sm:hidden">🧠</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="achievements" 
@@ -552,7 +550,6 @@ const Insights = () => {
               >
                 <Trophy size={16} className="flex-shrink-0" />
                 <span className="hidden sm:inline truncate">Achievements</span>
-                <span className="sm:hidden">🏆</span>
               </TabsTrigger>
             </TabsList>
           </div>
@@ -631,3 +628,5 @@ const Insights = () => {
 };
 
 export default Insights;
+
+</edits_to_apply>
