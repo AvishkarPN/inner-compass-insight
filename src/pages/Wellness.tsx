@@ -163,9 +163,31 @@ const Wellness = () => {
 
   const currentStreak = calculateStreak();
 
-  // Get earned achievements
+  // Calculate consistency percentage for achievements
+  const calculateConsistencyPercentage = () => {
+    if (moodEntries.length === 0) return 0;
+    
+    const last30Days = new Date();
+    last30Days.setDate(last30Days.getDate() - 30);
+    
+    const recentEntries = moodEntries.filter(entry => 
+      new Date(entry.timestamp) >= last30Days
+    );
+    
+    const daysWithEntries = new Set(
+      recentEntries.map(entry => 
+        new Date(entry.timestamp).toDateString()
+      )
+    ).size;
+    
+    return Math.round((daysWithEntries / 30) * 100);
+  };
+
+  const consistencyPercentage = calculateConsistencyPercentage();
+
+  // Get earned achievements - fix the function call to pass all required arguments
   const earnedAchievements = achievements.filter(achievement => 
-    achievement.requirement(totalEntries, currentStreak)
+    achievement.requirement(totalEntries, currentStreak, positiveEntries.length, consistencyPercentage)
   );
 
   const handleCrisisCall = () => {
@@ -631,3 +653,5 @@ const Wellness = () => {
 };
 
 export default Wellness;
+
+}
