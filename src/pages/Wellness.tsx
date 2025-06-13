@@ -66,7 +66,7 @@ const Wellness = () => {
     const moodVariety = Math.min((uniqueMoods / 6) * 100, 100);
     
     const avgCount = totalEntries / uniqueMoods;
-    const variance = Object.values(moodCounts).reduce((acc: number, count) => 
+    const variance = Object.values(moodCounts).reduce((acc: number, count: number) => 
       acc + Math.pow(count - avgCount, 2), 0) / uniqueMoods;
     const balanceScore = Math.max(0, 100 - (variance / avgCount) * 10);
     
