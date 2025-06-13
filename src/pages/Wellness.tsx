@@ -1,154 +1,193 @@
+
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { Heart, Brain, Sparkles, Trophy, Phone, MessageCircle, Calendar, Clock, Target, Award, Zap, Shield } from 'lucide-react';
 import { useMood } from '@/contexts/MoodContext';
-import GuidedMeditation from '@/components/wellness/GuidedMeditation';
-import BreathingExercise from '@/components/wellness/BreathingExercise';
 import GratitudeJournal from '@/components/wellness/GratitudeJournal';
+import BreathingExercise from '@/components/wellness/BreathingExercise';
+import GuidedMeditation from '@/components/wellness/GuidedMeditation';
 import EducationalResource from '@/components/wellness/EducationalResource';
-import MockDataLoader from '@/components/MockDataLoader';
-import { achievements } from '@/components/mood-garden/constants';
-import { 
-  TrendingUp, 
-  Target, 
-  Calendar, 
-  Brain, 
-  Heart,
-  Award,
-  Activity,
-  Lightbulb,
-  BookOpen,
-  Phone
-} from 'lucide-react';
+
+const achievements = [
+  {
+    id: 'streak-7',
+    title: '7-Day Streak',
+    description: 'Log your mood for 7 consecutive days.',
+    icon: Zap,
+    requirement: (totalEntries: number, currentStreak: number) => currentStreak >= 7,
+  },
+  {
+    id: 'streak-30',
+    title: '30-Day Streak',
+    description: 'Log your mood for 30 consecutive days.',
+    icon: Zap,
+    requirement: (totalEntries: number, currentStreak: number) => currentStreak >= 30,
+  },
+  {
+    id: 'first-entry',
+    title: 'First Entry',
+    description: 'Log your first mood entry.',
+    icon: Sparkles,
+    requirement: (totalEntries: number) => totalEntries >= 1,
+  },
+  {
+    id: '10-entries',
+    title: '10 Entries',
+    description: 'Log 10 mood entries.',
+    icon: Target,
+    requirement: (totalEntries: number) => totalEntries >= 10,
+  },
+   {
+    id: '50-entries',
+    title: '50 Entries',
+    description: 'Log 50 mood entries.',
+    icon: Target,
+    requirement: (totalEntries: number) => totalEntries >= 50,
+  },
+  {
+    id: 'positive-moods-10',
+    title: '10 Positive Days',
+    description: 'Log 10 days with positive moods.',
+    icon: Heart,
+    requirement: (totalEntries: number, currentStreak: number, positiveEntries: number) => positiveEntries >= 10,
+  },
+  {
+    id: 'consistency-80',
+    title: '80% Consistency',
+    description: 'Maintain 80% consistency in logging moods over the last 30 days.',
+    icon: Shield,
+    requirement: (totalEntries: number, currentStreak: number, positiveEntries: number, consistencyPercentage: number) => consistencyPercentage >= 80,
+  },
+];
+
+const wellnessResources = [
+  {
+    id: 'breathing',
+    title: 'Breathing Exercises',
+    description: 'Practice deep breathing techniques to reduce stress and anxiety.',
+    icon: Brain,
+    component: 'breathing',
+  },
+  {
+    id: 'gratitude',
+    title: 'Gratitude Journal',
+    description: 'Reflect on the things you are grateful for to boost your mood.',
+    icon: Heart,
+    component: 'gratitude',
+  },
+  {
+    id: 'meditation',
+    title: 'Guided Meditation',
+    description: 'Follow a guided meditation session to calm your mind.',
+    icon: Brain,
+    component: 'meditation',
+  },
+  {
+    id: 'resource1',
+    title: 'Understanding Anxiety',
+    description: 'Learn about the causes, symptoms, and treatments for anxiety.',
+    icon: Brain,
+    component: 'resource1',
+    link: 'https://www.helpguide.org/articles/anxiety/anxiety-disorders-and-anxiety-attacks.htm'
+  },
+  {
+    id: 'resource2',
+    title: 'Coping with Stress',
+    description: 'Discover healthy ways to manage and reduce stress in your life.',
+    icon: Brain,
+    component: 'resource2',
+    link: 'https://www.mayoclinic.org/healthy-lifestyle/stress-management/in-depth/stress-management/art-20044151'
+  },
+];
 
 const Wellness = () => {
-  const { moodEntries, getWeeklyMoodData } = useMood();
+  const { moodEntries } = useMood();
   const [activeComponent, setActiveComponent] = useState<string | null>(null);
-  const [selectedTopic, setSelectedTopic] = useState<'anxiety' | 'depression' | 'stress' | 'sleep'>('anxiety');
 
-  const weeklyData = getWeeklyMoodData();
-  const totalEntries = moodEntries.length;
-  const recentEntries = moodEntries.filter(entry => {
-    const entryDate = new Date(entry.timestamp);
-    const weekAgo = new Date();
-    weekAgo.setDate(weekAgo.getDate() - 7);
-    return entryDate >= weekAgo;
-  });
-
-  const positiveEntries = moodEntries.filter(entry => 
-    ['happy', 'energetic', 'calm'].includes(entry.mood)
-  );
-
-  const calculateWellnessScore = () => {
-    if (totalEntries === 0) return 0;
-    
-    let score = 0;
-    const weights = {
-      consistency: 0.25,
-      moodBalance: 0.20,
-      journalQuality: 0.15,
-      positivity: 0.15,
-      recentTrend: 0.15,
-      streakBonus: 0.10
-    };
-    
-    const consistencyScore = Math.min((recentEntries.length / 7) * 100, 100);
-    
-    const moodCounts = moodEntries.reduce((acc, entry) => {
-      acc[entry.mood] = (acc[entry.mood] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
-    
-    const uniqueMoods = Object.keys(moodCounts).length;
-    const moodVariety = Math.min((uniqueMoods / 6) * 100, 100);
-    
-    const avgCount = totalEntries / uniqueMoods;
-    const variance = Object.values(moodCounts).reduce((acc, count) => 
-      acc + Math.pow(count - avgCount, 2), 0) / uniqueMoods;
-    const balanceScore = Math.max(0, 100 - (variance / avgCount) * 10);
-    
-    const moodBalanceScore = (moodVariety + balanceScore) / 2;
-    
-    const avgJournalLength = moodEntries.reduce((acc, entry) => 
-      acc + entry.journalText.length, 0) / totalEntries;
-    const meaningfulEntries = moodEntries.filter(entry => 
-      entry.journalText.length > 20).length;
-    const qualityRatio = meaningfulEntries / totalEntries;
-    const journalQualityScore = Math.min(
-      (avgJournalLength / 150) * 50 + qualityRatio * 50, 100
-    );
-    
-    const positivityRatio = positiveEntries.length / totalEntries;
-    const positivityScore = positivityRatio <= 0.7 ? 
-      (positivityRatio / 0.7) * 100 : 
-      100 - ((positivityRatio - 0.7) / 0.3) * 20;
-    
-    const previousWeekEntries = moodEntries.filter(entry => {
-      const entryDate = new Date(entry.timestamp);
-      const twoWeeksAgo = new Date();
-      const oneWeekAgo = new Date();
-      twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
-      oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-      return entryDate >= twoWeeksAgo && entryDate < oneWeekAgo;
-    });
-    
-    const recentPositiveRatio = recentEntries.length > 0 ? 
-      recentEntries.filter(entry => positiveEntries.some(pe => pe.id === entry.id)).length / recentEntries.length : 0;
-    const previousPositiveRatio = previousWeekEntries.length > 0 ?
-      previousWeekEntries.filter(entry => positiveEntries.some(pe => pe.id === entry.id)).length / previousWeekEntries.length : 0;
-    
-    const trendImprovement = recentPositiveRatio - previousPositiveRatio;
-    const recentTrendScore = Math.max(0, Math.min(100, 50 + trendImprovement * 100));
-    
-    const streakBonusScore = Math.min(recentEntries.length * 15, 100);
-    
-    score = (
-      consistencyScore * weights.consistency +
-      moodBalanceScore * weights.moodBalance +
-      journalQualityScore * weights.journalQuality +
-      positivityScore * weights.positivity +
-      recentTrendScore * weights.recentTrend +
-      streakBonusScore * weights.streakBonus
-    );
-    
-    return Math.round(Math.max(0, Math.min(100, score)));
+  const handleComponentClose = () => {
+    setActiveComponent(null);
   };
 
-  const wellnessScore = calculateWellnessScore();
-  const streakDays = Math.min(recentEntries.length, 7);
+  if (activeComponent === 'gratitude') {
+    return <GratitudeJournal onClose={handleComponentClose} />;
+  }
 
-  const calculateStreak = () => {
+  if (activeComponent === 'breathing') {
+    return <BreathingExercise onClose={handleComponentClose} />;
+  }
+
+  if (activeComponent === 'meditation') {
+    return <GuidedMeditation onClose={handleComponentClose} />;
+  }
+
+  const crisisResources = [
+    {
+      name: 'Crisis Text Line',
+      description: 'Text HOME to 741741 to connect with a crisis counselor.',
+      phone: '741741',
+      icon: MessageCircle,
+      link: 'https://www.crisistextline.org/'
+    },
+    {
+      name: 'The Trevor Project',
+      description: 'Suicide prevention and crisis intervention for LGBTQ young people.',
+      phone: '1-866-488-7386',
+      icon: Phone,
+      link: 'https://www.thetrevorproject.org/'
+    },
+    {
+      name: 'National Suicide Prevention Lifeline',
+      description: 'Call or text 988 anytime in the US and Canada.',
+      phone: '988',
+      icon: Phone,
+      link: 'https://988lifeline.org/'
+    },
+  ];
+
+  const totalEntries = moodEntries.length;
+  const positiveEntries = moodEntries.filter(entry => entry.mood === 'happy' || entry.mood === 'energetic');
+
+  const calculateCurrentStreak = () => {
     if (moodEntries.length === 0) return 0;
-    
-    const sortedEntries = [...moodEntries].sort((a, b) => 
-      new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-    );
-    
-    let streak = 0;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    
-    for (let i = 0; i < sortedEntries.length; i++) {
+
+    let streak = 1;
+    let currentDate = new Date();
+    currentDate.setHours(0, 0, 0, 0);
+
+    // Sort entries by timestamp in descending order
+    const sortedEntries = [...moodEntries].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+
+    let previousEntryDate = new Date(sortedEntries[0].timestamp);
+    previousEntryDate.setHours(0, 0, 0, 0);
+
+    // If the most recent entry isn't today, streak is 0
+    if (previousEntryDate.getTime() !== currentDate.getTime()) {
+      return 0;
+    }
+
+    for (let i = 1; i < sortedEntries.length; i++) {
       const entryDate = new Date(sortedEntries[i].timestamp);
       entryDate.setHours(0, 0, 0, 0);
-      
-      const expectedDate = new Date(today);
-      expectedDate.setDate(today.getDate() - streak);
-      
+
+      const expectedDate = new Date(previousEntryDate);
+      expectedDate.setDate(previousEntryDate.getDate() - 1);
+
       if (entryDate.getTime() === expectedDate.getTime()) {
         streak++;
-      } else if (entryDate.getTime() < expectedDate.getTime()) {
-        break;
+        previousEntryDate = entryDate;
+      } else {
+        break; // Streak broken
       }
     }
-    
+
     return streak;
   };
 
-  const currentStreak = calculateStreak();
+  const currentStreak = calculateCurrentStreak();
 
   const calculateConsistencyPercentage = () => {
     if (moodEntries.length === 0) return 0;
@@ -171,341 +210,134 @@ const Wellness = () => {
 
   const consistencyPercentage = calculateConsistencyPercentage();
 
+  // Get earned achievements - fix the function call to pass all required arguments
   const earnedAchievements = achievements.filter(achievement => 
     achievement.requirement(totalEntries, currentStreak, positiveEntries.length, consistencyPercentage)
   );
 
-  const handleCrisisCall = () => {
-    window.open('tel:988', '_self');
-  };
-
-  const handleQuickAction = (action: string) => {
-    setActiveComponent(action);
-  };
-
-  const handleEducationalResource = (topic: 'anxiety' | 'depression' | 'stress' | 'sleep') => {
-    setSelectedTopic(topic);
-    setActiveComponent('educational');
-  };
-
-  const renderActiveComponent = () => {
-    if (!activeComponent) return null;
-
-    return (
-      <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-[9999]">
-        <div className="max-h-[90vh] overflow-y-auto w-full max-w-4xl">
-          {activeComponent === 'meditation' && (
-            <GuidedMeditation onClose={() => setActiveComponent(null)} />
-          )}
-          {activeComponent === 'breathing' && (
-            <BreathingExercise onClose={() => setActiveComponent(null)} />
-          )}
-          {activeComponent === 'gratitude' && (
-            <GratitudeJournal onClose={() => setActiveComponent(null)} />
-          )}
-          {activeComponent === 'educational' && (
-            <EducationalResource 
-              topic={selectedTopic} 
-              onClose={() => setActiveComponent(null)} 
-            />
-          )}
-        </div>
-      </div>
-    );
+  const handleCrisisButtonClick = (resource: { link: string | URL; }) => {
+    window.open(resource.link, '_blank');
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      {renderActiveComponent()}
-      
-      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 space-y-4 sm:space-y-6 md:space-y-8">
-        <div className="flex flex-col gap-3 sm:gap-4">
-          <div className="space-y-1 sm:space-y-2">
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">Wellness Hub</h1>
-            <p className="text-xs sm:text-sm md:text-base text-muted-foreground">Your comprehensive mental health companion</p>
-          </div>
-        </div>
-
-        <Tabs defaultValue="overview" className="space-y-4 sm:space-y-6">
-          <div className="overflow-x-auto">
-            <TabsList className="grid grid-cols-3 sm:grid-cols-6 w-full min-w-[480px] sm:min-w-0 h-auto gap-1">
-              <TabsTrigger value="overview" className="text-xs sm:text-sm px-2 sm:px-3 py-2 whitespace-nowrap">Overview</TabsTrigger>
-              <TabsTrigger value="patterns" className="text-xs sm:text-sm px-2 sm:px-3 py-2 whitespace-nowrap">Patterns</TabsTrigger>
-              <TabsTrigger value="progress" className="text-xs sm:text-sm px-2 sm:px-3 py-2 whitespace-nowrap">Progress</TabsTrigger>
-              <TabsTrigger value="resources" className="text-xs sm:text-sm px-2 sm:px-3 py-2 whitespace-nowrap">Resources</TabsTrigger>
-              <TabsTrigger value="recommendations" className="text-xs sm:text-sm px-2 sm:px-3 py-2 whitespace-nowrap">Tips</TabsTrigger>
-              <TabsTrigger value="demo" className="text-xs sm:text-sm px-2 sm:px-3 py-2 whitespace-nowrap">Demo Data</TabsTrigger>
+    <div className="container mx-auto py-8 space-y-6">
+      <Card className="shadow-md border-0">
+        <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+          <CardTitle className="text-2xl font-bold">Wellness Dashboard</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Tabs defaultValue="resources" className="space-y-4">
+            <TabsList>
+              <TabsTrigger value="resources">Resources</TabsTrigger>
+              <TabsTrigger value="achievements">Achievements</TabsTrigger>
+              <TabsTrigger value="crisis">Crisis Support</TabsTrigger>
             </TabsList>
-          </div>
+            <TabsContent value="resources" className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {wellnessResources.map((resource) => (
+                  <Card key={resource.id} className="shadow-sm hover:shadow-md transition-shadow duration-300">
+                    <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+                      <CardTitle className="text-lg font-semibold flex items-center gap-2">
+                        {resource.icon && <resource.icon className="w-5 h-5" />}
+                        {resource.title}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-sm text-muted-foreground">{resource.description}</p>
+                      <Button 
+                        variant="secondary" 
+                        className="mt-4 w-full"
+                        onClick={() => {
+                          if (resource.component && !resource.link) {
+                            setActiveComponent(resource.component);
+                          } else if (resource.link) {
+                            window.open(resource.link, '_blank');
+                          }
+                        }}
+                      >
+                        {resource.link ? 'Learn More' : 'Open'}
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </TabsContent>
+            <TabsContent value="achievements" className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {earnedAchievements.map((achievement) => (
+                  <Card key={achievement.id} className="shadow-sm hover:shadow-md transition-shadow duration-300">
+                    <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+                      <CardTitle className="text-lg font-semibold flex items-center gap-2">
+                        {achievement.icon && <achievement.icon className="w-5 h-5" />}
+                        {achievement.title}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-sm text-muted-foreground">{achievement.description}</p>
+                      <Badge variant="outline">Earned</Badge>
+                    </CardContent>
+                  </Card>
+                ))}
+                {earnedAchievements.length === 0 && (
+                  <div className="text-center py-6 col-span-full">
+                    <Award className="w-10 h-10 mx-auto text-muted-foreground mb-2" />
+                    <p className="text-sm text-muted-foreground">No achievements earned yet. Keep tracking your mood to unlock achievements!</p>
+                  </div>
+                )}
+              </div>
+              <div className="mt-6">
+                <h3 className="text-xl font-semibold mb-4">Your Progress</h3>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Total Entries</span>
+                    <span className="text-sm text-muted-foreground">{totalEntries}</span>
+                  </div>
+                  <Progress value={(totalEntries / 50) * 100} max={100} />
 
-          <TabsContent value="overview" className="space-y-4 sm:space-y-6">
-            <div className="grid gap-3 sm:gap-4 md:gap-6 grid-cols-2 lg:grid-cols-4">
-              <Card className="min-h-[100px] sm:min-h-[120px]">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-3 sm:px-6 pt-3 sm:pt-6">
-                  <CardTitle className="text-xs sm:text-sm font-medium">Wellness Score</CardTitle>
-                  <Heart className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent className="space-y-2 px-3 sm:px-6 pb-3 sm:pb-6">
-                  <div className="text-lg sm:text-xl md:text-2xl font-bold">{wellnessScore}%</div>
-                  <Progress value={wellnessScore} className="h-2" />
-                </CardContent>
-              </Card>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Current Streak</span>
+                    <span className="text-sm text-muted-foreground">{currentStreak} days</span>
+                  </div>
+                  <Progress value={(currentStreak / 30) * 100} max={100} />
 
-              <Card className="min-h-[100px] sm:min-h-[120px]">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-3 sm:px-6 pt-3 sm:pt-6">
-                  <CardTitle className="text-xs sm:text-sm font-medium">Current Streak</CardTitle>
-                  <Activity className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent className="space-y-1 px-3 sm:px-6 pb-3 sm:pb-6">
-                  <div className="text-lg sm:text-xl md:text-2xl font-bold">{currentStreak}</div>
-                  <p className="text-xs text-muted-foreground">consecutive days</p>
-                </CardContent>
-              </Card>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Positive Days</span>
+                    <span className="text-sm text-muted-foreground">{positiveEntries.length}</span>
+                  </div>
+                  <Progress value={(positiveEntries.length / 10) * 100} max={100} />
 
-              <Card className="min-h-[100px] sm:min-h-[120px]">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-3 sm:px-6 pt-3 sm:pt-6">
-                  <CardTitle className="text-xs sm:text-sm font-medium">Total Entries</CardTitle>
-                  <Calendar className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent className="space-y-1 px-3 sm:px-6 pb-3 sm:pb-6">
-                  <div className="text-lg sm:text-xl md:text-2xl font-bold">{totalEntries}</div>
-                  <p className="text-xs text-muted-foreground">logged moods</p>
-                </CardContent>
-              </Card>
-
-              <Card className="min-h-[100px] sm:min-h-[120px]">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-3 sm:px-6 pt-3 sm:pt-6">
-                  <CardTitle className="text-xs sm:text-sm font-medium">This Week</CardTitle>
-                  <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent className="space-y-1 px-3 sm:px-6 pb-3 sm:pb-6">
-                  <div className="text-lg sm:text-xl md:text-2xl font-bold">{recentEntries.length}</div>
-                  <p className="text-xs text-muted-foreground">new entries</p>
-                </CardContent>
-              </Card>
-            </div>
-
-            <div className="grid gap-4 sm:gap-6 lg:grid-cols-2">
-              <Card>
-                <CardHeader className="px-3 sm:px-6">
-                  <CardTitle className="flex items-center gap-2 text-sm sm:text-base md:text-lg">
-                    <Award className="h-4 w-4 sm:h-5 sm:w-5" />
-                    Achievements ({earnedAchievements.length}/{achievements.length})
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3 max-h-60 overflow-y-auto px-3 sm:px-6">
-                  {earnedAchievements.length > 0 ? (
-                    earnedAchievements.map(achievement => (
-                      <div key={achievement.id} className="flex flex-col gap-2">
-                        <Badge variant="secondary" className="flex items-center gap-1 text-xs w-fit">
-                          <span>{achievement.icon}</span>
-                          {achievement.title}
-                        </Badge>
-                        <span className="text-xs text-muted-foreground">{achievement.description}</span>
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-xs sm:text-sm text-muted-foreground">Start logging moods to earn achievements!</p>
-                  )}
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="px-3 sm:px-6">
-                  <CardTitle className="flex items-center gap-2 text-sm sm:text-base md:text-lg">
-                    <Target className="h-4 w-4 sm:h-5 sm:w-5" />
-                    Quick Actions
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3 px-3 sm:px-6">
-                  <Button 
-                    variant="outline" 
-                    className="w-full justify-start text-xs sm:text-sm h-auto py-2 sm:py-3"
-                    onClick={() => handleQuickAction('meditation')}
-                  >
-                    <Brain className="w-3 h-3 sm:w-4 sm:h-4 mr-2 flex-shrink-0" />
-                    <span>5-Minute Meditation</span>
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    className="w-full justify-start text-xs sm:text-sm h-auto py-2 sm:py-3"
-                    onClick={() => handleQuickAction('breathing')}
-                  >
-                    <Heart className="w-3 h-3 sm:w-4 sm:h-4 mr-2 flex-shrink-0" />
-                    <span>Breathing Exercise</span>
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    className="w-full justify-start text-xs sm:text-sm h-auto py-2 sm:py-3"
-                    onClick={() => handleQuickAction('gratitude')}
-                  >
-                    <BookOpen className="w-3 h-3 sm:w-4 sm:h-4 mr-2 flex-shrink-0" />
-                    <span>Gratitude Journal</span>
-                  </Button>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="demo" className="space-y-6">
-            <MockDataLoader />
-          </TabsContent>
-
-          <TabsContent value="patterns">
-            <h2>Mood Patterns Content</h2>
-            <p>Analyze your mood trends over time.</p>
-          </TabsContent>
-
-          <TabsContent value="progress">
-            <h2>Progress Tracker</h2>
-            <p>Visualize your progress and improvements.</p>
-          </TabsContent>
-
-          <TabsContent value="resources">
-            <div className="space-y-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Lightbulb className="h-4 w-4" />
-                    Understanding Anxiety
-                  </CardTitle>
-                  <CardDescription>Learn about the causes and symptoms of anxiety.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Button 
-                    variant="outline" 
-                    className="w-full justify-start"
-                    onClick={() => handleEducationalResource('anxiety')}
-                  >
-                    Explore Resources
-                  </Button>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Lightbulb className="h-4 w-4" />
-                    Understanding Depression
-                  </CardTitle>
-                  <CardDescription>Learn about the causes and symptoms of depression.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Button 
-                    variant="outline" 
-                    className="w-full justify-start"
-                    onClick={() => handleEducationalResource('depression')}
-                  >
-                    Explore Resources
-                  </Button>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Lightbulb className="h-4 w-4" />
-                    Managing Stress
-                  </CardTitle>
-                  <CardDescription>Effective strategies for stress reduction.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Button 
-                    variant="outline" 
-                    className="w-full justify-start"
-                    onClick={() => handleEducationalResource('stress')}
-                  >
-                    Explore Resources
-                  </Button>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Lightbulb className="h-4 w-4" />
-                    Improving Sleep
-                  </CardTitle>
-                  <CardDescription>Tips and techniques for better sleep quality.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Button 
-                    variant="outline" 
-                    className="w-full justify-start"
-                    onClick={() => handleEducationalResource('sleep')}
-                  >
-                    Explore Resources
-                  </Button>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="recommendations">
-            <div className="space-y-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Brain className="h-4 w-4" />
-                    Practice Mindfulness
-                  </CardTitle>
-                  <CardDescription>Engage in daily mindfulness exercises to reduce stress and improve focus.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Button variant="outline" className="w-full justify-start">
-                    Start Now
-                  </Button>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Heart className="h-4 w-4" />
-                    Connect with Others
-                  </CardTitle>
-                  <CardDescription>Reach out to friends, family, or support groups to share your feelings.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Button variant="outline" className="w-full justify-start">
-                    Find Support
-                  </Button>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Activity className="h-4 w-4" />
-                    Stay Active
-                  </CardTitle>
-                  <CardDescription>Regular physical activity can boost your mood and reduce anxiety.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Button variant="outline" className="w-full justify-start">
-                    Get Moving
-                  </Button>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Phone className="h-4 w-4" />
-                    Crisis Support
-                  </CardTitle>
-                  <CardDescription>If you're in crisis, please call or text 988 in the US and Canada.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Button variant="destructive" className="w-full justify-start" onClick={handleCrisisCall}>
-                    Call 988 Now
-                  </Button>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-        </Tabs>
-      </div>
+                   <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Logging Consistency (Last 30 Days)</span>
+                    <span className="text-sm text-muted-foreground">{consistencyPercentage}%</span>
+                  </div>
+                  <Progress value={consistencyPercentage} max={100} />
+                </div>
+              </div>
+            </TabsContent>
+            <TabsContent value="crisis" className="space-y-4">
+              <p className="text-muted-foreground">If you're in immediate danger, please call 911.</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {crisisResources.map((resource) => (
+                  <Card key={resource.name} className="shadow-sm hover:shadow-md transition-shadow duration-300">
+                    <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+                      <CardTitle className="text-lg font-semibold flex items-center gap-2">
+                        {resource.icon && <resource.icon className="w-5 h-5" />}
+                        {resource.name}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-sm text-muted-foreground">{resource.description}</p>
+                      <Button variant="secondary" className="mt-4 w-full" onClick={() => handleCrisisButtonClick(resource)}>
+                        Contact
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+      </Card>
     </div>
   );
 };
