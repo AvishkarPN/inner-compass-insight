@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -57,7 +58,7 @@ const Wellness = () => {
     
     const consistencyScore = Math.min((recentEntries.length / 7) * 100, 100);
     
-    const moodCounts = moodEntries.reduce((acc, entry) => {
+    const moodCounts: Record<string, number> = moodEntries.reduce((acc, entry) => {
       acc[entry.mood] = (acc[entry.mood] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
