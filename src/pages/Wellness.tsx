@@ -57,7 +57,7 @@ const Wellness = () => {
     
     const consistencyScore = Math.min((recentEntries.length / 7) * 100, 100);
     
-    const moodCounts: Record<string, number> = moodEntries.reduce((acc, entry) => {
+    const moodCounts: Record<string, number> = moodEntries.reduce((acc: Record<string, number>, entry) => {
       acc[entry.mood] = (acc[entry.mood] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
