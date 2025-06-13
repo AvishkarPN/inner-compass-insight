@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -67,13 +66,13 @@ const Wellness = () => {
     const moodVariety = Math.min((uniqueMoods / 6) * 100, 100);
     
     const avgCount = totalEntries / uniqueMoods;
-    const variance = Object.values(moodCounts).reduce((acc, count) => 
+    const variance = Object.values(moodCounts).reduce((acc: number, count) => 
       acc + Math.pow(count - avgCount, 2), 0) / uniqueMoods;
     const balanceScore = Math.max(0, 100 - (variance / avgCount) * 10);
     
     const moodBalanceScore = (moodVariety + balanceScore) / 2;
     
-    const avgJournalLength = moodEntries.reduce((acc, entry) => 
+    const avgJournalLength = moodEntries.reduce((acc: number, entry) => 
       acc + entry.journalText.length, 0) / totalEntries;
     const meaningfulEntries = moodEntries.filter(entry => 
       entry.journalText.length > 20).length;
