@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { useAuth } from './AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
+import { reminderService } from '@/utils/reminderService';
 
 interface MoodContextType {
   moodEntries: MoodEntry[];
@@ -23,6 +24,11 @@ export const MoodProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [recentMoods, setRecentMoods] = useState<MoodEntry[]>([]);
   const [syncing, setSyncing] = useState(false);
   const [localDataMigrated, setLocalDataMigrated] = useState(false);
+
+  // Initialize reminder service
+  useEffect(() => {
+    reminderService.initialize();
+  }, []);
 
   // Load local data on mount
   useEffect(() => {
@@ -164,6 +170,10 @@ export const MoodProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Save to localStorage for offline access
     const updatedEntries = [...moodEntries, newEntry];
     localStorage.setItem('moodEntries', JSON.stringify(updatedEntries));
+    
+    // Clear any reminder dismissal for today since user just added an entry
+    const today = new Date();
+    localStorage.removeItem(`reminder-dismissed-${today.toDateString()}`);
     
     // If user is signed in, also save to Supabase
     if (user) {

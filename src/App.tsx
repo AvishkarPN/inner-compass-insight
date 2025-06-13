@@ -16,6 +16,7 @@ import Wellness from "./pages/Wellness";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import PWAInstallPrompt from "./components/PWAInstallPrompt";
+import DailyReminderNotification from "./components/DailyReminderNotification";
 
 const queryClient = new QueryClient();
 
@@ -28,6 +29,7 @@ const App = () => (
             <Toaster />
             <Sonner />
             <PWAInstallPrompt />
+            <DailyReminderNotification />
             <Routes>
               <Route path="/auth" element={<Auth />} />
               <Route path="/*" element={
