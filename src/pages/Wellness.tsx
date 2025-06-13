@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -11,6 +10,7 @@ import GratitudeJournal from '@/components/wellness/GratitudeJournal';
 import BreathingExercise from '@/components/wellness/BreathingExercise';
 import GuidedMeditation from '@/components/wellness/GuidedMeditation';
 import EducationalResource from '@/components/wellness/EducationalResource';
+import MockDataLoader from '@/components/MockDataLoader';
 
 const achievements = [
   {
@@ -231,7 +231,9 @@ const Wellness = () => {
               <TabsTrigger value="resources">Resources</TabsTrigger>
               <TabsTrigger value="achievements">Achievements</TabsTrigger>
               <TabsTrigger value="crisis">Crisis Support</TabsTrigger>
+              <TabsTrigger value="mock-data">Demo Data</TabsTrigger>
             </TabsList>
+            
             <TabsContent value="resources" className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {wellnessResources.map((resource) => (
@@ -334,6 +336,9 @@ const Wellness = () => {
                   </Card>
                 ))}
               </div>
+            </TabsContent>
+            <TabsContent value="mock-data" className="space-y-4">
+              <MockDataLoader />
             </TabsContent>
           </Tabs>
         </CardContent>
