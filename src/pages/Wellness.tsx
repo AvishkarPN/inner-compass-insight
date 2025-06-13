@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -148,7 +149,7 @@ const Wellness = () => {
   ];
 
   const totalEntries = moodEntries.length;
-  const positiveEntries = moodEntries.filter(entry => entry.mood === 'happy' || entry.mood === 'excited');
+  const positiveEntries = moodEntries.filter(entry => entry.mood === 'happy' || entry.mood === 'energetic');
 
   const calculateCurrentStreak = () => {
     if (moodEntries.length === 0) return 0;

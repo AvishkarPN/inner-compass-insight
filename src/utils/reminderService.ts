@@ -40,7 +40,6 @@ export class ReminderService {
         icon: '/favicon.ico',
         badge: '/favicon.ico',
         tag: 'mood-reminder',
-        renotify: true,
         requireInteraction: false,
         silent: false
       });
