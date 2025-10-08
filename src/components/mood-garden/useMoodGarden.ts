@@ -75,13 +75,17 @@ export const useMoodGarden = () => {
     setPlantStage(newStage);
     setPlantSize(plantStages[newStage].size);
     
-    // Calculate health
-    // If no entry today and there was an entry yesterday, health drops
+    // Calculate health with gradual decay
     if (!hasEntryToday && previousDate) {
       const daysSinceLastEntry = differenceInDays(new Date(), previousDate);
-      // Exponential health decrease (squared for faster decrease after missing days)
-      const healthDecrease = Math.min(Math.pow(daysSinceLastEntry, 2) * 10, 100);
-      setPlantHealth(Math.max(0, 100 - healthDecrease));
+      // Gradual health decrease: 10% per day for first 3 days, then accelerated
+      let healthDecrease;
+      if (daysSinceLastEntry <= 3) {
+        healthDecrease = daysSinceLastEntry * 10;
+      } else {
+        healthDecrease = 30 + Math.pow(daysSinceLastEntry - 3, 1.5) * 15;
+      }
+      setPlantHealth(Math.max(0, 100 - Math.min(healthDecrease, 100)));
     } else if (hasEntryToday) {
       // Full health if there's an entry today
       setPlantHealth(100);

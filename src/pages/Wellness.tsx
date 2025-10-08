@@ -149,7 +149,7 @@ const Wellness = () => {
   ];
 
   const totalEntries = moodEntries.length;
-  const positiveEntries = moodEntries.filter(entry => entry.mood === 'happy' || entry.mood === 'energetic');
+  const positiveEntries = moodEntries.filter(entry => entry.mood === 'happy' || entry.mood === 'energetic').length;
 
   const calculateCurrentStreak = () => {
     if (moodEntries.length === 0) return 0;
@@ -212,7 +212,7 @@ const Wellness = () => {
 
   // Get earned achievements - fix the function call to pass all required arguments
   const earnedAchievements = achievements.filter(achievement => 
-    achievement.requirement(totalEntries, currentStreak, positiveEntries.length, consistencyPercentage)
+    achievement.requirement(totalEntries, currentStreak, positiveEntries, consistencyPercentage)
   );
 
   const handleCrisisButtonClick = (resource: { link: string | URL; }) => {
@@ -302,9 +302,9 @@ const Wellness = () => {
 
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium">Positive Days</span>
-                    <span className="text-sm text-muted-foreground">{positiveEntries.length}</span>
+                    <span className="text-sm text-muted-foreground">{positiveEntries}</span>
                   </div>
-                  <Progress value={(positiveEntries.length / 10) * 100} max={100} />
+                  <Progress value={(positiveEntries / 10) * 100} max={100} />
 
                    <div className="flex items-center justify-between">
                     <span className="text-sm font-medium">Logging Consistency (Last 30 Days)</span>
