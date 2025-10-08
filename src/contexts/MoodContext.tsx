@@ -71,7 +71,7 @@ export const MoodProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setSyncing(true);
     
     try {
-      // First, fetch existing data from Supabase
+      // Fetch existing mood entries from Supabase cloud storage
       const { data: existingEntries, error: fetchError } = await supabase
         .from('mood_entries')
         .select('*')

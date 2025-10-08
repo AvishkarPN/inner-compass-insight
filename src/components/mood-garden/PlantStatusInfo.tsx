@@ -44,34 +44,51 @@ const PlantStatusInfo: React.FC<PlantStatusInfoProps> = ({
   };
 
   return (
-    <div className="absolute top-2 left-2 right-2 z-10">
-      <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-lg p-3 shadow-sm border">
-        <div className="flex justify-between items-center text-sm mb-2">
-          <div className="flex items-center gap-2">
-            <span className={`font-medium ${
-              plantHealth === 0 ? 'text-red-600 dark:text-red-400' :
-              plantHealth < 40 ? 'text-orange-600 dark:text-orange-400' :
-              'text-green-600 dark:text-green-400'
-            }`}>
+    <div className="absolute inset-0 flex justify-center items-end pb-2" role="region" aria-label="Mood Plant Status">
+      <div
+        className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-lg p-2.5 sm:p-3 shadow-sm border border-border/50 w-[calc(100%-1rem)] max-w-sm"
+      >
+        <div className="flex justify-between items-center text-xs sm:text-sm mb-1.5 sm:mb-2">
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <span 
+              className={`font-medium ${
+                plantHealth === 0 ? 'text-red-600 dark:text-red-400' :
+                plantHealth < 40 ? 'text-orange-600 dark:text-orange-400' :
+                'text-green-600 dark:text-green-400'
+              }`}
+              role="status"
+              aria-live="polite"
+            >
               {getStatusMessage()}
             </span>
-            <span className="text-xs text-muted-foreground">
+            <span className="text-xs text-muted-foreground" aria-label={`${streak} day streak`}>
               {streak} day streak
             </span>
           </div>
-          <div className="text-xs text-muted-foreground">
+          <div className="text-xs text-muted-foreground" aria-label={
+            daysSince === 0 ? 'Logged today' : 
+            daysSince === 1 ? 'Logged yesterday' : 
+            `Logged ${daysSince} days ago`
+          }>
             {daysSince === 0 ? 'Logged today' : 
              daysSince === 1 ? 'Logged yesterday' : 
              `${daysSince} days ago`}
           </div>
         </div>
         
-        <div className="mb-2">
+        <div className="mb-1.5 sm:mb-2">
           <div className="flex justify-between text-xs text-muted-foreground mb-1">
             <span>Health</span>
-            <span>{Math.round(plantHealth)}%</span>
+            <span aria-label={`Plant health: ${Math.round(plantHealth)} percent`}>{Math.round(plantHealth)}%</span>
           </div>
-          <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
+          <div 
+            className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5 sm:h-2 overflow-hidden"
+            role="progressbar"
+            aria-valuenow={Math.round(plantHealth)}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-label="Plant health progress"
+          >
             <div 
               className={`h-full transition-all duration-500 ease-out rounded-full ${
                 plantHealth === 0 ? 'bg-gray-400' :
@@ -88,11 +105,15 @@ const PlantStatusInfo: React.FC<PlantStatusInfoProps> = ({
           </div>
         </div>
         
-        <div className={`text-xs px-2 py-1 rounded ${
-          plantHealth === 0 ? 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/30' :
-          plantHealth < 40 ? 'text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-950/30' :
-          'text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30'
-        }`}>
+        <div 
+          className={`text-xs px-2 py-1 rounded ${
+            plantHealth === 0 ? 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/30' :
+            plantHealth < 40 ? 'text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-950/30' :
+            'text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30'
+          }`}
+          role="status"
+          aria-live="polite"
+        >
           {getPlantStageMessage()}
         </div>
       </div>
