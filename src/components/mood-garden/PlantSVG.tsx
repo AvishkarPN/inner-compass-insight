@@ -1,5 +1,6 @@
 import React from 'react';
 import { MoodType } from '@/types/mood';
+import { moodColors as baseMoodColors } from './constants';
 
 interface PlantSVGProps {
   mood: MoodType;
@@ -12,17 +13,22 @@ const PlantSVG: React.FC<PlantSVGProps> = ({ mood, stage, health, size }) => {
   const baseSize = size;
   const healthScale = Math.max(0.5, health / 100);
   
-  // Color schemes based on mood
-  const moodColors: Record<MoodType, { primary: string; secondary: string; accent: string }> = {
-    happy: { primary: '#feca57', secondary: '#ff9ff3', accent: '#54a0ff' },
-    energetic: { primary: '#ff9ff3', secondary: '#feca57', accent: '#ff6348' },
-    calm: { primary: '#54a0ff', secondary: '#48dbfb', accent: '#00d2d3' },
-    sad: { primary: '#74b9ff', secondary: '#a29bfe', accent: '#6c5ce7' },
-    anxious: { primary: '#a29bfe', secondary: '#fd79a8', accent: '#fdcb6e' },
-    angry: { primary: '#ff6348', secondary: '#ff4757', accent: '#ff6b81' }
+  // Build a palette from base mood color in constants
+  const base = baseMoodColors[mood];
+  const lighten = (hex: string, amount: number) => {
+    const clamp = (n: number) => Math.max(0, Math.min(255, n));
+    const num = parseInt(hex.replace('#', ''), 16);
+    const r = clamp((num >> 16) + amount);
+    const g = clamp(((num >> 8) & 0x00ff) + amount);
+    const b = clamp((num & 0x0000ff) + amount);
+    return `#${(r << 16 | g << 8 | b).toString(16).padStart(6, '0')}`;
   };
-
-  const colors = moodColors[mood];
+  const darken = (hex: string, amount: number) => lighten(hex, -amount);
+  const colors = {
+    primary: darken(base, 20),
+    secondary: base,
+    accent: lighten(base, 40)
+  };
   
   // Opacity based on health
   const opacity = 0.6 + (healthScale * 0.4);
@@ -30,41 +36,35 @@ const PlantSVG: React.FC<PlantSVGProps> = ({ mood, stage, health, size }) => {
   // Different plant stages
   const renderPlant = () => {
     switch (stage) {
-      case 0: // Seed/Sprout
+      case 0: // Seed (buried) with subtle sprouting animation
         return (
           <g transform={`scale(${healthScale})`} opacity={opacity}>
-            {/* Soil */}
             <ellipse cx="50" cy="90" rx="25" ry="8" fill="#8B7355" opacity="0.6"/>
-            {/* Small sprout */}
-            <path
-              d="M 50 85 Q 48 75 50 70 L 52 65"
-              stroke={colors.primary}
-              strokeWidth="3"
-              fill="none"
-              strokeLinecap="round"
-            />
-            {/* Tiny leaf */}
-            <ellipse cx="52" cy="65" rx="4" ry="6" fill={colors.secondary} opacity="0.8"/>
-            <ellipse cx="48" cy="68" rx="3" ry="5" fill={colors.secondary} opacity="0.8"/>
+            <circle cx="50" cy="93" r="3" fill="#6b4f2a" />
+            <path d="M 50 88 Q 49 86 50 84" stroke={colors.primary} strokeWidth="2.5" fill="none" strokeLinecap="round">
+              <animate attributeName="d" dur="2.5s" repeatCount="indefinite"
+                values="M 50 88 Q 49 86 50 84; M 50 88 Q 49 82 50 78; M 50 88 Q 49 86 50 84" />
+            </path>
+            <ellipse cx="52" cy="76" rx="3.5" ry="5" fill={colors.secondary} opacity="0.85">
+              <animateTransform attributeName="transform" type="rotate" from="-5 52 76" to="5 52 76" dur="3s" repeatCount="indefinite"/>
+            </ellipse>
           </g>
         );
       
-      case 1: // Young plant
+      case 1: // Sprout with gentle upward growth animation
         return (
           <g transform={`scale(${healthScale})`} opacity={opacity}>
-            {/* Soil */}
             <ellipse cx="50" cy="90" rx="30" ry="10" fill="#8B7355" opacity="0.6"/>
-            {/* Stem */}
-            <path
-              d="M 50 90 Q 48 70 50 50 Q 52 40 50 35"
-              stroke={colors.primary}
-              strokeWidth="4"
-              fill="none"
-              strokeLinecap="round"
-            />
-            {/* Leaves */}
-            <ellipse cx="45" cy="60" rx="8" ry="12" fill={colors.secondary} opacity="0.9"/>
-            <ellipse cx="55" cy="55" rx="9" ry="13" fill={colors.secondary} opacity="0.9"/>
+            <path d="M 50 90 Q 48 70 50 50 Q 52 40 50 35" stroke={colors.primary} strokeWidth="4" fill="none" strokeLinecap="round">
+              <animate attributeName="d" dur="3s" repeatCount="indefinite"
+                values="M 50 90 Q 49 78 50 60 Q 51 50 50 45; M 50 90 Q 48 70 50 50 Q 52 40 50 35; M 50 90 Q 49 78 50 60 Q 51 50 50 45" />
+            </path>
+            <ellipse cx="45" cy="60" rx="8" ry="12" fill={colors.secondary} opacity="0.9">
+              <animateTransform attributeName="transform" type="rotate" values="-2 45 60;2 45 60;-2 45 60" dur="4s" repeatCount="indefinite" />
+            </ellipse>
+            <ellipse cx="55" cy="55" rx="9" ry="13" fill={colors.secondary} opacity="0.9">
+              <animateTransform attributeName="transform" type="rotate" values="2 55 55;-2 55 55;2 55 55" dur="4s" repeatCount="indefinite" />
+            </ellipse>
             <ellipse cx="48" cy="45" rx="7" ry="10" fill={colors.accent} opacity="0.8"/>
             <ellipse cx="52" cy="40" rx="8" ry="11" fill={colors.accent} opacity="0.8"/>
           </g>
@@ -97,7 +97,9 @@ const PlantSVG: React.FC<PlantSVGProps> = ({ mood, stage, health, size }) => {
             <ellipse cx="33" cy="38" rx="7" ry="11" fill={colors.accent} opacity="0.8"/>
             
             {/* Top leaves */}
-            <ellipse cx="48" cy="30" rx="10" ry="14" fill={colors.primary} opacity="0.9"/>
+            <ellipse cx="48" cy="30" rx="10" ry="14" fill={colors.primary} opacity="0.9">
+              <animateTransform attributeName="transform" type="rotate" values="-1 48 30;1 48 30;-1 48 30" dur="5s" repeatCount="indefinite" />
+            </ellipse>
             <ellipse cx="52" cy="25" rx="9" ry="13" fill={colors.primary} opacity="0.9"/>
           </g>
         );
@@ -147,7 +149,7 @@ const PlantSVG: React.FC<PlantSVGProps> = ({ mood, stage, health, size }) => {
           </g>
         );
       
-      case 4: // Full tree
+      case 4: // Mature Tree with particle effects
         return (
           <g transform={`scale(${healthScale})`} opacity={opacity}>
             {/* Soil */}
@@ -198,17 +200,26 @@ const PlantSVG: React.FC<PlantSVGProps> = ({ mood, stage, health, size }) => {
               </>
             )}
             
-            {/* Sparkles for healthy plant */}
-            {health > 80 && (
+            {/* Particle effects based on mood */}
+            {health > 70 && mood === 'happy' && (
               <>
-                <circle cx="15" cy="60" r="2" fill="#FFF" opacity="0.8">
-                  <animate attributeName="opacity" values="0.3;1;0.3" dur="2s" repeatCount="indefinite"/>
+                <circle cx="40" cy="20" r="1.5" fill={colors.accent} opacity="0.9">
+                  <animate attributeName="cy" from="20" to="100" dur="4s" repeatCount="indefinite" />
+                  <animate attributeName="cx" values="40;42;38;40" dur="4s" repeatCount="indefinite" />
                 </circle>
-                <circle cx="85" cy="58" r="2" fill="#FFF" opacity="0.8">
-                  <animate attributeName="opacity" values="0.8;0.3;0.8" dur="2.5s" repeatCount="indefinite"/>
+                <circle cx="60" cy="15" r="1.5" fill={colors.secondary} opacity="0.8">
+                  <animate attributeName="cy" from="15" to="100" dur="5s" repeatCount="indefinite" />
+                  <animate attributeName="cx" values="60;62;58;60" dur="5s" repeatCount="indefinite" />
                 </circle>
-                <circle cx="50" cy="5" r="3" fill="#FFF" opacity="0.9">
-                  <animate attributeName="opacity" values="0.5;1;0.5" dur="1.8s" repeatCount="indefinite"/>
+              </>
+            )}
+            {health > 70 && mood === 'energetic' && (
+              <>
+                <circle cx="50" cy="8" r="2" fill="#ffffff99">
+                  <animate attributeName="opacity" values="0;1;0" dur="1.2s" repeatCount="indefinite" />
+                </circle>
+                <circle cx="20" cy="50" r="1.8" fill="#ffffff99">
+                  <animate attributeName="opacity" values="0;1;0" dur="1.6s" repeatCount="indefinite" />
                 </circle>
               </>
             )}

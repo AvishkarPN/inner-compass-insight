@@ -8,6 +8,7 @@ import { useMood } from '@/contexts/MoodContext';
 
 interface MoodEntryCardProps {
   entry: MoodEntry;
+  highlight?: string;
 }
 
 const moodColorMap = {
@@ -20,8 +21,24 @@ const moodColorMap = {
   sad: '#74b9ff', // Fixed to match MoodSelector
 };
 
-const MoodEntryCard: React.FC<MoodEntryCardProps> = ({ entry }) => {
+const MoodEntryCard: React.FC<MoodEntryCardProps> = ({ entry, highlight }) => {
   const { deleteMoodEntry } = useMood();
+  const q = (highlight || '').trim().toLowerCase();
+  const highlightText = (text: string) => {
+    if (!q) return text;
+    const idx = text.toLowerCase().indexOf(q);
+    if (idx === -1) return text;
+    const before = text.slice(0, idx);
+    const match = text.slice(idx, idx + q.length);
+    const after = text.slice(idx + q.length);
+    return (
+      <>
+        {before}
+        <mark className="bg-yellow-200 dark:bg-yellow-700 rounded px-0.5">{match}</mark>
+        {after}
+      </>
+    ) as unknown as string;
+  };
   
   return (
     <Card className="relative overflow-hidden">
@@ -45,7 +62,7 @@ const MoodEntryCard: React.FC<MoodEntryCardProps> = ({ entry }) => {
         </div>
         
         <div className="text-sm mt-2 text-muted-foreground line-clamp-3">
-          {entry.journalText || <em>No journal entry</em>}
+          {entry.journalText ? highlightText(entry.journalText) : <em>No journal entry</em>}
         </div>
       </CardContent>
       

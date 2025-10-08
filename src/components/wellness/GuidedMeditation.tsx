@@ -19,6 +19,7 @@ const GuidedMeditation: React.FC<GuidedMeditationProps> = ({ onClose }) => {
   const [musicVolume, setMusicVolume] = useState([50]);
   const [selectedAmbience, setSelectedAmbience] = useState<'forest' | 'ocean' | 'rain' | 'silence'>('forest');
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [userInteracted, setUserInteracted] = useState(false);
   const totalDuration = 300; // 5 minutes
 
   const meditationSteps = [
@@ -39,15 +40,24 @@ const GuidedMeditation: React.FC<GuidedMeditationProps> = ({ onClose }) => {
     { id: 'silence', name: 'Silence', icon: VolumeX, color: 'bg-purple-100 text-purple-800' }
   ];
 
-  // Create audio context for background music simulation
+  // Map ambience to sample audio URLs (public domain / placeholders)
+  const ambienceSrc: Record<string, string> = {
+    forest: 'https://cdn.pixabay.com/download/audio/2021/08/04/audio_3cfb1f4e2a.mp3?filename=forest-birds-ambient-14375.mp3',
+    ocean: 'https://cdn.pixabay.com/download/audio/2021/10/19/audio_0a675985d2.mp3?filename=ocean-waves-ambient-9875.mp3',
+    rain: 'https://cdn.pixabay.com/download/audio/2022/03/15/audio_2c0c2f9e7b.mp3?filename=gentle-rain-ambient-10885.mp3'
+  };
+
+  // Prepare audio element
   useEffect(() => {
     if (musicEnabled && selectedAmbience !== 'silence') {
-      // In a real app, you would load actual audio files here
-      // For now, we'll simulate with a dummy audio element
       if (!audioRef.current) {
         audioRef.current = new Audio();
         audioRef.current.loop = true;
         audioRef.current.volume = musicVolume[0] / 100;
+      }
+      const src = ambienceSrc[selectedAmbience] || '';
+      if (src) {
+        audioRef.current.src = src;
       }
     }
 
@@ -77,11 +87,10 @@ const GuidedMeditation: React.FC<GuidedMeditationProps> = ({ onClose }) => {
         });
       }, 1000);
 
-      // Start background music
-      if (musicEnabled && selectedAmbience !== 'silence' && audioRef.current) {
+      // Start background music (requires prior user interaction on mobile)
+      if (musicEnabled && selectedAmbience !== 'silence' && audioRef.current && userInteracted) {
         audioRef.current.play().catch(() => {
-          // Handle autoplay restrictions
-          console.log('Autoplay prevented');
+          // Autoplay prevented; will play after user interaction
         });
       }
     } else {
@@ -91,10 +100,24 @@ const GuidedMeditation: React.FC<GuidedMeditationProps> = ({ onClose }) => {
       }
     }
     return () => clearInterval(interval);
-  }, [isPlaying, currentTime, musicEnabled, selectedAmbience]);
+  }, [isPlaying, currentTime, musicEnabled, selectedAmbience, userInteracted]);
 
   const handlePlayPause = () => {
+    setUserInteracted(true);
     setIsPlaying(!isPlaying);
+    // Gentle fade in/out
+    const fade = (target: number) => {
+      if (!audioRef.current) return;
+      const step = (target - audioRef.current.volume) / 10;
+      let i = 0;
+      const id = setInterval(() => {
+        if (!audioRef.current) { clearInterval(id); return; }
+        audioRef.current.volume = Math.max(0, Math.min(1, audioRef.current.volume + step));
+        if (++i >= 10) clearInterval(id);
+      }, 60);
+    };
+    if (!isPlaying && musicEnabled && selectedAmbience !== 'silence') fade(musicVolume[0] / 100);
+    if (isPlaying) fade(0);
   };
 
   const handleReset = () => {
@@ -175,7 +198,8 @@ const GuidedMeditation: React.FC<GuidedMeditationProps> = ({ onClose }) => {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setMusicEnabled(!musicEnabled)}
+              onClick={() => { setUserInteracted(true); setMusicEnabled(!musicEnabled); }}
+              aria-label={musicEnabled ? 'Disable background music' : 'Enable background music'}
             >
               {musicEnabled ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
             </Button>
@@ -193,6 +217,7 @@ const GuidedMeditation: React.FC<GuidedMeditationProps> = ({ onClose }) => {
                 max={100}
                 step={5}
                 className="w-full"
+                aria-label="Music volume"
               />
             </div>
           )}
@@ -203,7 +228,7 @@ const GuidedMeditation: React.FC<GuidedMeditationProps> = ({ onClose }) => {
           <Button onClick={handleReset} variant="outline" size="sm">
             <RotateCcw className="h-4 w-4" />
           </Button>
-          <Button onClick={handlePlayPause} size="lg" className="px-8">
+          <Button onClick={handlePlayPause} size="lg" className="px-8" aria-label={isPlaying ? 'Pause meditation' : 'Start meditation'}>
             {isPlaying ? <Pause className="h-4 w-4 mr-2" /> : <Play className="h-4 w-4 mr-2" />}
             {isPlaying ? 'Pause' : 'Start'}
           </Button>

@@ -116,6 +116,14 @@ export const useMoodGarden = () => {
     setDominantMood(dominant);
   }, [moodEntries]);
 
+  // Trigger gentle re-renders to animate health decay/growth over time (e.g., hourly)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setPlantHealth((h) => h); // noop state update to trigger rerender without changing value
+    }, 60 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, []);
+
   return {
     streak,
     plantHealth,

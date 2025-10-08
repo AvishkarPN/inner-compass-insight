@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useMood } from '@/contexts/MoodContext';
 import MoodEntryCard from '@/components/MoodEntryCard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,14 +9,18 @@ import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
 import { CalendarIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Input } from '@/components/ui/input';
+import { useDebounce } from '@/hooks/useDebounce';
 
 const History = () => {
   const { moodEntries } = useMood();
   const [dateFrom, setDateFrom] = useState<Date>();
   const [dateTo, setDateTo] = useState<Date>();
+  const [query, setQuery] = useState('');
+  const debouncedQuery = useDebounce(query, 250);
   
   // Filter entries by date range if selected
-  const filteredEntries = moodEntries.filter(entry => {
+  const filteredEntries = useMemo(() => moodEntries.filter(entry => {
     const entryDate = new Date(entry.timestamp);
     let includeEntry = true;
     
@@ -31,8 +35,17 @@ const History = () => {
       includeEntry = includeEntry && entryDate <= endOfDay;
     }
     
+    // Text/mood filter
+    const q = debouncedQuery.trim().toLowerCase();
+    if (q) {
+      const matchesMood = entry.mood.toLowerCase().includes(q);
+      const matchesJournal = (entry.journalText || '').toLowerCase().includes(q);
+      const matchesDate = new Date(entry.timestamp).toLocaleDateString().toLowerCase().includes(q);
+      includeEntry = includeEntry && (matchesMood || matchesJournal || matchesDate);
+    }
+
     return includeEntry;
-  });
+  }), [moodEntries, dateFrom, dateTo, debouncedQuery]);
   
   // Sort entries by date (newest first)
   const sortedEntries = [...filteredEntries].sort((a, b) => 
@@ -61,6 +74,17 @@ const History = () => {
         <h1 className="text-xl sm:text-2xl font-bold">Mood History</h1>
         
         <div className="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center w-full sm:w-auto">
+          <div className="w-full sm:w-[220px] lg:w-[260px]">
+            <Input
+              placeholder="Search by mood, text, or date..."
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              aria-label="Search mood history"
+            />
+            {debouncedQuery && (
+              <p className="mt-1 text-xs text-muted-foreground">{filteredEntries.length} entries found</p>
+            )}
+          </div>
           <Popover>
             <PopoverTrigger asChild>
               <Button variant="outline" className="w-full sm:w-[140px] lg:w-[180px] justify-start text-left font-normal text-xs sm:text-sm">
@@ -97,7 +121,7 @@ const History = () => {
             </PopoverContent>
           </Popover>
           
-          {(dateFrom || dateTo) && (
+          {(dateFrom || dateTo || debouncedQuery) && (
             <Button variant="ghost" size="sm" onClick={clearFilters} className="text-xs sm:text-sm">
               Clear
             </Button>
@@ -114,7 +138,7 @@ const History = () => {
             <CardContent className="px-3 sm:px-6">
               <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                 {entries.map(entry => (
-                  <MoodEntryCard key={entry.id} entry={entry} />
+                  <MoodEntryCard key={entry.id} entry={entry} highlight={debouncedQuery} />
                 ))}
               </div>
             </CardContent>

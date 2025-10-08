@@ -23,7 +23,7 @@ const PlantDisplay: React.FC<PlantDisplayProps> = ({ dominantMood, plantSize, pl
 
   return (
     <div className="absolute inset-0 flex justify-center items-end" role="region" aria-label="Mood Garden Plant Display">
-      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 transition-all duration-700 ease-in-out">
+      <div className="absolute bottom-6 sm:bottom-8 left-1/2 -translate-x-1/2 transition-all duration-700 ease-in-out will-change-transform">
         {/* Ambient particles for healthy plants */}
         {plantHealth > 70 && (
           <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
