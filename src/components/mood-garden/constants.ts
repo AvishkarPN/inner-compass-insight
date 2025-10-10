@@ -10,13 +10,13 @@ export const moodEmojis = {
 };
 
 export const moodColors = {
-  happy: '#FEF08A',
-  sad: '#BFDBFE',
-  anxious: '#DDD6FE',
-  calm: '#BBF7D0',
-  energetic: '#FBBF24',
-  angry: '#FCA5A5',
-  peaceful: '#A7F3D0'
+  happy: '#FCD34D',      // Vibrant golden yellow
+  sad: '#60A5FA',        // Soft blue
+  anxious: '#C084FC',    // Purple
+  calm: '#34D399',       // Fresh green
+  energetic: '#FB923C',  // Energetic orange
+  angry: '#F87171',      // Warm red
+  peaceful: '#6EE7B7'    // Mint green
 };
 
 export const moodPlantMap = {

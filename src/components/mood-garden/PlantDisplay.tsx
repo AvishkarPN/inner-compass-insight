@@ -22,11 +22,11 @@ const PlantDisplay: React.FC<PlantDisplayProps> = ({ dominantMood, plantSize, pl
   const plantStage = getPlantStage();
 
   return (
-    <div className="absolute inset-0 flex justify-center items-end" role="region" aria-label="Mood Garden Plant Display">
-      <div className="absolute bottom-6 sm:bottom-8 left-1/2 -translate-x-1/2 transition-all duration-700 ease-in-out will-change-transform">
+    <div className="absolute inset-0 flex justify-center items-end z-10" role="region" aria-label="Mood Garden Plant Display">
+      <div className="absolute bottom-8 sm:bottom-10 left-1/2 -translate-x-1/2 transition-all duration-700 ease-in-out will-change-transform">
         {/* Ambient particles for healthy plants */}
         {plantHealth > 70 && (
-          <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
+          <div className="absolute inset-0 pointer-events-none z-20" aria-hidden="true">
             <span className="absolute -top-12 -left-8 text-2xl animate-float-gentle opacity-60">✨</span>
             <span className="absolute -top-10 right-8 text-xl animate-float opacity-60 delay-1000">✨</span>
             <span className="absolute -top-14 left-0 text-lg animate-float-gentle opacity-50 delay-2000">🌟</span>
@@ -35,9 +35,9 @@ const PlantDisplay: React.FC<PlantDisplayProps> = ({ dominantMood, plantSize, pl
         
         {/* SVG Plant */}
         <div 
-          className="animate-float-gentle"
+          className="animate-float-gentle relative z-10"
           style={{
-            filter: plantHealth > 80 ? 'drop-shadow(0 8px 16px rgba(0, 0, 0, 0.15))' : 'none',
+            filter: plantHealth > 80 ? 'drop-shadow(0 10px 20px rgba(0, 0, 0, 0.2))' : 'drop-shadow(0 5px 10px rgba(0, 0, 0, 0.1))',
           }}
         >
           <PlantSVG 
