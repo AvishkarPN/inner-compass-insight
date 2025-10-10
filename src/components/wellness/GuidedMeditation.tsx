@@ -19,7 +19,9 @@ const GuidedMeditation: React.FC<GuidedMeditationProps> = ({ onClose }) => {
   const [musicVolume, setMusicVolume] = useState([50]);
   const [selectedAmbience, setSelectedAmbience] = useState<'forest' | 'ocean' | 'rain' | 'silence'>('forest');
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const voiceRef = useRef<SpeechSynthesisUtterance | null>(null);
   const [userInteracted, setUserInteracted] = useState(false);
+  const [voiceEnabled, setVoiceEnabled] = useState(true);
   const totalDuration = 300; // 5 minutes
 
   const meditationSteps = [
@@ -75,6 +77,31 @@ const GuidedMeditation: React.FC<GuidedMeditationProps> = ({ onClose }) => {
     }
   }, [musicVolume]);
 
+  // Voice guidance effect
+  useEffect(() => {
+    if (voiceEnabled && isPlaying && userInteracted) {
+      const currentStepData = meditationSteps[currentStep];
+      if (currentStepData && currentTime === currentStepData.time) {
+        // Speak the instruction
+        if ('speechSynthesis' in window) {
+          window.speechSynthesis.cancel(); // Cancel any ongoing speech
+          const utterance = new SpeechSynthesisUtterance(currentStepData.instruction);
+          utterance.rate = 0.9;
+          utterance.pitch = 1;
+          utterance.volume = 0.8;
+          voiceRef.current = utterance;
+          window.speechSynthesis.speak(utterance);
+        }
+      }
+    }
+    
+    return () => {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+    };
+  }, [currentStep, currentTime, isPlaying, voiceEnabled, userInteracted]);
+
   useEffect(() => {
     let interval: NodeJS.Timeout;
     if (isPlaying && currentTime < totalDuration) {
@@ -97,6 +124,10 @@ const GuidedMeditation: React.FC<GuidedMeditationProps> = ({ onClose }) => {
       // Pause background music
       if (audioRef.current) {
         audioRef.current.pause();
+      }
+      // Stop voice guidance
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
       }
     }
     return () => clearInterval(interval);
@@ -127,6 +158,9 @@ const GuidedMeditation: React.FC<GuidedMeditationProps> = ({ onClose }) => {
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
+    }
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
     }
   };
 
@@ -188,9 +222,24 @@ const GuidedMeditation: React.FC<GuidedMeditationProps> = ({ onClose }) => {
           </div>
         </div>
 
-        {/* Music Controls */}
-        <div className="space-y-4 p-4 bg-gray-50 rounded-lg">
+        {/* Audio Controls */}
+        <div className="space-y-4 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
           <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Volume2 className="h-4 w-4" />
+              <span className="text-sm font-medium">Voice Guidance</span>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => { setUserInteracted(true); setVoiceEnabled(!voiceEnabled); }}
+              aria-label={voiceEnabled ? 'Disable voice guidance' : 'Enable voice guidance'}
+            >
+              {voiceEnabled ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
+            </Button>
+          </div>
+          
+          <div className="flex items-center justify-between pt-2 border-t border-border">
             <div className="flex items-center gap-2">
               <Music className="h-4 w-4" />
               <span className="text-sm font-medium">Background Music</span>
