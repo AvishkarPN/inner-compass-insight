@@ -17,7 +17,7 @@ const GuidedMeditation: React.FC<GuidedMeditationProps> = ({ onClose }) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [musicEnabled, setMusicEnabled] = useState(true);
   const [musicVolume, setMusicVolume] = useState([50]);
-  const [selectedAmbience, setSelectedAmbience] = useState<'forest' | 'ocean' | 'rain' | 'silence'>('forest');
+  const [selectedAmbience, setSelectedAmbience] = useState<'forest' | 'ocean' | 'rain' | 'whitenoise'>('forest');
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [userInteracted, setUserInteracted] = useState(false);
   const totalDuration = 300; // 5 minutes
@@ -37,19 +37,20 @@ const GuidedMeditation: React.FC<GuidedMeditationProps> = ({ onClose }) => {
     { id: 'forest', name: 'Forest', icon: Leaf, color: 'bg-green-100 text-green-800' },
     { id: 'ocean', name: 'Ocean', icon: Waves, color: 'bg-blue-100 text-blue-800' },
     { id: 'rain', name: 'Rain', icon: Zap, color: 'bg-gray-100 text-gray-800' },
-    { id: 'silence', name: 'Silence', icon: VolumeX, color: 'bg-purple-100 text-purple-800' }
+    { id: 'whitenoise', name: 'White Noise', icon: VolumeX, color: 'bg-gray-100 text-gray-800' }
   ];
 
-  // Map ambience to sample audio URLs (public domain / placeholders)
+  // Map ambience to audio sources (external for now - can be replaced with local files)
   const ambienceSrc: Record<string, string> = {
-    forest: 'https://cdn.pixabay.com/download/audio/2021/08/04/audio_3cfb1f4e2a.mp3?filename=forest-birds-ambient-14375.mp3',
-    ocean: 'https://cdn.pixabay.com/download/audio/2021/10/19/audio_0a675985d2.mp3?filename=ocean-waves-ambient-9875.mp3',
-    rain: 'https://cdn.pixabay.com/download/audio/2022/03/15/audio_2c0c2f9e7b.mp3?filename=gentle-rain-ambient-10885.mp3'
+    forest: 'https://assets.mixkit.co/active_storage/sfx/2459/2459-preview.mp3',
+    ocean: 'https://assets.mixkit.co/active_storage/sfx/2487/2487-preview.mp3',
+    rain: 'https://assets.mixkit.co/active_storage/sfx/2484/2484-preview.mp3',
+    whitenoise: '/audio/whitenoise.mp3'
   };
 
   // Prepare audio element
   useEffect(() => {
-    if (musicEnabled && selectedAmbience !== 'silence') {
+    if (musicEnabled) {
       if (!audioRef.current) {
         audioRef.current = new Audio();
         audioRef.current.loop = true;
@@ -88,7 +89,7 @@ const GuidedMeditation: React.FC<GuidedMeditationProps> = ({ onClose }) => {
       }, 1000);
 
       // Start background music (requires prior user interaction on mobile)
-      if (musicEnabled && selectedAmbience !== 'silence' && audioRef.current && userInteracted) {
+      if (musicEnabled && audioRef.current && userInteracted) {
         audioRef.current.play().catch(() => {
           // Autoplay prevented; will play after user interaction
         });
@@ -116,7 +117,7 @@ const GuidedMeditation: React.FC<GuidedMeditationProps> = ({ onClose }) => {
         if (++i >= 10) clearInterval(id);
       }, 60);
     };
-    if (!isPlaying && musicEnabled && selectedAmbience !== 'silence') fade(musicVolume[0] / 100);
+    if (!isPlaying && musicEnabled) fade(musicVolume[0] / 100);
     if (isPlaying) fade(0);
   };
 
@@ -205,7 +206,7 @@ const GuidedMeditation: React.FC<GuidedMeditationProps> = ({ onClose }) => {
             </Button>
           </div>
           
-          {musicEnabled && selectedAmbience !== 'silence' && (
+          {musicEnabled && (
             <div className="space-y-2">
               <div className="flex items-center justify-between text-sm">
                 <span>Volume</span>

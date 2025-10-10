@@ -44,10 +44,8 @@ const PlantStatusInfo: React.FC<PlantStatusInfoProps> = ({
   };
 
   return (
-    <div className="absolute inset-0 flex justify-center items-end pb-2" role="region" aria-label="Mood Plant Status">
-      <div
-        className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-lg p-2.5 sm:p-3 shadow-sm border border-border/50 w-[calc(100%-1rem)] max-w-sm"
-      >
+    <div className="w-full" role="region" aria-label="Mood Plant Status">
+      <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-lg p-2.5 sm:p-3 shadow-sm border border-border/50">
         <div className="flex justify-between items-center text-xs sm:text-sm mb-1.5 sm:mb-2">
           <div className="flex items-center gap-1.5 sm:gap-2">
             <span 

@@ -28,16 +28,9 @@ const MoodGarden = () => {
   }
   
   return (
-    <div className="relative h-full flex flex-col bg-gradient-to-b from-amber-50/30 to-amber-100/30 dark:from-amber-950/30 dark:to-amber-900/30 rounded-lg p-4">
-      <PlantStatusInfo 
-        streak={streak}
-        plantStage={plantStage}
-        plantHealth={plantHealth}
-        lastEntryDate={lastEntryDate}
-      />
-      
+    <div className="h-full flex flex-col bg-gradient-to-b from-amber-50/30 to-amber-100/30 dark:from-amber-950/30 dark:to-amber-900/30 rounded-lg p-4 gap-3">
       {/* Garden area */}
-      <div className="flex-1 relative bg-white/40 dark:bg-gray-800/40 rounded-lg overflow-hidden shadow-inner">
+      <div className="flex-1 relative bg-white/40 dark:bg-gray-800/40 rounded-lg overflow-hidden shadow-inner min-h-0">
         {/* Garden ground */}
         <div className="absolute bottom-0 left-0 right-0 h-1/4 bg-gradient-to-t from-amber-200/70 to-transparent dark:from-amber-900/70 rounded-b-lg pointer-events-none" />
         
@@ -48,6 +41,14 @@ const MoodGarden = () => {
           streak={streak}
         />
       </div>
+      
+      {/* Status Info - Now below the garden */}
+      <PlantStatusInfo 
+        streak={streak}
+        plantStage={plantStage}
+        plantHealth={plantHealth}
+        lastEntryDate={lastEntryDate}
+      />
     </div>
   );
 };
