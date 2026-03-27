@@ -22,8 +22,8 @@ const PlantDisplay: React.FC<PlantDisplayProps> = ({ dominantMood, plantSize, pl
   const plantStage = getPlantStage();
 
   return (
-    <div className="absolute inset-0 flex justify-center items-end z-10" role="region" aria-label="Mood Garden Plant Display">
-      <div className="absolute bottom-8 sm:bottom-10 left-1/2 -translate-x-1/2 transition-all duration-700 ease-in-out will-change-transform">
+    <div className="absolute inset-0 flex justify-center items-end z-10 pointer-events-none" role="region" aria-label="Mood Garden Plant Display">
+      <div className="absolute bottom-[40px] left-1/2 -translate-x-1/2 transition-all duration-700 ease-in-out will-change-transform">
         {/* Ambient particles for healthy plants */}
         {plantHealth > 70 && (
           <div className="absolute inset-0 pointer-events-none z-20" aria-hidden="true">
@@ -37,14 +37,15 @@ const PlantDisplay: React.FC<PlantDisplayProps> = ({ dominantMood, plantSize, pl
         <div 
           className="animate-float-gentle relative z-10"
           style={{
-            filter: plantHealth > 80 ? 'drop-shadow(0 10px 20px rgba(0, 0, 0, 0.2))' : 'drop-shadow(0 5px 10px rgba(0, 0, 0, 0.1))',
+            transformOrigin: 'bottom center',
+            filter: plantHealth > 80 ? 'drop-shadow(0 15px 25px rgba(0, 0, 0, 0.25))' : 'drop-shadow(0 8px 15px rgba(0, 0, 0, 0.15))',
           }}
         >
           <PlantSVG 
             mood={dominantMood}
             stage={plantStage}
             health={plantHealth}
-            size={plantSize * 2.5}
+            size={Math.max(140, plantSize * 3)}
           />
         </div>
       </div>

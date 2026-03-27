@@ -1,6 +1,6 @@
 import React from 'react';
 import { MoodType } from '@/types/mood';
-import { moodColors as baseMoodColors } from './constants';
+import { MOOD_COLORS } from '@/constants/moodColors';
 
 interface PlantSVGProps {
   mood: MoodType;
@@ -11,10 +11,13 @@ interface PlantSVGProps {
 
 const PlantSVG: React.FC<PlantSVGProps> = ({ mood, stage, health, size }) => {
   const baseSize = size;
+  // A9: Clamp stage to [0, 4] to prevent any out-of-range renders
+  const safeStage = Math.max(0, Math.min(4, Math.floor(stage)));
   const healthScale = Math.max(0.5, health / 100);
   
   // Build a vibrant palette from base mood color
-  const base = baseMoodColors[mood];
+  // A2: Use single source of truth colors
+  const base = MOOD_COLORS[mood] ?? '#10b981';
   const lighten = (hex: string, amount: number) => {
     const clamp = (n: number) => Math.max(0, Math.min(255, n));
     const num = parseInt(hex.replace('#', ''), 16);
@@ -39,8 +42,8 @@ const PlantSVG: React.FC<PlantSVGProps> = ({ mood, stage, health, size }) => {
   const opacity = 0.7 + (healthScale * 0.3);
   
   // Different plant stages
-  const renderPlant = () => {
-    switch (stage) {
+  const renderPlant = (stageOverride?: number) => {
+    switch (stageOverride !== undefined ? stageOverride : safeStage) {
       case 0: // Seed with early sprout
         return (
           <g transform={`scale(${healthScale})`} opacity={opacity}>
@@ -347,7 +350,16 @@ const PlantSVG: React.FC<PlantSVGProps> = ({ mood, stage, health, size }) => {
         );
       
       default:
-        return renderPlant();
+        // A9 FIX: Was calling renderPlant() recursively — infinite loop when stage is
+        // unexpected. Now renders stage 0 directly as a safe fallback.
+        return (
+          <g transform={`scale(${healthScale})`} opacity={opacity}>
+            <ellipse cx="50" cy="90" rx="28" ry="9" fill="#6B5744" opacity="0.8"/>
+            <ellipse cx="50" cy="89" rx="25" ry="7" fill="#8B7355" opacity="0.7"/>
+            <ellipse cx="50" cy="91" rx="4" ry="3" fill="#4A3C2A"/>
+            <path d="M 50 88 Q 49 84 50 80" stroke={colors.stem} strokeWidth="2.5" fill="none" strokeLinecap="round"/>
+          </g>
+        );
     }
   };
 
@@ -360,7 +372,7 @@ const PlantSVG: React.FC<PlantSVGProps> = ({ mood, stage, health, size }) => {
       style={{
         filter: health > 80 ? `drop-shadow(0 0 10px ${colors.primary}40)` : 'none',
       }}
-      aria-label={`${mood} mood plant at stage ${stage} with ${health}% health`}
+      aria-label={`${mood} mood plant at stage ${safeStage} with ${health}% health`}
       role="img"
     >
       {renderPlant()}

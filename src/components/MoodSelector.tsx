@@ -1,46 +1,21 @@
 
 import React, { useState } from 'react';
-import { MoodType, MoodOption } from '../types/mood';
+import { MoodType } from '../types/mood';
+import { MOOD_COLORS, MOOD_LABELS, MOOD_EMOJIS } from '@/constants/moodColors';
 import { cn } from '@/lib/utils';
 
-const moodOptions: MoodOption[] = [
-  {
-    label: 'Angry',
-    value: 'angry',
-    color: '#ff6b6b',
-    description: 'Feeling frustrated or upset'
-  },
-  {
-    label: 'Energetic',
-    value: 'energetic',
-    color: '#ffa502',
-    description: 'Full of energy and excitement'
-  },
-  {
-    label: 'Happy',
-    value: 'happy',
-    color: '#feca57',
-    description: 'Joyful and content'
-  },
-  {
-    label: 'Sad',
-    value: 'sad',
-    color: '#74b9ff',
-    description: 'Feeling down or melancholic'
-  },
-  {
-    label: 'Calm',
-    value: 'calm',
-    color: '#3498db',
-    description: 'Relaxed and at ease'
-  },
-  {
-    label: 'Anxious',
-    value: 'anxious',
-    color: '#9b59b6',
-    description: 'Worried or nervous'
-  }
-];
+// B2: Mood options now built from the single-source-of-truth constants
+const moodDescriptions: Record<MoodType, string> = {
+  angry:     'Feeling frustrated or upset',
+  energetic: 'Full of energy and excitement',
+  happy:     'Joyful and content',
+  sad:       'Feeling down or melancholic',
+  calm:      'Relaxed and at ease',
+  anxious:   'Worried or nervous',
+};
+
+// Order the moods in a sensible visual sequence
+const MOOD_ORDER: MoodType[] = ['angry', 'energetic', 'happy', 'sad', 'calm', 'anxious'];
 
 interface MoodSelectorProps {
   onMoodSelect: (mood: MoodType) => void;
@@ -48,54 +23,60 @@ interface MoodSelectorProps {
 }
 
 export default function MoodSelector({ onMoodSelect, selectedMood }: MoodSelectorProps) {
-  const [hoverMood, setHoverMood] = useState<MoodOption | null>(null);
-  
+  const [hoverMood, setHoverMood] = useState<MoodType | null>(null);
+
   const handleMoodClick = (mood: MoodType) => {
-    // More subtle haptic feedback
     if ('vibrate' in navigator) {
-      navigator.vibrate(30); // Shorter vibration for subtler feedback
+      navigator.vibrate(30);
     }
-    
     onMoodSelect(mood);
   };
-  
+
   return (
     <div className="w-full">
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3">
-        {moodOptions.map((mood) => (
+        {MOOD_ORDER.map((mood) => (
           <button
-            key={mood.value}
+            key={mood}
+            aria-label={MOOD_LABELS[mood]}
+            aria-pressed={selectedMood === mood}
             className={cn(
               "rounded-xl p-3 sm:p-4 h-20 sm:h-24 flex flex-col items-center justify-center gap-1 sm:gap-2",
-              "transition-all duration-300 ease-in-out", // Smoother transition
-              selectedMood === mood.value 
-                ? "ring-2 ring-offset-1 ring-offset-background scale-[1.02] shadow-md" // More subtle selected state
-                : "hover:scale-[1.02] shadow hover:shadow-md", // More subtle hover effect
-              "focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-offset-background",
+              "transition-all duration-300 ease-in-out",
+              selectedMood === mood
+                ? "ring-2 ring-offset-2 ring-offset-background scale-[1.05] shadow-lg"
+                : "hover:scale-[1.03] shadow hover:shadow-md",
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
             )}
-            style={{ 
-              backgroundColor: mood.color,
-              opacity: selectedMood && selectedMood !== mood.value ? 0.85 : 1, // Subtle dimming of unselected items
+            style={{
+              backgroundColor: MOOD_COLORS[mood],
+              opacity: selectedMood && selectedMood !== mood ? 0.8 : 1,
             }}
             onMouseEnter={() => setHoverMood(mood)}
             onMouseLeave={() => setHoverMood(null)}
-            onClick={() => handleMoodClick(mood.value)}
+            onClick={() => handleMoodClick(mood)}
           >
-            <span className="font-semibold text-white drop-shadow-sm text-sm sm:text-base">{mood.label}</span>
+            {/* B2: Emoji above label, aria-hidden since button has aria-label */}
+            <span className="text-xl sm:text-2xl" aria-hidden="true">
+              {MOOD_EMOJIS[mood]}
+            </span>
+            <span className="font-semibold text-white drop-shadow-sm text-xs sm:text-sm">
+              {MOOD_LABELS[mood]}
+            </span>
           </button>
         ))}
       </div>
-      
-      {/* Fixed height container for mood descriptions to prevent layout shift */}
+
+      {/* Fixed height container for mood descriptions */}
       <div className="h-6 sm:h-8 mt-2 sm:mt-3">
-        <div 
+        <div
           className={cn(
             "text-xs sm:text-sm text-muted-foreground text-center sm:text-left",
             "transition-opacity duration-300",
             hoverMood ? "opacity-100" : "opacity-0"
           )}
         >
-          {hoverMood?.description || ""}
+          {hoverMood ? moodDescriptions[hoverMood] : ""}
         </div>
       </div>
     </div>

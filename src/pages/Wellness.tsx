@@ -1,16 +1,27 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
-import { Heart, Brain, Sparkles, Trophy, Phone, MessageCircle, Calendar, Clock, Target, Award, Zap, Shield } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
+import { Slider } from '@/components/ui/slider';
+import { Heart, Brain, Sparkles, Trophy, Phone, MessageCircle, Calendar, Clock, Target, Award, Zap, Shield, Bell, BellOff } from 'lucide-react';
 import { useMood } from '@/contexts/MoodContext';
 import GratitudeJournal from '@/components/wellness/GratitudeJournal';
 import BreathingExercise from '@/components/wellness/BreathingExercise';
 import GuidedMeditation from '@/components/wellness/GuidedMeditation';
 import EducationalResource from '@/components/wellness/EducationalResource';
+import { calculateStreak } from '@/utils/streakUtils';
+import {
+  requestNotificationPermission,
+  showTestNotification,
+  scheduleLocalReminder,
+  loadNotificationConfig,
+  saveNotificationConfig,
+} from '@/utils/pushNotifications';
 
 const achievements = [
   {
@@ -151,43 +162,8 @@ const Wellness = () => {
   const totalEntries = moodEntries.length;
   const positiveEntries = moodEntries.filter(entry => entry.mood === 'happy' || entry.mood === 'energetic').length;
 
-  const calculateCurrentStreak = () => {
-    if (moodEntries.length === 0) return 0;
-
-    let streak = 1;
-    let currentDate = new Date();
-    currentDate.setHours(0, 0, 0, 0);
-
-    // Sort entries by timestamp in descending order
-    const sortedEntries = [...moodEntries].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-
-    let previousEntryDate = new Date(sortedEntries[0].timestamp);
-    previousEntryDate.setHours(0, 0, 0, 0);
-
-    // If the most recent entry isn't today, streak is 0
-    if (previousEntryDate.getTime() !== currentDate.getTime()) {
-      return 0;
-    }
-
-    for (let i = 1; i < sortedEntries.length; i++) {
-      const entryDate = new Date(sortedEntries[i].timestamp);
-      entryDate.setHours(0, 0, 0, 0);
-
-      const expectedDate = new Date(previousEntryDate);
-      expectedDate.setDate(previousEntryDate.getDate() - 1);
-
-      if (entryDate.getTime() === expectedDate.getTime()) {
-        streak++;
-        previousEntryDate = entryDate;
-      } else {
-        break; // Streak broken
-      }
-    }
-
-    return streak;
-  };
-
-  const currentStreak = calculateCurrentStreak();
+  // A7: Use unified streak calculation from streakUtils
+  const currentStreak = calculateStreak(moodEntries);
 
   const calculateConsistencyPercentage = () => {
     if (moodEntries.length === 0) return 0;
@@ -338,7 +314,135 @@ const Wellness = () => {
           </Tabs>
         </CardContent>
       </Card>
+      {/* Feature 8: Daily Reminder / Push Notification Settings */}
+      <PushNotificationCard />
     </div>
+  );
+};
+
+// --- Push Notification Card ---
+const PushNotificationCard: React.FC = () => {
+  const [config, setConfig] = useState(loadNotificationConfig);
+  const [permission, setPermission] = useState<NotificationPermission>(
+    typeof Notification !== 'undefined' ? Notification.permission : 'denied'
+  );
+  const [cleanupFn, setCleanupFn] = useState<(() => void) | null>(null);
+  const notifSupported = typeof window !== 'undefined' && 'Notification' in window;
+
+  useEffect(() => {
+    return () => { cleanupFn?.(); };
+  }, [cleanupFn]);
+
+  const handleToggle = async (checked: boolean) => {
+    if (checked && permission !== 'granted') {
+      const result = await requestNotificationPermission();
+      setPermission(result);
+      if (result !== 'granted') return;
+    }
+    const next = { ...config, enabled: checked };
+    setConfig(next);
+    saveNotificationConfig(next);
+    if (checked) {
+      cleanupFn?.();
+      setCleanupFn(() => scheduleLocalReminder(next.hour));
+    } else {
+      cleanupFn?.();
+      setCleanupFn(null);
+    }
+  };
+
+  const handleHourChange = (val: number[]) => {
+    const next = { ...config, hour: val[0] };
+    setConfig(next);
+    saveNotificationConfig(next);
+    if (config.enabled) {
+      cleanupFn?.();
+      setCleanupFn(() => scheduleLocalReminder(next.hour));
+    }
+  };
+
+  const formatHour = (h: number) => {
+    const date = new Date();
+    date.setHours(h, 0, 0, 0);
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  };
+
+  return (
+    <Card>
+      <CardHeader className="pb-3">
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Bell size={18} aria-hidden="true" />
+          Daily Check-in Reminder
+          {!notifSupported && (
+            <Badge variant="outline" className="ml-auto text-xs">Not supported in this browser</Badge>
+          )}
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-5">
+        {notifSupported ? (
+          <>
+            <div className="flex items-center justify-between">
+              <div>
+                <Label htmlFor="notif-toggle" className="font-medium">
+                  {config.enabled ? 'Reminder ON' : 'Reminder OFF'}
+                </Label>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {permission === 'denied'
+                    ? 'Notifications are blocked in your browser settings.'
+                    : config.enabled
+                    ? `You'll be reminded daily at ${formatHour(config.hour)}`
+                    : 'Enable to get a daily check-in nudge.'}
+                </p>
+              </div>
+              <Switch
+                id="notif-toggle"
+                checked={config.enabled}
+                onCheckedChange={handleToggle}
+                disabled={permission === 'denied'}
+                aria-label="Toggle daily reminder"
+              />
+            </div>
+
+            {config.enabled && (
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span>Reminder time</span>
+                  <span className="font-medium">{formatHour(config.hour)}</span>
+                </div>
+                <Slider
+                  min={6}
+                  max={23}
+                  step={1}
+                  value={[config.hour]}
+                  onValueChange={handleHourChange}
+                  aria-label="Reminder hour"
+                />
+                <div className="flex justify-between text-xs text-muted-foreground">
+                  <span>6:00 AM</span>
+                  <span>11:00 PM</span>
+                </div>
+              </div>
+            )}
+
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-2"
+              disabled={permission !== 'granted'}
+              onClick={showTestNotification}
+              aria-label="Send a test notification now"
+            >
+              <Bell size={14} aria-hidden="true" />
+              Send test notification
+            </Button>
+          </>
+        ) : (
+          <p className="text-sm text-muted-foreground">
+            Your browser doesn't support notifications. Try Chrome or Edge for daily reminders.
+          </p>
+        )}
+      </CardContent>
+    </Card>
   );
 };
 

@@ -23,18 +23,20 @@ const History = () => {
   const filteredEntries = useMemo(() => moodEntries.filter(entry => {
     const entryDate = new Date(entry.timestamp);
     let includeEntry = true;
-    
+
     if (dateFrom) {
-      dateFrom.setHours(0, 0, 0, 0);
-      includeEntry = includeEntry && entryDate >= dateFrom;
+      // A6 FIX: Avoid mutating the Date state object — create a copy first
+      const d = new Date(dateFrom);
+      d.setHours(0, 0, 0, 0);
+      includeEntry = includeEntry && entryDate >= d;
     }
-    
+
     if (dateTo) {
       const endOfDay = new Date(dateTo);
       endOfDay.setHours(23, 59, 59, 999);
       includeEntry = includeEntry && entryDate <= endOfDay;
     }
-    
+
     // Text/mood filter
     const q = debouncedQuery.trim().toLowerCase();
     if (q) {
@@ -63,9 +65,11 @@ const History = () => {
     entriesByDate[dateStr].push(entry);
   });
   
+  // B10 #38 FIX: Clear resets ALL filters — dates AND text search
   const clearFilters = () => {
     setDateFrom(undefined);
     setDateTo(undefined);
+    setQuery('');
   };
   
   return (

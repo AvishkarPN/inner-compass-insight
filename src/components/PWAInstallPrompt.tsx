@@ -142,7 +142,7 @@ const PWAInstallPrompt = () => {
     <Card className="fixed bottom-4 left-4 right-4 z-[9998] mx-auto max-w-sm border-primary bg-background shadow-xl md:left-auto md:right-4 md:mx-0 animate-fade-in">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-sm">Install Mood Journal</CardTitle>
+          <CardTitle className="text-sm">Install Mind Garden</CardTitle>
           <Button
             variant="ghost"
             size="sm"

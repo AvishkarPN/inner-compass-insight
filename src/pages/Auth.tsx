@@ -6,7 +6,8 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Label } from '@/components/ui/label';
-import { Calendar } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
+import { Calendar, ShieldCheck } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 
@@ -25,6 +26,25 @@ const Auth = () => {
       navigate('/');
     }
   }, [user, navigate]);
+
+  // Password strength logic
+  const calculateStrength = (pwd: string) => {
+    let score = 0;
+    if (!pwd) return { score: 0, color: 'bg-muted', label: '' };
+    if (pwd.length >= 8) score += 25;
+    if (pwd.match(/[A-Z]/)) score += 25;
+    if (pwd.match(/[0-9]/)) score += 25;
+    if (pwd.match(/[^A-Za-z0-9]/)) score += 25;
+    
+    let color = 'bg-red-500';
+    let label = 'Weak';
+    if (score >= 50) { color = 'bg-yellow-500'; label = 'Fair'; }
+    if (score >= 75) { color = 'bg-emerald-500'; label = 'Strong'; }
+
+    return { score, color, label };
+  };
+
+  const strength = calculateStrength(signUpData.password);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,7 +75,7 @@ const Auth = () => {
           <div className="bg-primary/10 p-3 rounded-full mr-3">
             <Calendar className="h-8 w-8 text-primary" />
           </div>
-          <h1 className="text-3xl font-bold">Mood Journal</h1>
+          <h1 className="text-3xl font-bold">Mind Garden</h1>
         </div>
 
         <Card>
@@ -132,8 +152,28 @@ const Auth = () => {
                       onChange={(e) => setSignUpData(prev => ({ ...prev, password: e.target.value }))}
                       required
                     />
+                    {/* Feature: Password strength indicator */}
+                    {signUpData.password && (
+                      <div className="pt-2 space-y-1">
+                        <div className="flex justify-between items-center text-xs">
+                          <span className="text-muted-foreground flex items-center gap-1">
+                            <ShieldCheck size={12} className={strength.score >= 75 ? 'text-emerald-500' : 'text-muted-foreground'} />
+                            Strength: <span className="font-medium">{strength.label}</span>
+                          </span>
+                        </div>
+                        <div className="h-1.5 w-full bg-secondary rounded-full overflow-hidden">
+                          <div 
+                            className={`h-full transition-all duration-300 ${strength.color}`} 
+                            style={{ width: `${strength.score}%` }} 
+                          />
+                        </div>
+                        <p className="text-[10px] text-muted-foreground">
+                          Try using 8+ characters with a mix of numbers, symbols, and capitals.
+                        </p>
+                      </div>
+                    )}
                   </div>
-                  <Button type="submit" className="w-full" disabled={loading}>
+                  <Button type="submit" className="w-full" disabled={loading || strength.score < 25}>
                     {loading ? 'Creating Account...' : 'Sign Up'}
                   </Button>
                 </form>

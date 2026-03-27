@@ -1,8 +1,8 @@
 
 {
-  "name": "Mood Journal",
-  "short_name": "Mood Journal",
-  "description": "Track your emotional well-being with Mood Journal",
+  "name": "Mind Garden",
+  "short_name": "Mind Garden",
+  "description": "Track your emotional well-being with Mind Garden",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",

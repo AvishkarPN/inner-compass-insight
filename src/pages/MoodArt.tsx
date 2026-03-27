@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useMood } from '@/contexts/MoodContext';
 import { MoodEntry } from '@/types/mood';
 import MoodCanvas from '@/components/MoodCanvas';
@@ -6,11 +6,15 @@ import MoodInsights from '@/components/MoodInsights';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
-import { Share2, Download, Calendar } from 'lucide-react';
+import { Download, Calendar } from 'lucide-react';
+import { useToast } from '@/components/ui/use-toast';
+import SocialShare from '@/components/SocialShare';
 
 const MoodArt = () => {
   const { moodEntries } = useMood();
+  const { toast } = useToast();
   const [timeFrame, setTimeFrame] = useState<'day' | 'week' | 'month' | 'all'>('week');
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   
   // Filter entries based on selected timeframe
   const getFilteredEntries = (): MoodEntry[] => {
@@ -65,7 +69,7 @@ const MoodArt = () => {
     link.click();
   };
   
-  // Handle share functionality
+  // Handle share functionality — #30: use toast() instead of alert()
   const handleShare = () => {
     if (navigator.share) {
       navigator.share({
@@ -76,7 +80,18 @@ const MoodArt = () => {
         console.log('Error sharing:', err);
       });
     } else {
-      alert("Sharing is not supported in your browser. You can download the image instead.");
+      // Clipboard copy fallback
+      navigator.clipboard.writeText(window.location.href).then(() => {
+        toast({
+          title: 'Link copied!',
+          description: 'The page URL has been copied to your clipboard.',
+        });
+      }).catch(() => {
+        toast({
+          title: 'Sharing not supported',
+          description: 'Download the image and share it manually.',
+        });
+      });
     }
   };
   
@@ -117,15 +132,17 @@ const MoodArt = () => {
                 <MoodCanvas entries={filteredEntries} width={600} height={400} />
               </div>
               
-              <div className="flex justify-center gap-4">
+              <div className="flex justify-center gap-4 flex-wrap">
                 <Button onClick={handleDownload} variant="outline" className="flex items-center gap-2">
-                  <Download className="w-4 h-4" />
+                  <Download className="w-4 h-4" aria-hidden="true" />
                   Download
                 </Button>
-                <Button onClick={handleShare} variant="outline" className="flex items-center gap-2">
-                  <Share2 className="w-4 h-4" />
-                  Share
-                </Button>
+                <SocialShare
+                  title="My Mood Canvas"
+                  text={`Check out my mood canvas for ${timePeriod}!`}
+                  canvasRef={canvasRef}
+                  label="Share"
+                />
               </div>
             </>
           )}

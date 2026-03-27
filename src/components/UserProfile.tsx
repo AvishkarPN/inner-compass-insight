@@ -20,7 +20,7 @@ const UserProfile = () => {
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-muted-foreground">
-            Create an account to sync your data across devices and never lose your mood journal.
+            Create an account to sync your data across devices and never lose your mind garden.
           </p>
           <div className="flex gap-2">
             <Button asChild className="flex-1">

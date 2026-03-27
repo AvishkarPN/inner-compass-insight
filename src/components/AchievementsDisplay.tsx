@@ -6,45 +6,10 @@ import { Badge } from '@/components/ui/badge';
 import { useMood } from '@/contexts/MoodContext';
 import { achievements } from '@/components/mood-garden/constants';
 import { CheckCircle, Circle } from 'lucide-react';
+import { calculateStreak } from '@/utils/streakUtils';
 
 const AchievementsDisplay: React.FC = () => {
   const { moodEntries } = useMood();
-  
-  // Calculate current streak
-  const calculateStreak = () => {
-    if (!moodEntries.length) return 0;
-    
-    const sortedEntries = [...moodEntries].sort((a, b) => 
-      new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-    );
-    
-    let currentStreak = 0;
-    let previousDate: Date | null = null;
-    
-    for (const entry of sortedEntries) {
-      const entryDate = new Date(entry.timestamp);
-      entryDate.setHours(0, 0, 0, 0);
-      
-      if (!previousDate) {
-        currentStreak = 1;
-        previousDate = entryDate;
-        continue;
-      }
-      
-      const diffDays = Math.floor((previousDate.getTime() - entryDate.getTime()) / (1000 * 60 * 60 * 24));
-      
-      if (diffDays === 1) {
-        currentStreak++;
-        previousDate = entryDate;
-      } else if (diffDays > 1) {
-        break;
-      } else {
-        previousDate = entryDate;
-      }
-    }
-    
-    return currentStreak;
-  };
   
   // Calculate unique moods used
   const calculateUniqueMoods = () => {
@@ -62,17 +27,24 @@ const AchievementsDisplay: React.FC = () => {
   };
   
   const totalEntries = moodEntries.length;
-  const currentStreak = calculateStreak();
+  // A10 + A21: Use unified streak calculation from streakUtils
+  const currentStreak = calculateStreak(moodEntries);
   const uniqueMoods = calculateUniqueMoods();
   const moodCounts = calculateMoodCounts();
   
   const getProgress = (achievement: any): number => {
     const isCompleted = achievement.requirement(totalEntries, currentStreak, uniqueMoods, moodCounts);
-    
+
     if (isCompleted) {
       return 100;
     }
-    
+
+    // A10 FIX: 'first-step' has no digit in description — parseInt gives 0, causing 0/0.
+    // Handle it explicitly: progress is based on totalEntries toward 1.
+    if (achievement.id === 'first-step') {
+      return Math.min(totalEntries / 1 * 100, 100);
+    }
+
     // Handle mood-specific achievements
     if (achievement.id === 'happy-gardener') {
       return Math.min(((moodCounts.happy || 0) / 10) * 100, 100);
@@ -83,16 +55,14 @@ const AchievementsDisplay: React.FC = () => {
     if (achievement.id === 'energy-master') {
       return Math.min(((moodCounts.energetic || 0) / 10) * 100, 100);
     }
-    if (achievement.id === 'peaceful-soul') {
-      return Math.min(((moodCounts.peaceful || 0) / 10) * 100, 100);
-    }
     
     if (achievement.id === 'colorful-garden') {
       return Math.min((uniqueMoods / 7) * 100, 100);
     }
-    
+
     if (achievement.id === 'mood-explorer') {
-      return Math.min((uniqueMoods / 7) * 100, 100);
+      // 6 distinct moods required
+      return Math.min((uniqueMoods / 6) * 100, 100);
     }
     
     if (achievement.id === 'garden-master') {
@@ -105,6 +75,8 @@ const AchievementsDisplay: React.FC = () => {
     
     // Extract target number from description
     const target = parseInt(achievement.description.match(/\d+/)?.[0] || '0');
+    // Guard against zero target (e.g. description has no number)
+    if (target === 0) return totalEntries > 0 ? 100 : 0;
     
     // Check if it's a streak-based achievement
     if (achievement.id.includes('streak') || 
@@ -133,16 +105,13 @@ const AchievementsDisplay: React.FC = () => {
     if (achievement.id === 'energy-master') {
       return isCompleted ? 10 : (moodCounts.energetic || 0);
     }
-    if (achievement.id === 'peaceful-soul') {
-      return isCompleted ? 10 : (moodCounts.peaceful || 0);
-    }
-    
+
     if (achievement.id === 'colorful-garden') {
-      return isCompleted ? 7 : uniqueMoods;
+      return isCompleted ? 6 : uniqueMoods;
     }
-    
+
     if (achievement.id === 'mood-explorer') {
-      return isCompleted ? 7 : uniqueMoods;
+      return isCompleted ? 6 : uniqueMoods;
     }
     
     if (achievement.id === 'garden-master') {
@@ -180,12 +149,13 @@ const AchievementsDisplay: React.FC = () => {
   };
   
   const getTargetValue = (achievement: any) => {
-    if (achievement.id === 'happy-gardener' || achievement.id === 'calm-spirit' || achievement.id === 'energy-master' || achievement.id === 'peaceful-soul') return 10;
-    if (achievement.id === 'colorful-garden') return 7;
-    if (achievement.id === 'mood-explorer') return 7;
+    if (achievement.id === 'first-step') return 1;
+    if (achievement.id === 'happy-gardener' || achievement.id === 'calm-spirit' || achievement.id === 'energy-master') return 10;
+    if (achievement.id === 'colorful-garden' || achievement.id === 'mood-explorer') return 6;
     if (achievement.id === 'garden-master') return 'Both targets';
-    
-    return parseInt(achievement.description.match(/\d+/)?.[0] || '0');
+
+    const target = parseInt(achievement.description.match(/\d+/)?.[0] || '0');
+    return target > 0 ? target : 1;
   };
   
   return (

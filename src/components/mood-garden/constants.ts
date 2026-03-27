@@ -1,23 +1,10 @@
+import { MOOD_COLORS, MOOD_EMOJIS } from '@/constants/moodColors';
 
-export const moodEmojis = {
-  happy: '😊',
-  sad: '😢',
-  anxious: '😰',
-  calm: '😌',
-  energetic: '⚡',
-  angry: '😠',
-  peaceful: '☮️'
-};
+// Re-export from canonical source (A2 unification)
+export const moodEmojis = MOOD_EMOJIS;
 
-export const moodColors = {
-  happy: '#FCD34D',      // Vibrant golden yellow
-  sad: '#60A5FA',        // Soft blue
-  anxious: '#C084FC',    // Purple
-  calm: '#34D399',       // Fresh green
-  energetic: '#FB923C',  // Energetic orange
-  angry: '#F87171',      // Warm red
-  peaceful: '#6EE7B7'    // Mint green
-};
+// Re-export canonical colors so PlantSVG and other consumers get consistent values
+export const moodColors = MOOD_COLORS;
 
 export const moodPlantMap = {
   happy: '🌻',
@@ -26,7 +13,6 @@ export const moodPlantMap = {
   calm: '🌿',
   energetic: '🌟',
   angry: '🔥',
-  peaceful: '🕊️'
 };
 
 export const plantStages = [
@@ -121,14 +107,14 @@ export const achievements = [
     title: 'Happy Gardener',
     description: 'Log 10 happy moods',
     icon: '🌻',
-    requirement: (totalEntries: number, currentStreak: number, uniqueDays: number, moodCounts: Record<string, number>) => (moodCounts?.happy || 0) >= 10
+    requirement: (_t: number, _s: number, _u: number, moodCounts: Record<string, number>) => (moodCounts?.happy || 0) >= 10
   },
   {
     id: 'calm-spirit',
     title: 'Calm Spirit',
     description: 'Log 10 calm moods',
     icon: '🌿',
-    requirement: (totalEntries: number, currentStreak: number, uniqueDays: number, moodCounts: Record<string, number>) => (moodCounts?.calm || 0) >= 10
+    requirement: (_t: number, _s: number, _u: number, moodCounts: Record<string, number>) => (moodCounts?.calm || 0) >= 10
   },
   {
     id: 'energy-master',

@@ -3,30 +3,23 @@ import React from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 import { useMood } from '@/contexts/MoodContext';
 import { MoodType } from '@/types/mood';
-
-const moodColorMap: Record<MoodType, string> = {
-  angry: '#ff6b6b',
-  energetic: '#ffa502',
-  happy: '#feca57',
-  sad: '#74b9ff',
-  calm: '#3498db',
-  anxious: '#9b59b6',
-};
+import { MOOD_COLORS, MOOD_LABELS, MOOD_EMOJIS } from '@/constants/moodColors';
 
 const MoodDistributionChart = () => {
   const { moodEntries } = useMood();
-  
+
   // Calculate mood distribution
   const distribution = moodEntries.reduce((acc, entry) => {
     acc[entry.mood] = (acc[entry.mood] || 0) + 1;
     return acc;
   }, {} as Record<MoodType, number>);
-  
+
   const data = Object.entries(distribution).map(([mood, count]) => ({
-    name: mood.charAt(0).toUpperCase() + mood.slice(1),
-    value: count
+    mood: mood as MoodType,
+    name: `${MOOD_EMOJIS[mood as MoodType]} ${MOOD_LABELS[mood as MoodType]}`,
+    value: count,
   }));
-  
+
   if (data.length === 0) {
     return (
       <div className="flex items-center justify-center h-[300px] bg-muted/20 rounded-lg">
@@ -34,7 +27,7 @@ const MoodDistributionChart = () => {
       </div>
     );
   }
-  
+
   return (
     <ResponsiveContainer width="100%" height={300}>
       <PieChart>
@@ -51,13 +44,13 @@ const MoodDistributionChart = () => {
           animationBegin={0}
         >
           {data.map((entry, index) => (
-            <Cell 
-              key={`cell-${index}`} 
-              fill={moodColorMap[entry.name.toLowerCase() as MoodType]} 
+            <Cell
+              key={`cell-${index}`}
+              fill={MOOD_COLORS[entry.mood]}
             />
           ))}
         </Pie>
-        <Tooltip />
+        <Tooltip formatter={(value, name) => [value, name]} />
         <Legend />
       </PieChart>
     </ResponsiveContainer>

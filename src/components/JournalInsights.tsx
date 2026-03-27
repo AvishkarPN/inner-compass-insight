@@ -67,7 +67,7 @@ const JournalInsights = () => {
       }, {} as Record<string, number>);
       
       // Find most common mood
-      let dominantMood = Object.entries(moodDistribution).sort((a, b) => b[1] - a[1])[0][0];
+      const dominantMood = Object.entries(moodDistribution).sort((a, b) => b[1] - a[1])[0][0];
       
       insights.push({
         title: "Emotional Patterns",

@@ -1,0 +1,94 @@
+﻿
+> vite_react_shadcn_ts@0.0.0 lint
+> eslint .
+
+
+C:\Avishkar\Project\Mood Journal\src\components\AchievementsDisplay.tsx
+   69:37  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  124:41  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  182:40  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Avishkar\Project\Mood Journal\src\components\JournalInsights.tsx
+  70:11  error  'dominantMood' is never reassigned. Use 'const' instead  prefer-const
+
+C:\Avishkar\Project\Mood Journal\src\components\PWAInstallPrompt.tsx
+  22:30  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  62:53  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Avishkar\Project\Mood Journal\src\components\ui\badge.tsx
+  36:17  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+C:\Avishkar\Project\Mood Journal\src\components\ui\button.tsx
+  56:18  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+C:\Avishkar\Project\Mood Journal\src\components\ui\command.tsx
+  24:11  error  An interface declaring no members is equivalent to its supertype  @typescript-eslint/no-empty-object-type
+
+C:\Avishkar\Project\Mood Journal\src\components\ui\form.tsx
+  168:3  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+C:\Avishkar\Project\Mood Journal\src\components\ui\navigation-menu.tsx
+  119:3  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+C:\Avishkar\Project\Mood Journal\src\components\ui\sidebar.tsx
+  760:3  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+C:\Avishkar\Project\Mood Journal\src\components\ui\sonner.tsx
+  29:19  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+C:\Avishkar\Project\Mood Journal\src\components\ui\textarea.tsx
+  5:18  error  An interface declaring no members is equivalent to its supertype  @typescript-eslint/no-empty-object-type
+
+C:\Avishkar\Project\Mood Journal\src\components\ui\toggle.tsx
+  43:18  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+C:\Avishkar\Project\Mood Journal\src\components\wellness\BreathingExercise.tsx
+  73:6   warning  React Hook useEffect has missing dependencies: 'currentPattern' and 'playBreathingSound'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  79:62  error    Unexpected any. Specify a different type                                                                                                      @typescript-eslint/no-explicit-any
+
+C:\Avishkar\Project\Mood Journal\src\components\wellness\BreathingPatterns.tsx
+  13:14  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+C:\Avishkar\Project\Mood Journal\src\components\wellness\GuidedMeditation.tsx
+   71:6   warning  React Hook useEffect has missing dependencies: 'ambienceSrc' and 'musicVolume'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  104:6   warning  React Hook useEffect has a missing dependency: 'meditationSteps'. Either include it or remove the dependency array                  react-hooks/exhaustive-deps
+  182:67  error    Unexpected any. Specify a different type                                                                                            @typescript-eslint/no-explicit-any
+
+C:\Avishkar\Project\Mood Journal\src\contexts\AuthContext.tsx
+   10:84  error    Unexpected any. Specify a different type                                                                                        @typescript-eslint/no-explicit-any
+   11:65  error    Unexpected any. Specify a different type                                                                                        @typescript-eslint/no-explicit-any
+  125:14  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+C:\Avishkar\Project\Mood Journal\src\contexts\MoodContext.tsx
+   39:49  error    Unexpected any. Specify a different type                                                                                        @typescript-eslint/no-explicit-any
+   58:6   warning  React Hook useEffect has a missing dependency: 'syncWithSupabase'. Either include it or remove the dependency array             react-hooks/exhaustive-deps
+  283:14  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+C:\Avishkar\Project\Mood Journal\src\pages\MoodArt.tsx
+  95:83  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Avishkar\Project\Mood Journal\src\pages\Wellness.tsx
+  158:9  error  'currentDate' is never reassigned. Use 'const' instead  prefer-const
+
+C:\Avishkar\Project\Mood Journal\src\types\global.d.ts
+  17:56  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  18:58  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  19:51  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  20:75  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  21:72  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  22:71  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  23:56  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  24:58  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  25:57  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  26:59  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  27:53  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Avishkar\Project\Mood Journal\src\utils\storageUtils.ts
+  9:33  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Avishkar\Project\Mood Journal\tailwind.config.ts
+  120:12  error  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+
+Γ£û 42 problems (28 errors, 14 warnings)
+  2 errors and 0 warnings potentially fixable with the `--fix` option.
+
