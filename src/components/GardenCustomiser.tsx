@@ -82,19 +82,19 @@ export const GardenCustomiser: React.FC<GardenCustomiserProps> = ({ config, onUp
   // Define unlock requirements
   const PLANT_UNLOCKS: Record<PlantStyle, number> = {
     sprout: 0,
-    flower: 3,
-    tree: 7,
-    pine: 14,
-    bamboo: 30
+    flower: 0,
+    tree: 0,
+    pine: 0,
+    bamboo: 0
   };
 
   const POT_UNLOCKS: Record<string, number> = {
     '#c2724f': 0, // Terracotta
-    '#2563eb': 3, // Cobalt
-    '#4d7c60': 7, // Sage
-    '#7c3aed': 14, // Lavender
-    '#374151': 21, // Charcoal
-    '#e11d48': 30, // Rose
+    '#2563eb': 0, // Cobalt
+    '#4d7c60': 0, // Sage
+    '#7c3aed': 0, // Lavender
+    '#374151': 0, // Charcoal
+    '#e11d48': 0, // Rose
   };
 
   return (
@@ -117,7 +117,7 @@ export const GardenCustomiser: React.FC<GardenCustomiserProps> = ({ config, onUp
               <Leaf size={18} aria-hidden="true" /> Customise Your Garden
             </SheetTitle>
             <SheetDescription>
-              Pick a plant style and pot colour. Keep journaling to unlock more!
+              Pick a plant style and pot colour to personalise your garden space.
             </SheetDescription>
           </SheetHeader>
 
