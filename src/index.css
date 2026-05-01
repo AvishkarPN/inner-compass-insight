@@ -127,4 +127,13 @@
       scroll-behavior: auto !important;
     }
   }
+
+  /* VR Touch Target Requirements */
+  button, 
+  [role="button"],
+  input[type="submit"],
+  input[type="button"] {
+    min-width: 48px;
+    min-height: 48px;
+  }
 }

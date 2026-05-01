@@ -123,10 +123,9 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onTranscript, disabled })
     <Button
       type="button"
       variant={isRecording ? "destructive" : "outline"}
-      size="sm"
       onClick={isRecording ? stopRecording : startRecording}
       disabled={disabled}
-      className="flex items-center gap-2"
+      className="flex items-center gap-2 min-h-[48px] min-w-[48px]"
     >
       {isRecording ? (
         <>

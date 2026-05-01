@@ -42,10 +42,10 @@ export default defineConfig(({ mode }) => ({
         name: 'Mind Garden',
         short_name: 'MindGarden',
         description: 'Track your emotional well-being every day',
-        theme_color: '#6366f1',
-        background_color: '#f8fafc',
+        theme_color: '#007bff',
+        background_color: '#ffffff',
         display: 'standalone',
-        orientation: 'portrait',
+        orientation: 'portrait-primary',
         start_url: '/',
         scope: '/',
         icons: [

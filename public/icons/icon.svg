@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" fill="#007bff"/>
+  <!-- Leaf Base -->
+  <path d="M256 412 V250 M256 250 C380 250, 380 120, 256 120 C132 120, 132 250, 256 250" stroke="white" stroke-width="24" stroke-linecap="round" stroke-linejoin="round" fill="#0056b3"/>
+  <!-- Side Leaves -->
+  <path d="M256 350 C340 350, 340 250, 256 250" stroke="white" stroke-width="20" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <path d="M256 310 C180 310, 180 210, 256 210" stroke="white" stroke-width="20" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+</svg>
